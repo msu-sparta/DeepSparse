@@ -14,7 +14,7 @@
 #include <vector>
 #include <iomanip>
 #include <unordered_map>
-#include <iosrteam>
+#include <iostream>
 
 using namespace std;
 
@@ -29,13 +29,13 @@ extern int nrows, ncols, nnz, numrows, numcols, nnonzero, nthrds ;
 
 
 /* ##### For Sparse MTX DS ##### */
-template<typename T>
+//template<typename T>
 struct block
 {   
     int nnz;
     int roffset, coffset;
     int *rloc, *cloc;
-    T *val;
+    double *val;
 };
 
 
@@ -57,9 +57,26 @@ struct eqstr
         return strcmp(s1, s2) == 0;
     }
 };
+
+
+////taskinfo struct
+struct TaskInfo
+{
+  int opCode;
+  int numParamsCount;
+  int *numParamsList;
+  int strParamsCount;
+  char **strParamsList;
+  int taskID;
+  int partitionNo;
+  int priority;
+} ;
+
+
 extern int wblk, nrowblks, ncolblks, nthreads;
 extern int *nnzPerRow;
-extern block<double> *matrixBlock; // goes to lib_mtx
+//extern block<double> *matrixBlock; // goes to lib_mtx
+extern block *matrixBlock; // goes to lib_mtx
 
 /* #### For DAG generator #### */
 typedef std::unordered_map<const char * , int, my_hash, eqstr> VertexType;
@@ -75,6 +92,10 @@ extern int nodeCount, edgeCount;
 extern int total_func; //not now
 extern double *graphGenTime; //not now
 
+
+
+extern char **globalGraph;
+extern int globalNodeCount;
 
 
 /* ##### For Hierarchical Partitioning DS ##### */
@@ -115,15 +136,16 @@ extern int small_block;
 
 int split(const char *str, char c, char ***arr);
 void print_vector(vector<string> nodeName);
-void print_map(vextexType mymap);
+void print_map(VertexType mymap);
 
 
 
-template<typename T>
-void read_custom(char* filename, T *&xrem);
+//template<typename T>
+void read_custom(char* filename, double *&xrem);
 
-template<typename T>
-void csc2blkcoord(block<T> *&matrixBlock, T *xrem);
+//template<typename T>
+//void csc2blkcoord(block<T> *&matrixBlock, double *xrem);
+void csc2blkcoord(block *&matrixBlock, double *xrem);
 
 void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[], char edge1_part3[], int task_id_1,
             int edge2Format, char edge2_var[], char edge2_part1[], char edge2_func[], char edge2_part2[], char edge2_part3[], int task_id_2,
@@ -221,7 +243,14 @@ double get_outgoing_memory_value(const char* task_name, const char* child_task_n
 
 
 
+///buildTaskinfoStruct functions
+void buildTaskInfoStruct_main(int nodeCount, char **graph , const char* loopType, int blksize , const char *matrixName);
+void buildTaskInfoStruct(struct TaskInfo *taskInfo, char *partFile);
+void reverse(char str[], int length);
+void structToString(struct TaskInfo taskInfo, char *structToStr);
 
+
+#endif 
 
 
 
