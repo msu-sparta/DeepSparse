@@ -1974,96 +1974,9 @@ void sum_sqrt(char edge1_part1[], char edge1_func[], char edge1_part2[], char ed
 //template<typename T>
 void read_custom(char* filename, double *&xrem)
 {
- /*   int i, j;
-    ifstream file (filename, ios::in|ios::binary);
-    if (file.is_open())
-    {
-        //file.seekg(0, ios::end); // set the pointer to the end
-        //long size = file.tellg() ; // get the length of the file
-        //cout << "Size of file: " << size << endl;
-        //file.seekg(0, ios::beg); // set the pointer to the beginning
 
-        unsigned char MyBytes[4];  //set values to this also.
-        
 
-        int a = 0;
-        float d = 0;
-        unsigned int b = 0;
-
-        file.read ((char*)&numrows, sizeof(numrows));
-        cout << "numrows: " << numrows << endl;
-        
-        file.read(reinterpret_cast<char*>(&numcols), sizeof(numcols));
-        cout << "numcols: " << numcols << endl;
-
-        file.read(reinterpret_cast<char*>(&nnonzero), sizeof(nnonzero));
-        cout << "nnonzero: " << nnonzero << endl;
-
-        //cout << "sizeof(unsigned int): " << sizeof(unsigned int) << " sizeof(float): " << sizeof(d) << endl;
-
-        colptrs = new int[numcols+1];
-        irem = new int[nnonzero];
-        xrem = new T[nnonzero];
-        cout << "Memory allocaiton finished" << endl;
-        
-        position = 0;
-        while(!file.eof() && position <= numcols)
-        {
-            //int Int32 = 0;
-            //file.read((char *)MyBytes, 4);
-            //Int32 = (Int32 << 8) + MyBytes[3];
-            //Int32 = (Int32 << 8) + MyBytes[2];
-            //Int32 = (Int32 << 8) + MyBytes[1];
-            //Int32 = (Int32 << 8) + MyBytes[0];
-            //colptrs[position++] = Int32;
-
-            a = 0;
-            //file.read(reinterpret_cast<char*>(&b), sizeof(b)); 
-            file.read ((char*)&a, sizeof(a));
-            colptrs[position] = a;
-            position++;
-        }
-        cout << "finished reading colptrs" << endl;
-
-        position = 0;
-        while(!file.eof() && position < nnonzero)
-        {
-            a = 0;
-            //file.read(reinterpret_cast<char*>(&a), sizeof(a)); 
-            file.read ((char*)&a, sizeof(a));
-            irem[position++] = a;
-        }
-        cout << "finished reading irem" << endl;
-
-        position = 0 ;
-        while(!file.eof() && position < nnonzero)
-        {
-            d = 0;
-            file.read(reinterpret_cast<char*>(&d), sizeof(d));
-            //file.read ((char*)&d, sizeof(d)); 
-            xrem[position++] = d;
-         
-        }
-        cout << "finished reading xrem" << endl;
-    }
-    else
-    {
-        cout << "file open error" << endl;
-    }
-
-    /*for(i = numcols - 10 ; i <=numcols ; i++)
-        cout << colptrs[i] << " ";
-    cout << endl;
-
-    for(i = nnonzero - 10 ; i < nnonzero ; i++)
-        cout << irem[i] << " ";
-    cout << endl;
-
-    for(i = nnonzero - 10 ; i < nnonzero ; i++)
-        cout << xrem[i] << " ";
-    cout << endl;*/
-
-            FILE *fp;
+    FILE *fp;
 
     double tstart, tend;
 
@@ -2477,7 +2390,8 @@ void buildTaskInfoStruct_main(int nodeCount, char **graph , const char *loopType
     string numStr;
 
     char taskinfo_file_name[500];
-    strcpy(taskinfo_file_name , matrixName);
+    strcpy(taskinfo_file_name , "../dag_files/");
+    strcat(taskinfo_file_name , matrixName);
     strcat(taskinfo_file_name , "_");
     strcat(taskinfo_file_name , loopType);
     strcat(taskinfo_file_name , "_");
@@ -2865,7 +2779,7 @@ void buildTaskInfoStruct_main(int nodeCount, char **graph , const char *loopType
                 strcat(ary, ",0");
                 taskInfoFile << ary << endl;
 
-                printf("taskName: %s --> %s\n", taskName, ary);
+                //printf("taskName: %s --> %s\n", taskName, ary);
             }
 
             else if(!strcmp(splitParams[0], "DOTV")) /* taskName starts DGEMV */
@@ -2882,7 +2796,7 @@ void buildTaskInfoStruct_main(int nodeCount, char **graph , const char *loopType
                 strcat(ary, ",0");
                 taskInfoFile << ary << endl;
 
-                printf("taskName: %s --> %s\n", taskName, ary);
+                //printf("taskName: %s --> %s\n", taskName, ary);
             }
         }// end if(tokenCount == 1)
     } //end while (file read)

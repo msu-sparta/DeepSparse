@@ -16,68 +16,7 @@ using namespace std;
 
 #include <omp.h>
 #include "../../common/util.h"
-//#include "new_edgeweight_try/inc/rMLGP.h"
 
-
-
-/* gen_graph_v29.cpp using map (Each csb blcok is task): 
-* 1. working on v28
-* 2. Only generating DAG for the first non-loop part
-*/
-
-
-
-//std::ofstream node_file("node.txt");
-//std::ofstream edge_file("edge.txt");
-
-
-//------ global parametes (block) ---------
-/*
-long position = 0 ;
-int *colptrs, *irem;
-int nrows, ncols, nnz, numrows, numcols, nnonzero, nthrds = 32;
-int wblk, nrowblks, ncolblks, nthreads;
-int *nnzPerRow;
-block<double> *matrixBlock;
-
-
-
-
-
-//typedef std::unordered_map<const char * , int, my_hash, eqstr> VertexType;
-
-VertexType vertexName;
-
-int *edgeU, *edgeV;
-double *edgeW;
-double *vertexWeight;
-char **nrowblksString;
-int nodeCount = 0 , edgeCount = 0;
-
-stringstream convertToString;
-/* gen timing breakdown */
-/*int total_func = 14;
-double *graphGenTime;
-
-// ##### Hier Partitioner DS ##### //
-int **pseudo_tid_map;
-int small_block;
-
-TaskDetail td;
-InOutVariable iov;
-task_allinout_memory all_mem_in_task;
-input_map inp_map;
-output_map out_map;
-
-char global_filename[1000];
-
-
-
-
-
-/* global graph for OpenMP scheduler */
-//char **globalGraph;
-//int globalNodeCount = 0;
 
 
 void  nonloop(int blocksize, int block_width);
@@ -414,38 +353,7 @@ void firstloop(int blocksize , int block_width){
     M = numrows;
     N = numcols;
 
- /*   #pragma omp parallel
-    #pragma omp master
-    {
-        nthreads = omp_get_num_threads();
-    }
 
-    /* initializing nrowblksString */
-    
-/*    tstart = omp_get_wtime();
-    int intTOstringCount = (nrowblks > nthreads) ? nrowblks : nthreads;
-    nrowblksString = (char**) malloc(intTOstringCount * sizeof(char *)); // Allocate row pointers
-    
-    for(i = 0 ; i < intTOstringCount ; i++)
-    {
-        nrowblksString[i] = (char *) malloc(7 * sizeof(char));
-        myitoa(i, nrowblksString[i]);
-        //printf("%d : %s\n", i, nrowblksString[i]);
-    }
-
-    tend = omp_get_wtime();
-    printf("nrowblksString time: %lf sec. \n", tend - tstart);
-    
-
-    /* graphn Gen timing breakdown*/
-/*    graphGenTime = (double *) malloc(total_func * sizeof(double));
-    
-    for(i = 0 ; i < total_func; i++)
-    {
-        graphGenTime[i] = 0.0;
-    }
-*/
-    
 
     ////initialize edgeCount and nodeCount to zero
 
@@ -453,23 +361,7 @@ void firstloop(int blocksize , int block_width){
     nodeCount = 0 ; 
     globalNodeCount = 0 ; 
 
-/*    int guessEdgeCount = 8000000;
-    int guessNodeCount = 8000000;
-    edgeU = (int *) malloc(guessEdgeCount * sizeof(int));
-    edgeV = (int *) malloc(guessEdgeCount * sizeof(int));
-    edgeW = (double *) malloc(guessEdgeCount * sizeof(double));
-    vertexWeight = (double *) malloc(guessEdgeCount * sizeof(double));
-    
-    vertexName.reserve(guessEdgeCount);
-    vertexName.max_load_factor(0.25);
 
-    //allocating memory for global graph
-    globalGraph = (char **) malloc(guessNodeCount * sizeof(char *));
-    for (i = 0 ; i < guessNodeCount ; i++)
-    {
-        globalGraph[i] = (char*) malloc(100 * sizeof(char));
-    }
-*/
 
     printf("Rows: %d, Cols: %d\n", M, N);
     printf("Block Size: %d Block Width: %d nthreads: %d nrowblks: %d ncolblks: %d\n", blocksize, block_width, nthreads, nrowblks, ncolblks);
