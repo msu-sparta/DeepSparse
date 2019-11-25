@@ -2018,6 +2018,15 @@ void read_custom(char* filename, double *&xrem)
     
         xrem[i] = txrem[i];
     }
+
+
+    for(int i = 0 ; i < numcols+1 ; i++)
+    {   
+        colptrs[i]--;
+    }
+
+    for(int i = 0 ; i < nnonzero ; i++)
+        irem[i]--;
     
     delete []txrem;
     tend = omp_get_wtime();
@@ -2069,14 +2078,14 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
     //calculatig nnz per block
     for(c = 0 ; c < numcols ; c++)
     {
-        k1 = colptrs[c];
-        k2 = colptrs[c + 1] - 1;
+        k1 = colptrs[c]+1;
+        k2 = colptrs[c + 1] - 1+1;
         blkc = ceil((c + 1) / (float)wblk);
         //cout<<"K1: "<<k1<<" K2: "<<k2<<" blkc: "<<blkc<<endl;
 
         for(k = k1 - 1 ; k < k2 ; k++)
         {
-            r = irem[k];
+            r = irem[k]+1;
             blkr = ceil(r/(float)wblk);
             if((blkr - 1) >= nrowblks || (blkc - 1) >= ncolblks)
             {
@@ -2126,13 +2135,13 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
 
     for(c = 0 ; c < numcols ; c++)
     {
-        k1 = colptrs[c];
-        k2 = colptrs[c + 1] - 1;
+        k1 = colptrs[c]+1;
+        k2 = colptrs[c + 1] - 1+1;
         blkc = ceil((c + 1) / (float)wblk);
 
         for(k = k1 - 1 ; k < k2 ; k++)
         {
-            r = irem[k];
+            r = irem[k]+1;
             blkr = ceil(r / (float)wblk);
 
             matrixBlock[(blkr - 1) * ncolblks+blkc - 1].rloc[top[blkr-1][blkc-1]] = r - matrixBlock[(blkr - 1) * ncolblks + blkc - 1].roffset;
@@ -2401,6 +2410,9 @@ void buildTaskInfoStruct_main(int nodeCount, char **graph , const char *loopType
     ofstream taskInfoFile(taskinfo_file_name);
 
     partNo = 0 ; 
+
+
+    taskInfoFile << nodeCount << endl;
 
     for(i = 0 ; i < nodeCount ; i++)
     {

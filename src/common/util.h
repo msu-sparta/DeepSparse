@@ -35,6 +35,7 @@ struct block
     int nnz;
     int roffset, coffset;
     int *rloc, *cloc;
+    //short int *rloc , *cloc;
     double *val;
 };
 
@@ -244,8 +245,8 @@ double get_outgoing_memory_value(const char* task_name, const char* child_task_n
 
 
 ///buildTaskinfoStruct functions
-void buildTaskInfoStruct_main(int nodeCount, char **graph , const char* loopType, int blksize , const char *matrixName);
 void buildTaskInfoStruct(struct TaskInfo *taskInfo, char *partFile);
+void buildTaskInfoStruct_main(int nodeCount, char **graph , const char *loopType, int blksize , const char *matrixName);
 void reverse(char str[], int length);
 void structToString(struct TaskInfo taskInfo, char *structToStr);
 
