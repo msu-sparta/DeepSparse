@@ -124,8 +124,8 @@ int main(int argc, char *argv[])
         }
     }
 
-    printf("Printing blockVectorX: \n");
-    print_mat(blockVectorX, 9, blocksize);
+    //printf("Printing blockVectorX: \n");
+    //print_mat(blockVectorX, 9, blocksize);
 
     //cout << "finished reading X" << endl;
 
@@ -250,6 +250,7 @@ int main(int argc, char *argv[])
     taskCount_secondLoop = buildTaskInfoStruct(taskInfo_secondLoop, argv[6]);
     cout << "taskCount_secondLoop: " << taskCount_secondLoop << endl;
     
+
 
     //opening partition file
     // ifstream nonLoopFile(argv[4]);
@@ -573,11 +574,12 @@ int main(int argc, char *argv[])
     } //end parallel
 
     free(taskInfo_nonLoop);
+ //   printf("After nonloop part \n");
+ //    for(i = 0 ; i < blocksize ; i++)
+//    {
+//        cout << lambda[i * blocksize + i] << endl;
+//    }
 
-    // for(i = 0 ; i < blocksize ; i++)
-    // {
-    //     cout << lambda[i * blocksize + i] << endl;
-    // }
 
     free(gramXAX); 
     double *coordX;

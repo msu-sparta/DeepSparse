@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-std=c++11 -Wall -Wextra -Wconversion -O3 -xmic-avx512 -qopenmp
+CFLAGS=-std=c++11 -Wall -Wextra -Wconversion -O3 -fopenmp
 
 EXEDIR=../exe
 

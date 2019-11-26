@@ -360,7 +360,9 @@ void _XTY_v1_RED(double *buf, double *result, int N, int P, int block_width)
         #pragma omp task private(sum, k, l, tid, tstart, tend)\
         firstprivate(i, nthrds, blksz, buf, N, P, result, block_width)\
         depend(in: N, P) depend(out: result[i * P : blksz * P])\
-        depend(in: buf[0*N*P:N*P], buf[1*N*P:N*P], buf[2*N*P:N*P], buf[3*N*P:nthrds*N*P], buf[4*N*P:N*P], buf[5*N*P:N*P], buf[6*N*P:N*P])
+        depend(in: buf[0*N*P:N*P], buf[1*N*P:N*P], buf[2*N*P:N*P], buf[3*N*P:nthrds*N*P], buf[4*N*P:N*P], buf[5*N*P:N*P], buf[6*N*P:N*P],\
+        buf[7*N*P:N*P], buf[8*N*P:N*P], buf[9*N*P:N*P], buf[10*N*P:nthrds*N*P], buf[11*N*P:N*P], buf[12*N*P:N*P], buf[13*N*P:N*P],\
+        buf[14*N*P:N*P], buf[15*N*P:N*P])
         {
             tid = omp_get_thread_num();
             tstart = omp_get_wtime();
