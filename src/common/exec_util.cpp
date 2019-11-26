@@ -133,8 +133,8 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
 {
     int i, j, r, c, k, k1, k2, blkr, blkc, tmp;
     int **top;
-    nrowblks = ceil(numrows / (float)(wblk));
-    ncolblks = ceil(numcols / (float)(wblk));
+    nrowblks = ceil(numrows / (double)(wblk));
+    ncolblks = ceil(numcols / (double)(wblk));
     cout << "wblk = " << wblk << endl;
     cout << "nrowblks = " << nrowblks << endl;
     cout << "ncolblks = " << ncolblks << endl;
@@ -172,7 +172,7 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
     {
         k1 = colptrs[c]+1;
         k2 = colptrs[c + 1] - 1+1;
-        blkc = ceil((c + 1) / (float)wblk);
+        blkc = ceil((c + 1) / (double)wblk);
         //k1 = colptrs[c];
         //k2 = colptrs[c + 1] - 1;
         //blkc = ceil((c + 1) / (float)wblk);
@@ -182,7 +182,7 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
         {
             r = irem[k]+1;
             //r = irem[k];
-            blkr = ceil(r/(float)wblk);
+            blkr = ceil(r/(double)wblk);
             if((blkr - 1) >= nrowblks || (blkc - 1) >= ncolblks)
             {
                 cout << "(" << blkr - 1 << ", " << blkc - 1 << ") doesn't exist" << endl;
