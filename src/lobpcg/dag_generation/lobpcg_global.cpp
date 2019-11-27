@@ -92,8 +92,8 @@ int main(int argc, char *argv[]){
     }
 
 
-    int guessEdgeCount = 8000000;
-    int guessNodeCount = 8000000;
+    int guessEdgeCount = 20000000;
+    int guessNodeCount = 80000000;
     edgeU = (int *) malloc(guessEdgeCount * sizeof(int));
     edgeV = (int *) malloc(guessEdgeCount * sizeof(int));
     edgeW = (double *) malloc(guessEdgeCount * sizeof(double));
@@ -1935,6 +1935,11 @@ void secondloop(int blocksize, int block_width)
     cout << "Edge Count: " << edgeCount << endl;
     cout << "map size: " << vertexName.size() << endl; 
 
+
+
+    for(i = 0 ; i < 10 ; i++){
+    	printf("%s\n",globalGraph[i]);
+    }
     buildTaskInfoStruct_main(globalNodeCount, globalGraph , "secondloop", blocksize , "msdoor");
 
 }
