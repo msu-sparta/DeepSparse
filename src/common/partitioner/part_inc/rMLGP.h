@@ -9,7 +9,9 @@
  //#include "../lobpcg_gen_graph_v30.h"
 
 //#include "../lobpcg_gen_graph_v28.h"
-#include "../lobpcg_gen_graph_v29.h"
+//#include "../lobpcg_gen_graph_v29.h"
+
+#include "../../util.h"
 
 extern dgraph main_graph;
 int processArgs_rMLGP(int argc, char **argv, MLGP_option* opt);

@@ -1,12 +1,13 @@
-CC=g++
-CFLAGS=-std=c++11 -Wall -Wextra -Wconversion -O3 -fopenmp
+CC=icpc
+CFLAGS= -w -O3 -fopenmp
 
 EXEDIR_DAG=../exe
 
-lobpcg_global: 
-	$(CC)  -c ../../common/util.cpp  -fopenmp
-	$(CC)  -c lobpcg_global.cpp   util.o -fopenmp
-	$(CC) -o $(EXEDIR_DAG)/lobpcg_global.x util.o lobpcg_global.o -fopenmp
+#lobpcg_global: 
+#	$(CC)  -c ../../common/util.cpp  -fopenmp
+#	$(CC)  -c lobpcg_global.cpp   util.o -fopenmp
+#	$(CC) -o $(EXEDIR_DAG)/lobpcg_global.x util.o lobpcg_global.o -fopenmp
+
 
 
 LIBS=-ldgraph -lm
@@ -15,12 +16,12 @@ AR=ar rv
 RANLIB=ranlib
 
 #nersc
-METISLIBDIR=/usr/common/software/metis/5.1.0/lib
-METISHDIR=/usr/common/software/metis/5.1.0/include
+#METISLIBDIR=/usr/common/software/metis/5.1.0/lib
+#METISHDIR=/usr/common/software/metis/5.1.0/include
 
 #hpcc
-#METISLIBDIR=/opt/software/METIS/5.1.0-intel-2017.01/lib
-#METISHDIR=/opt/software/METIS/5.1.0-intel-2017.01/include
+METISLIBDIR=/opt/software/METIS/5.1.0-intel-2017.01/lib
+METISHDIR=/opt/software/METIS/5.1.0-intel-2017.01/include
 
 
 INCDIR=../../common/partitioner/part_inc
@@ -49,8 +50,8 @@ $(SRCDIR)/%.o: $(SRCDIR)/%.c $(INCDIR)/dgraph.h
 
 
 $(EXEDIR)/rMLGP: $(SRCDIR)/rMLGP.o $(DGRAPHLIB) 
-	g++ -c lobpcg_part.cpp -o lobpcg_part.o -std=c++11 -O3 -fopenmp -mkl
-	g++ -o lobpcg_part.x lobpcg_part.o $(SRCDIR)/rMLGP.o $(LIBDIR)libdgraph.a -fopenmp -mkl -std=C++11 -O3  -L$(LIBDIR) -L$(METISLIBDIR)  -ldgraph -lm -I$(INCDIR) -I$(METISHDIR)
+	icpc -c lobpcg_part.cpp -o lobpcg_part.o -O3 -qopenmp -mkl -w 
+	icpc -o lobpcg_part.x lobpcg_part.o $(SRCDIR)/rMLGP.o $(LIBDIR)libdgraph.a -qopenmp -mkl -std=C++11 -O3  -L$(LIBDIR) -L$(METISLIBDIR)  -ldgraph -lm -I$(INCDIR) -I$(METISHDIR)
 	#@mkdir -p $(@D)
 	#$(CC) -o $@ $^ $(CFLAGS) $(LIBDIRA)  $(LIBSA) $(INCDIRA)
 

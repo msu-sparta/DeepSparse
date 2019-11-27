@@ -52,6 +52,17 @@ char **globalGraph;
 int globalNodeCount = 0;
 
 
+// ##### Hier Partitioner DS ##### //
+int **pseudo_tid_map;
+int small_block;
+
+TaskDetail td; 
+InOutVariable iov;
+task_allinout_memory all_mem_in_task;
+input_map inp_map;
+output_map out_map;
+
+char global_filename[1000];
 
 
 
@@ -183,10 +194,16 @@ void mat_addition(int edge1Format, char edge1_var[], char edge1_part1[], char ed
     int i, edge2_id;
     char i_string[8], task_id1_char[4], task_id2_char[4], add_id_char[4];
     char ary[150];
-
+        
     myitoa(task_id_1, task_id1_char);
     myitoa(task_id_2, task_id2_char);
     myitoa(add_id, add_id_char);
+
+    char main_task[150];
+    char tmp_input1[150];
+    char tmp_input2[150];
+    memory_chunk temp_chunk;
+
 
     if(edge2Format == 1) // edge coming from a single matrix 
     {
@@ -200,15 +217,12 @@ void mat_addition(int edge1Format, char edge1_var[], char edge1_part1[], char ed
         strcat(ary, nrowblksString[i]);
         strcat(ary, ",");
         strcat(ary, add_id_char);
-
+       
         vertexName[strdup(ary)] = nodeCount;
         vertexWeight[nodeCount] =  block_width * col * sizeof(double);
         nodeCount++;
-
-        //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
-
+        
+        strcpy(main_task,ary);
 
         if(edge1Format == 1) //edge coming from a single matrix 
         {
@@ -216,11 +230,23 @@ void mat_addition(int edge1Format, char edge1_var[], char edge1_part1[], char ed
             strcat(ary, edge1_var);
             strcat(ary, ",");
             strcat(ary, nrowblksString[i]);
-
+            
             edgeU[edgeCount] = vertexName[ary];
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
             edgeCount++;
+
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
         else //coming from another operation of format : func_(inp1, inp2, blk) 
         {
@@ -230,10 +256,24 @@ void mat_addition(int edge1Format, char edge1_var[], char edge1_part1[], char ed
             strcat(ary, nrowblksString[i]);
             strcat(ary, ",");
             strcat(ary, task_id1_char);
+            
             edgeU[edgeCount] = vertexName[ary];
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
             edgeCount++;
+
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+
 
         }
 
@@ -243,28 +283,52 @@ void mat_addition(int edge1Format, char edge1_var[], char edge1_part1[], char ed
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
             edgeCount++;
+
+            strcpy(tmp_input2,input2);
+            strcat(tmp_input2,",");
+            strcat(tmp_input2,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input2);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
+
         }
         else // coming from another operation of format : func_(inp1, inp2, blk) 
-        {
+        {   
             memset(&ary[0], 0, sizeof(ary));
             strcat(ary, edge2_func);
             strcat(ary, ",");
             strcat(ary, nrowblksString[i]);
             strcat(ary, ",");
             strcat(ary, task_id2_char);
-
+            
             edgeU[edgeCount] = vertexName[ary];
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
             edgeCount++;
+
+            strcpy(tmp_input2,input2);
+            strcat(tmp_input2,",");
+            strcat(tmp_input2,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input2);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
+
         }
     }
 
     tend = omp_get_wtime();
     graphGenTime[3] += (tend - tstart);
 }
-
-
 
 void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[], char edge1_part3[], int task_id_1,
             int edge2Format, char edge2_var[], char edge2_part1[], char edge2_func[], char edge2_part2[], char edge2_part3[], int task_id_2,
@@ -276,7 +340,7 @@ void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[
     Output: result[M*P]
     nthrds : global variable, total # of threads
     ***********************************************/
-
+    
     /* funciton code: 1 */
 
     double tstart, tend;
@@ -285,15 +349,23 @@ void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[
     int i, edge2_id;
     char i_string[8], task_id1_char[4], task_id2_char[4], xy_id_char[4];
     char ary[150];
-
+        
     myitoa(task_id_1, task_id1_char);
     myitoa(task_id_2, task_id2_char);
     myitoa(xy_id, xy_id_char);
 
-    if(edge2Format == 1)
+    if(edge2Format == 1) 
     {
         edge2_id = vertexName[edge2_var];
     }
+
+    //printf("inside XY function edge1_var = %s edge2_var = %s\n", edge1_var,edge2_var);
+
+    // #### Hier #####
+    char main_task[100];
+    char tmp_input1[100];
+    char tmp_input2[100];
+    memory_chunk temp_chunk;
 
     for(i = 0 ; i < nrowblks ; i++)
     {
@@ -303,14 +375,17 @@ void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[
         strcat(ary, ",");
         strcat(ary, xy_id_char);
 
+        // #### Hier #####
+        strcpy(main_task, ary);
+
+
+
+
+        
         vertexName[strdup(ary)] = nodeCount;
         vertexWeight[nodeCount] = block_width * P * sizeof(double);
         nodeCount++;
-
-        //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
-
+     
         if(edge1Format == 1)
         {
             memset(&ary[0], 0, sizeof(ary));
@@ -322,6 +397,19 @@ void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * N * sizeof(double);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
         else
         {
@@ -336,36 +424,95 @@ void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * N * sizeof(double);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
 
         if(edge2Format == 1) //whole edge2_var
-        {
-            edgeU[edgeCount] = edge2_id;
+        {   
+            edgeU[edgeCount] = edge2_id; 
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * N * sizeof(double);
-            edgeCount++;
+            edgeCount++; 
+
+            // #### Hier #####
+            strcpy(tmp_input2,input2);
+            
+
+            strcpy(temp_chunk.memory_name,tmp_input2);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(edge2_var)] = temp_chunk;
+            out_map[strdup(edge2_var)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,edge2_var,tmp_input2,edgeW[edgeCount-1]);
+
+
         }
         else
-        {
-            memset(&ary[0], 0, sizeof(ary));
+        {   
+            /*memset(&ary[0], 0, sizeof(ary));
             strcat(ary, edge2_func);
             strcat(ary, ",");
             strcat(ary, nrowblksString[i]);
             strcat(ary, ",");
             strcat(ary, task_id2_char);
-
+               
             edgeU[edgeCount] = vertexName[ary];
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * N * sizeof(double);
-            edgeCount++;
+            edgeCount++; 
+
+            // #### Hier #####
+            strcpy(tmp_input2,input2);
+            strcat(tmp_input2,",");
+            strcat(tmp_input2,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input2);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);*/
+            //quick fix ==> Double check later
+            edge2_id = vertexName[edge2_var];
+            edgeU[edgeCount] = edge2_id; 
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = N * P *  sizeof(double); //block_width * N * sizeof(double);
+            edgeCount++; 
+
+            // #### Hier #####
+            strcpy(tmp_input2, input2);
+            strcat(tmp_input2, ",0");
+            strcpy(temp_chunk.memory_name, tmp_input2);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(edge2_var)] = temp_chunk;
+            out_map[strdup(edge2_var)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,edge2_var,tmp_input2,edgeW[edgeCount-1]);
+
         }
     }
 
     tend = omp_get_wtime();
     graphGenTime[1] += (tend - tstart);
 }
+
 void _XY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[], int task_id,
-            int edge2Format, char edge2_var[], char edge2_part1[], char edge2_func[], char edge2_part2[], char edge2_part3[],
+            int edge2Format, char edge2_var[], char edge2_part1[], char edge2_func[], char edge2_part2[], char edge2_part3[], 
             char input1[], char input2[], char output[], int M, int N, int P, int block_width, int xy_id)
 {
     //cout << "in _XY_v1" << endl;
@@ -375,24 +522,31 @@ void _XY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
     Output: result[M*P]
     nthrds : global variable, total # of threads
     ***********************************************/
-
+   
 
     /* funciton code: 1 */
-
+    
     double tstart, tend;
     tstart = omp_get_wtime();
 
     int i, edge2_id;
     char i_string[8], task_id1_char[4], xy_id_char[4];
     char ary[150];
-
+        
     myitoa(task_id, task_id1_char);
     myitoa(xy_id, xy_id_char);
 
-    if(edge2Format == 1)
+    if(edge2Format == 1) 
     {
         edge2_id = vertexName[edge2_var];
     }
+
+    //printf("inside XY function edge1_var = %s edge2_var = %s\n", edge1_var,edge2_var);
+
+    char main_task[100];
+    char tmp_input1[100];
+    char tmp_input2[100];
+    memory_chunk temp_chunk;
 
     for(i = 0 ; i < nrowblks ; i++)
     {
@@ -401,13 +555,16 @@ void _XY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
         strcat(ary, nrowblksString[i]);
         strcat(ary, ",");
         strcat(ary, xy_id_char);
+
+        strcpy(main_task,ary);
+
+
+
+
+        
         vertexName[strdup(ary)] = nodeCount;
         vertexWeight[nodeCount] = block_width * P * sizeof(double);
         nodeCount++;
-
-        //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
 
         if(edge1Format == 1)
         {
@@ -415,11 +572,24 @@ void _XY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
             strcat(ary, edge1_var);
             strcat(ary, ",");
             strcat(ary, nrowblksString[i]);
-
+            
             edgeU[edgeCount] = vertexName[ary];
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * N * sizeof(double);
             edgeCount++;
+
+
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
         else
         {
@@ -433,34 +603,90 @@ void _XY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
             edgeU[edgeCount] = vertexName[ary];
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * N * sizeof(double);
-            edgeCount++;       
+            edgeCount++;
+
+
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
 
         if(edge2Format == 1) //whole edge2_var
         {
             edgeU[edgeCount] = edge2_id;
             edgeV[edgeCount] = nodeCount - 1;
-            edgeW[edgeCount] = N * P * sizeof(double);
-            edgeCount++;  
+            edgeW[edgeCount] = block_width * N  *sizeof(double);
+            edgeCount++; 
+
+            strcpy(tmp_input2,input2);
+            
+
+            strcpy(temp_chunk.memory_name,tmp_input2);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(edge2_var)] = temp_chunk;
+            out_map[strdup(edge2_var)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,edge2_var,tmp_input2,edgeW[edgeCount-1]);
+
+
         }
         else
         {
-            memset(&ary[0], 0, sizeof(ary));
+            /*memset(&ary[0], 0, sizeof(ary));
             strcat(ary, edge2_func);
             strcat(ary, ",");
             strcat(ary, nrowblksString[i]);
             
             edgeU[edgeCount] = vertexName[ary];
             edgeV[edgeCount] = nodeCount - 1;
-            edgeW[edgeCount] = N * P * sizeof(double);
-            edgeCount++;      
+            edgeW[edgeCount] = N * P *sizeof(double);
+            edgeCount++; 
+
+            strcpy(tmp_input2,input2);
+            strcat(tmp_input2,",");
+            strcat(tmp_input2,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input2);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);*/
+
+            //quick fix ==> Double check later
+            edge2_id = vertexName[edge2_var];
+            edgeU[edgeCount] = edge2_id; 
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = N * P *  sizeof(double); //block_width * N * sizeof(double);
+            edgeCount++; 
+
+            // #### Hier #####
+            strcpy(tmp_input2, input2);
+            strcat(tmp_input2, ",0");
+            strcpy(temp_chunk.memory_name, tmp_input2);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(edge2_var)] = temp_chunk;
+            out_map[strdup(edge2_var)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,edge2_var,tmp_input2,edgeW[edgeCount-1]);
+
         }
     }
 
     tend = omp_get_wtime();
     graphGenTime[1] += (tend - tstart);
 }
-
 void _XY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[],
             char edge2_var[],
             char input1[], char input2[], char output[], int M, int N, int P, int block_width, int xy_id, int **SPMM_vertexNo)
@@ -484,6 +710,13 @@ void _XY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
 
     int edge2_id = vertexName[edge2_var]; 
 
+    // #### Hier #####
+    char main_task[150];
+    char tmp_input1[150];
+    char tmp_input2[150];
+    char spmm_task[150];
+    memory_chunk temp_chunk;
+
     for(i = 0 ; i < nrowblks ; i++)
     {
         memset(&ary[0], 0, sizeof(ary));
@@ -496,9 +729,8 @@ void _XY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
         vertexWeight[nodeCount] = block_width * P * sizeof(double);
         nodeCount++;
 
-        //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
+        // #### Hier #####
+        strcpy(main_task,ary);
 
         if(edge1Format == 1)
         {
@@ -511,6 +743,20 @@ void _XY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * N * sizeof(double);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+
 
              
 
@@ -536,6 +782,28 @@ void _XY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
                     //printf("%d %d\n", edgeU[edgeCount], edgeV[edgeCount]);
                     edgeW[edgeCount] = block_width * N * sizeof(double);
                     edgeCount++;
+
+                    // #### Hier #####
+                    strcpy(spmm_task, "SPMM,");
+                    strcat(spmm_task, nrowblksString[i]);
+                    strcat(spmm_task, ",");
+                    strcat(spmm_task, nrowblksString[l]);
+                    strcat(spmm_task, ",");
+                    strcat(spmm_task, nrowblksString[pseudo_tid_map[i][l]]);
+
+                    strcpy(tmp_input1,input1);
+                    strcat(tmp_input1,",");
+                    strcat(tmp_input1,nrowblksString[i]);
+
+                    strcpy(temp_chunk.memory_name,tmp_input1);
+                    temp_chunk.value = edgeW[edgeCount-1];
+
+                    inp_map[strdup(main_task)][strdup(spmm_task)] = temp_chunk;
+                    out_map[strdup(spmm_task)][strdup(main_task)] = temp_chunk;
+
+                    //printf("input_map[%s][%s] = %s %lf\n", main_task,spmm_task,tmp_input1,edgeW[edgeCount-1]);
+
+
                 }
             }      
         }
@@ -544,7 +812,21 @@ void _XY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
         edgeU[edgeCount] = edge2_id;
         edgeV[edgeCount] = nodeCount - 1;
         edgeW[edgeCount] = N * P * sizeof(double);
-        edgeCount++;          
+        edgeCount++;      
+
+        // #### Hier #####
+        strcpy(tmp_input1,input2);
+
+        strcpy(temp_chunk.memory_name,tmp_input1);
+        temp_chunk.value = edgeW[edgeCount-1];
+
+        inp_map[strdup(main_task)][strdup(edge2_var)] = temp_chunk;
+        out_map[strdup(edge2_var)][strdup(main_task)] = temp_chunk;
+
+        //printf("input_map[%s][%s] = %s %lf\n", main_task,edge2_var,tmp_input1,edgeW[edgeCount-1]);
+
+
+
     }
 
     tend = omp_get_wtime();
@@ -581,6 +863,12 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
     myitoa(task_id_2, task_id2_char);
     myitoa(xty_id, xty_id_char);
 
+    // #### Hier #####
+    char main_task[150];
+    char tmp_input1[150];
+    char tmp_input2[150];
+    memory_chunk temp_chunk;
+
     for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
     {
         memset(&ary[0], 0, sizeof(ary));
@@ -610,6 +898,9 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
         strcat(ary, nrowblksString[k]);
         strcat(ary, ",");
         strcat(ary, xty_id_char);
+
+        // #### Hier #####
+        strcpy(main_task,ary);
         
         vertexName[strdup(ary)] = nodeCount;
         if( (i * block_width + block_width) > row)
@@ -617,10 +908,6 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
         else
             vertexWeight[nodeCount] = block_width * p * sizeof(double);
         nodeCount++;
-
-        //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
 
         if(edge1Format == 2) //coming from another task
         {
@@ -634,7 +921,20 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
             edgeU[edgeCount] = vertexName[ary];
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;        
+            edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);        
         }
         else
         {
@@ -647,6 +947,21 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+
+
         }
 
         if(edge2Format == 2)
@@ -661,7 +976,20 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
             edgeU[edgeCount] = vertexName[ary];
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;      
+            edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input2);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);      
         }
         else
         {
@@ -674,6 +1002,19 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input2);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
         for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
         {
@@ -685,23 +1026,25 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
             
             edgeU[edgeCount] = nodeCount - 1;
             edgeV[edgeCount] = vertexName[ary];
-            edgeW[edgeCount] = vertexWeight[nodeCount]; //=> changed //sizeof(double); 
+            edgeW[edgeCount] = nthrds * col * p * sizeof(double); //=> changed //sizeof(double); 
+
+            //printf("%s --> %s %lf nthrds = %d col = %d p = %d \n", main_task, ary, edgeW[edgeCount],nthrds,col,p);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,output);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[l]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+            out_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", ary,main_task,tmp_input1,edgeW[edgeCount-1]);
+
         }
-    }
-
-    //For global graph only 
-    for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
-    {
-        memset(&ary[0], 0, sizeof(ary));
-        strcat(ary, "RED,");
-        strcat(ary, output);
-        strcat(ary, "BUF,");
-        strcat(ary, nrowblksString[l]);
-
-        //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
     }
 
     tend = omp_get_wtime();
@@ -737,6 +1080,12 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
     myitoa(task_id_2, task_id2_char);
     myitoa(xty_id, xty_id_char);
 
+    // #### Hier #####
+    char main_task[100];
+    char tmp_input1[100];
+    char tmp_input2[100];
+    memory_chunk temp_chunk;
+
     for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
     {   
         memset(&ary[0], 0, sizeof(ary));
@@ -766,6 +1115,9 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
         strcat(ary, nrowblksString[k]);
         strcat(ary, ",");
         strcat(ary, xty_id_char);
+
+        // #### Hier #####
+        strcpy(main_task,ary);
         
         vertexName[strdup(ary)] = nodeCount;
         if( (i * block_width + block_width) > row)
@@ -777,11 +1129,6 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
         else
             vertexWeight[nodeCount] = block_width * p * sizeof(double);
         nodeCount++;
-
-        //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
-
 
         if(edge1Format == 2) //coming from another task
         {
@@ -796,6 +1143,19 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);        
         }
         else
         {
@@ -808,6 +1168,21 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+
+
         }
 
         if(edge2Format == 2)
@@ -823,6 +1198,19 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input2);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);      
         }
         else
         {   
@@ -835,6 +1223,19 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input2);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
 
         for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
@@ -847,28 +1248,29 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             
             edgeU[edgeCount] = nodeCount - 1;
             edgeV[edgeCount] = vertexName[ary];
-            edgeW[edgeCount] = vertexWeight[nodeCount]; //sizeof(double);
+            edgeW[edgeCount] = nthrds * col * p * sizeof(double); //sizeof(double);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,output);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[l]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+            out_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", ary,main_task,tmp_input1,edgeW[edgeCount-1]);
+
         }
-    }
-
-    //For global graph only 
-    for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
-    {
-        memset(&ary[0], 0, sizeof(ary));
-        strcat(ary, "RED,");
-        strcat(ary, output);
-        strcat(ary, "BUF,");
-        strcat(ary, nrowblksString[l]);
-
-        //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
     }
 
     tend = omp_get_wtime();
     graphGenTime[0] += (tend - tstart);
 }
+
 
 void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[], int task_id_1,
             int edge2Format, char edge2_var[], char edge2_part1[], char edge2_func[], char edge2_part2[], int task_id_2,
@@ -889,6 +1291,12 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
     myitoa(task_id_1, task_id1_char);
     myitoa(task_id_2, task_id2_char);
     myitoa(xty_id, xty_id_char);
+
+    // #### Hier #####
+    char main_task[150];
+    char tmp_input1[150];
+    char tmp_input2[150];
+    memory_chunk temp_chunk;
 
     for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
     {
@@ -919,17 +1327,17 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
         strcat(ary, nrowblksString[k]);
         strcat(ary, ",");
         strcat(ary, xty_id_char);
+
+        // #### Hier #####
+        strcpy(main_task,ary);
         
         vertexName[strdup(ary)] = nodeCount;
+        
         if( (i * block_width + block_width) > row)
             vertexWeight[nodeCount] = (row - i * block_width) * p * sizeof(double);
         else
             vertexWeight[nodeCount] = block_width * p * sizeof(double);
         nodeCount++;
-
-        //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
 
         if(edge1Format == 2) //coming from another task
         {
@@ -943,7 +1351,20 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             edgeU[edgeCount] = vertexName[ary];
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;      
+            edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);        
         }
         else
         {
@@ -956,6 +1377,21 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+
+
         }
 
         if(edge2Format == 2)
@@ -971,6 +1407,19 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input2);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);      
         }
         else
         {
@@ -983,6 +1432,19 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input2);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
         for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
         {
@@ -994,23 +1456,23 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
          
             edgeU[edgeCount] = nodeCount - 1;
             edgeV[edgeCount] = vertexName[ary];
-            edgeW[edgeCount] = vertexWeight[nodeCount]; //sizeof(double);
+            edgeW[edgeCount] = nthrds * col * p * sizeof(double); //sizeof(double);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,output);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[l]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+            out_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", ary,main_task,tmp_input1,edgeW[edgeCount-1]);
+
         }
-    }
-
-    //For global graph only 
-    for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
-    {
-        memset(&ary[0], 0, sizeof(ary));
-        strcat(ary, "RED,");
-        strcat(ary, output);
-        strcat(ary, "BUF,");
-        strcat(ary, nrowblksString[l]);
-
-        //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
     }
 
     tend = omp_get_wtime();
@@ -1019,7 +1481,7 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
 
 
 
-void _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[],
+void  _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[],
             int edge2Format, char edge2_var[], char edge2_part1[], char edge2_func[], char edge2_part2[], int task_id_2,
             char input1[], char input2[], char output[], int row, int col, int p, int block_width, int xty_id, int **SPMM_vertexNo)
 {
@@ -1035,6 +1497,13 @@ void _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
         
     myitoa(task_id_2, task_id2_char);
     myitoa(xty_id, xty_id_char);
+
+    // #### Hier #####
+    char main_task[150];
+    char tmp_input1[150];
+    char tmp_input2[150];
+    char spmm_task[150];
+    memory_chunk temp_chunk;
 
     for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
     {
@@ -1065,13 +1534,12 @@ void _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
         strcat(ary, nrowblksString[k]); //buf_id
         strcat(ary, ","); 
         strcat(ary, xty_id_char); //xty_id
+
+        // #### Hier #####
+        strcpy(main_task,ary);
         
         vertexName[strdup(ary)] = nodeCount;
         nodeCount++;
-
-        //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
 
         if( (i * block_width + block_width) > row)
             vertexWeight[nodeCount] = (row - i * block_width) * p * sizeof(double);
@@ -1103,6 +1571,31 @@ void _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
                     //printf("%d %d\n", edgeU[edgeCount], edgeV[edgeCount]);
                     edgeCount++;
 
+                    // #### Hier #####
+                    strcpy(spmm_task, "SPMM,");
+                    strcat(spmm_task, nrowblksString[i]);
+                    strcat(spmm_task, ",");
+                    strcat(spmm_task, nrowblksString[l]);
+                    strcat(spmm_task, ",");
+                    strcat(spmm_task, nrowblksString[pseudo_tid_map[i][l]]);
+
+                    //printf("\n\nspmm_task  %s\n\n",spmm_task);
+
+                    strcpy(tmp_input1,input1);
+                    strcat(tmp_input1,",");
+                    strcat(tmp_input1,nrowblksString[i]);
+
+                    strcpy(temp_chunk.memory_name,tmp_input1);
+                    temp_chunk.value = edgeW[edgeCount-1];
+
+                    inp_map[strdup(main_task)][strdup(spmm_task)] = temp_chunk;
+                    out_map[strdup(spmm_task)][strdup(main_task)] = temp_chunk;
+
+
+                    //printf("input_map[%s][%s] = %s %lf\n",main_task,spmm_task, tmp_input1,edgeW[edgeCount-1]);
+
+
+
                 }
             }      
         }
@@ -1117,6 +1610,19 @@ void _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
 
         if(edge2Format == 2)
@@ -1132,6 +1638,19 @@ void _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input2);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
         else
         {
@@ -1144,6 +1663,19 @@ void _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * col * sizeof(double);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input2);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
         for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
         {
@@ -1155,27 +1687,1488 @@ void _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
 
             edgeU[edgeCount] = nodeCount - 1;
             edgeV[edgeCount] = vertexName[ary];
-            edgeW[edgeCount] = vertexWeight[nodeCount]; //sizeof(double);
+            edgeW[edgeCount] = nthrds * col * p * sizeof(double); //sizeof(double);
             edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,output);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[l]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+            out_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", ary,main_task,tmp_input1,edgeW[edgeCount-1]);
+
         }
     }
+    tend = omp_get_wtime();
+    graphGenTime[0] += (tend - tstart);
+}
 
-    //For global graph only 
-    for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
+
+
+void spmm_blkcoord_csbTask(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[],
+            char input1[], char input2[], char output[], int row, int col, int p, int block_width, int currentBlockSize, int taskwait_node_no, int *actR_vertexNo, int **SPMM_vertexNo)
+{
+    int i, j, k;
+    int nbuf = 1; // how many partial SPMM results?
+    //int nnz = 20; //nnz in each csb block, for time-being it is set to 20
+    int pseudo_tid = 0, max_pesudo_tid = 0;
+    char ary[150];
+
+    double tstart, tend, t1, t2, fetch_time = 0, insert_time = 0, sprintf_time = 0, conversion_time = 0 ;
+    int total_insert = 0 , total_fetch = 0;
+    char i_string[8], j_string[8], k_string[4];
+    
+    int buf_setzero_node_no = -1;
+    int buf_reduction_node_no = -1;
+    int offset, modulus;
+
+    // #### Hier #####
+    char main_task[150];
+    char tmp_input1[150];
+    char tmp_input2[150];
+    char extra_task1[150];
+    char extra_task2[150];
+    memory_chunk temp_chunk;
+
+    
+
+    tstart = omp_get_wtime();
+
+    for(i = 0 ; i < nrowblks ; i++)
     {
+        //t1 = omp_get_wtime();   
+     
         memset(&ary[0], 0, sizeof(ary));
-        strcat(ary, "RED,");
-        strcat(ary, output);
-        strcat(ary, "BUF,");
-        strcat(ary, nrowblksString[l]);
+        strcat(ary, "SETZERO,");
+        strcat(ary, nrowblksString[i]);
+        strcat(ary, ",1");
 
-        //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
+        // #### Hier #####
+        strcpy(extra_task2, ary);
+     
+        //t2 = omp_get_wtime();
+        //sprintf_time += (t2 - t1);
+        //t1 = omp_get_wtime();
+
+        vertexName[strdup(ary)] = nodeCount;
+        vertexWeight[nodeCount] = block_width * currentBlockSize * sizeof(double);
+        buf_setzero_node_no = nodeCount; //saving it to use later in nested looop
+        nodeCount++;
+
+        //t2 = omp_get_wtime();
+        //insert_time += (t2 - t1);
+        //total_insert++;
+        
+
+        //t1 = omp_get_wtime();
+        
+        //memset(&ary[0], 0, sizeof(ary));
+        //strcat(ary, "SPMMRED,");
+        //strcat(ary, nrowblksString[i]);
+        
+        //t2 = omp_get_wtime();
+        //sprintf_time += (t2 - t1);
+
+        //t1 = omp_get_wtime();
+
+        //vertexName[strdup(ary)] = nodeCount;
+        //vertexWeight[nodeCount] = block_width * currentBlockSize * sizeof(double);
+        //buf_reduction_node_no = nodeCount;
+        //nodeCount++; 
+
+        //t2 = omp_get_wtime();
+        //insert_time += (t2 - t1);
+        //total_insert++;
+       
+        
+
+        for(j = 0 ; j < ncolblks ; j++)
+        {
+            if(matrixBlock[i * ncolblks + j].nnz > 0)
+            {
+                pseudo_tid = ( (((i * ncolblks) + j) % nbuf) > (nthreads - 1) ? 0 : ( ((i * ncolblks) + j) % nbuf ) );
+                k = pseudo_tid;
+                max_pesudo_tid = ((max_pesudo_tid > pseudo_tid) ? max_pesudo_tid : pseudo_tid );
+                
+                //t1 = omp_get_wtime();
+                
+                memset(&ary[0], 0, sizeof(ary));
+                strcat(ary, "SPMM,");
+                strcat(ary, nrowblksString[i]);
+                strcat(ary, ",");
+                strcat(ary, nrowblksString[j]);
+                strcat(ary, ",");
+                strcat(ary, nrowblksString[k]);
+
+                // #### Hier #####
+                pseudo_tid_map[i][j] = k;
+                strcpy(main_task, ary);
+                //strcat(ary, ")");
+
+                //t2 = omp_get_wtime();
+                //sprintf_time += (t2 - t1);
+
+                //t1 = omp_get_wtime();
+
+
+                vertexName[strdup(ary)] = nodeCount;
+                vertexWeight[nodeCount] = block_width * currentBlockSize * sizeof(double);
+                SPMM_vertexNo[i][j] = nodeCount; //saving SPMM node number for later use
+                nodeCount++;
+
+                //t2 = omp_get_wtime();
+                //insert_time += (t2 - t1);
+                //total_insert++;
+                
+
+                //this will come from actR  
+                edgeU[edgeCount] = actR_vertexNo[j]; //SPMM(r,c) requires actR(c) 
+                edgeV[edgeCount] = nodeCount - 1;
+                edgeW[edgeCount] = block_width * currentBlockSize * sizeof(double) + matrixBlock[i * ncolblks + j].nnz * sizeof(double); //instead of adding _A(i,j) can we add the weight of _A(i,j) to actR(j) weight? 
+                edgeCount++;
+
+                // #### Hier #####
+                strcpy(tmp_input1,input2);
+                strcat(tmp_input1,",");
+                strcat(tmp_input1,nrowblksString[j]);
+
+                strcpy(temp_chunk.memory_name,tmp_input1);
+                temp_chunk.value = edgeW[edgeCount-1];
+
+                strcpy(extra_task1,"DLACPY,");  
+
+                //char dla_id[4];
+                //myitoa(j,dla_id);
+                //strcat(extra_task1,dla_id);
+                strcat(extra_task1,nrowblksString[j]);
+                strcat(extra_task1,",1");
+
+
+                inp_map[strdup(main_task)][strdup(extra_task1)] = temp_chunk;
+                out_map[strdup(extra_task1)][strdup(main_task)] = temp_chunk;
+
+                //printf("input_map[%s][%s] = %s %lf\n", main_task,extra_task1,tmp_input1,edgeW[edgeCount-1]);
+
+
+                //SETZERO AR to SPMM
+                edgeU[edgeCount] = buf_setzero_node_no; 
+                edgeV[edgeCount] = nodeCount - 1; 
+                edgeW[edgeCount] = block_width * p * sizeof(double); //single block of a particular partial buffer
+                edgeCount++;
+
+                strcpy(tmp_input1,output);
+                strcat(tmp_input1,",");
+                strcat(tmp_input1,nrowblksString[i]);
+
+                strcpy(temp_chunk.memory_name, tmp_input1);
+                temp_chunk.value = edgeW[edgeCount-1];
+
+                inp_map[strdup(main_task)][strdup(extra_task2)] = temp_chunk;
+                out_map[strdup(extra_task2)][strdup(main_task)] = temp_chunk;
+
+                //printf("input_map[%s][%s] = %s %lf\n", main_task,extra_task2,tmp_input1,edgeW[edgeCount-1]);
+
+
+
+                //SPMM to SPMMRED
+                //edgeU[edgeCount] = nodeCount - 1; 
+                //edgeV[edgeCount] = buf_reduction_node_no;
+                //edgeW[edgeCount] = block_width * p * sizeof(double); //what should be the proper weight of the edges going out from SPMM task? should be on nnz of that block???
+                //edgeCount++;
+            }
+        }
+        //SETZERO(actAR) to SPMMRED
+        //edgeU[edgeCount] = SETZERO_SPMM_OUTPUT_vertexNo[i]; 
+        //edgeV[edgeCount] = buf_reduction_node_no;
+        //edgeW[edgeCount] = block_width * p * sizeof(double);
+        //edgeCount++;
     }
 
     tend = omp_get_wtime();
-    graphGenTime[0] += (tend - tstart);
+    graphGenTime[2] += (tend - tstart);
+
+    //cout << "SPMM fetch time: " << fetch_time << " sec. " << "total_fetch: " << total_fetch << endl;
+    //cout << "SPMM insert time: " << insert_time << " sec. " << "total_insert: " << total_insert << endl;
+    ///cout << "SPMM sprintf time: " << sprintf_time << " sec." << endl;
+    //cout << "Conversion time: " << conversion_time << " sec." << endl;
+}
+
+void custom_dlacpy(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[], char edge1_part3[], int task_id,
+            char input1[], char output[], int row, int col, int block_width, int dlacpy_id)
+{
+    /* funciton code: 9 */
+    
+    double tstart, tend;
+    tstart = omp_get_wtime();
+    
+    int i;
+
+    char i_string[8], task_id1_char[4], dlacpy_id_char[4];
+    char ary[150];
+        
+    myitoa(task_id, task_id1_char);
+    myitoa(dlacpy_id, dlacpy_id_char);
+
+    // #### Hier #####
+    char main_task[150];
+    char tmp_input1[150];
+    char tmp_input2[150];
+    memory_chunk temp_chunk;
+
+
+    for(i = 0 ; i < nrowblks ; i++)
+    {
+        memset(&ary[0], 0, sizeof(ary));
+        strcat(ary, "DLACPY,");
+        strcat(ary, nrowblksString[i]);
+        strcat(ary, ",");
+        strcat(ary, dlacpy_id_char);
+
+        // #### Hier #####
+        strcpy(main_task,ary);
+        
+        vertexName[strdup(ary)] = nodeCount;
+        vertexWeight[nodeCount] = block_width * col * sizeof(double);
+        nodeCount++;
+
+        if(edge1Format == 1) //edge coming from a single matrix 
+        {
+            memset(&ary[0], 0, sizeof(ary));
+            strcat(ary, edge1_var);
+            strcat(ary, ",");
+            strcat(ary, nrowblksString[i]);
+            
+            edgeU[edgeCount] = vertexName[ary];
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+
+
+        }
+        else //coming from another operation of format : func_(inp1, inp2, blk) 
+        {
+            memset(&ary[0], 0, sizeof(ary));
+            strcat(ary, edge1_func);
+            strcat(ary, ",");
+            strcat(ary, nrowblksString[i]);
+            strcat(ary, ",");
+            strcat(ary, task_id1_char);
+            
+            edgeU[edgeCount] = vertexName[ary];
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+
+        }
+    }
+
+    tend = omp_get_wtime();
+    graphGenTime[9] += (tend - tstart);
+}
+
+//called only once before SPMM
+void custom_dlacpy_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[], char edge1_part3[], int task_id,
+            char input1[], char output[], int row, int col, int block_width, int dlacpy_id, int taskwait_node_no, int *actR_vertexNo)
+{
+    /* funciton code: 9 */
+    
+    double tstart, tend;
+    tstart = omp_get_wtime();
+
+    int i;
+    
+    char i_string[8], task_id1_char[4], dlacpy_id_char[4];
+    char ary[150];
+        
+    myitoa(task_id, task_id1_char);
+    myitoa(dlacpy_id, dlacpy_id_char);
+
+    // #### Hier #####
+    char main_task[150];
+    char tmp_input1[150];
+    char tmp_input2[150];
+    memory_chunk temp_chunk;
+
+    for(i = 0 ; i < nrowblks ; i++)
+    {       
+        memset(&ary[0], 0, sizeof(ary));
+        strcat(ary, "DLACPY,");
+        strcat(ary, nrowblksString[i]);
+        strcat(ary, ",");
+        strcat(ary, dlacpy_id_char);
+        vertexName[strdup(ary)] = nodeCount;
+        vertexWeight[nodeCount] = block_width * col * sizeof(double);
+        actR_vertexNo[i] = nodeCount; //saving it for SPMM tasks
+        nodeCount++;
+
+        // #### Hier #####
+        strcpy(main_task,ary);
+
+        if(edge1Format == 1) //edge coming from a single matrix 
+        {       
+            memset(&ary[0], 0, sizeof(ary));
+            strcat(ary, edge1_var);
+            strcat(ary, ",");
+            strcat(ary, nrowblksString[i]);
+
+            
+            edgeU[edgeCount] = vertexName[ary];
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+
+
+        }
+        else //coming from another operation of format : func_(inp1, inp2, blk) 
+        {
+            memset(&ary[0], 0, sizeof(ary));
+            strcat(ary, edge1_func);
+            strcat(ary, ",");
+            strcat(ary, nrowblksString[i]);
+            strcat(ary, ",");
+            strcat(ary, task_id1_char);
+
+            edgeU[edgeCount] = vertexName[ary];
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+
+        }
+    }
+
+    tend = omp_get_wtime();
+    graphGenTime[9] += (tend - tstart);
+}
+
+
+
+
+
+
+void getActiveBlockVector(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[], char edge1_part3[], int task_id_1,
+            char edge2[], int edge2_id,
+            char input1[], char input2[], char output[], int row, int col, int currentBlockSize, int block_width, int get_id ) //edge2 is activeMask node
+{
+    /* funciton code: 6 */
+    
+    double tstart, tend;
+    tstart = omp_get_wtime();
+
+    int i;// edge2_id;
+    char i_string[8], task_id1_char[4], get_id_char[4];
+    char ary[150];
+        
+    myitoa(task_id_1, task_id1_char);
+    myitoa(get_id, get_id_char);
+
+    // #### Hier #####
+    char main_task[150];
+    char tmp_input1[150];
+    char tmp_input2[150];
+    memory_chunk temp_chunk;
+
+    for(i = 0 ; i < nrowblks ; i++)
+    {
+        memset(&ary[0], 0, sizeof(ary));
+        strcat(ary, "GET,");
+        strcat(ary, nrowblksString[i]);
+        strcat(ary, ",");
+        strcat(ary, get_id_char);
+
+        // #### Hier #####
+        strcpy(main_task,ary);
+        
+        vertexName[strdup(ary)] = nodeCount;
+        vertexWeight[nodeCount] = block_width * currentBlockSize * sizeof(double);
+        nodeCount++;
+
+        
+
+        if(edge1Format == 1) //edge coming from a single matrix
+        {
+            memset(&ary[0], 0, sizeof(ary));
+            strcat(ary, edge1_var);
+            strcat(ary, ",");
+            strcat(ary, nrowblksString[i]);
+         
+            edgeU[edgeCount] = vertexName[ary];
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;       
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+        }
+        else //coming from another operation of format : func_(inp1, inp2, blk) 
+        {
+            memset(&ary[0], 0, sizeof(ary));
+            strcat(ary, edge1_func);
+            strcat(ary, ",");
+            strcat(ary, nrowblksString[i]);
+            strcat(ary, ",");
+            strcat(ary, task_id1_char);
+            
+            edgeU[edgeCount] = vertexName[ary];
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;       
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+        }
+
+        edgeU[edgeCount] = edge2_id;
+        edgeV[edgeCount] = nodeCount - 1;
+        edgeW[edgeCount] = col * sizeof(double);
+        edgeCount++;
+
+        // #### Hier #####
+        strcpy(tmp_input1,input2);
+        strcpy(temp_chunk.memory_name,tmp_input1);
+        temp_chunk.value = edgeW[edgeCount-1];
+
+        inp_map[strdup(main_task)][strdup(edge2)] = temp_chunk;
+        out_map[strdup(edge2)][strdup(main_task)] = temp_chunk;
+
+        //printf("input_map[%s][%s] = %s %lf\n", main_task,edge2,tmp_input1,edgeW[edgeCount-1]);
+
+
+
+
+
+    }
+
+    tend = omp_get_wtime();
+    graphGenTime[6] += (tend - tstart);
+}
+
+void updateBlockVector(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[], int task_id,
+            char edge2[], int edge2_id,
+            char input1[], char input2[], char output[], int row, int col, int currentBlockSize, int block_width, int update_id) //edge2 is activeMask node
+{ 
+    /* funciton code: 7 */
+    
+    double tstart, tend;
+    tstart = omp_get_wtime();
+    
+    int i;
+    char i_string[8], task_id1_char[4], update_id_char[4];
+    char ary[150];
+        
+    myitoa(task_id, task_id1_char);
+    myitoa(update_id, update_id_char);
+
+    // #### Hier #####
+    char main_task[150];
+    char tmp_input1[150];
+    char tmp_input2[150];
+    memory_chunk temp_chunk;
+    
+    for(i = 0 ; i < nrowblks ; i++)
+    {
+        memset(&ary[0], 0, sizeof(ary));
+        strcat(ary, "UPDATE,");
+        strcat(ary, nrowblksString[i]);
+        strcat(ary, ",");
+        strcat(ary, update_id_char);
+
+        // #### Hier #####
+        strcpy(main_task,ary);
+        
+        vertexName[strdup(ary)] = nodeCount;
+        vertexWeight[nodeCount] = block_width * currentBlockSize * sizeof(double);
+        nodeCount++;
+
+        if(edge1Format == 1) //edge coming from a single matrix 
+        {
+            memset(&ary[0], 0, sizeof(ary));
+            strcat(ary, edge1_var);
+            strcat(ary, ",");
+            strcat(ary, nrowblksString[i]);
+            
+            edgeU[edgeCount] = vertexName[ary];
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;       
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+
+
+
+        }
+        else //coming from another operation of format : func_(inp1, inp2, blk) 
+        {
+            memset(&ary[0], 0, sizeof(ary));
+            strcat(ary, edge1_func);
+            strcat(ary, ",");
+            strcat(ary, nrowblksString[i]);
+            strcat(ary, ",");
+            strcat(ary, task_id1_char);
+            
+            edgeU[edgeCount] = vertexName[ary];
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+
+        }
+
+        edgeU[edgeCount] = edge2_id; 
+        edgeV[edgeCount] = nodeCount - 1;
+        edgeW[edgeCount] = col * sizeof(double);
+        edgeCount++; 
+
+        // #### Hier #####
+        strcpy(tmp_input1,input2);
+        strcpy(temp_chunk.memory_name,tmp_input1);
+        temp_chunk.value = edgeW[edgeCount-1];
+
+        inp_map[strdup(main_task)][strdup(edge2)] = temp_chunk;
+        out_map[strdup(edge2)][strdup(main_task)] = temp_chunk;
+
+        //printf("input_map[%s][%s] = %s %lf\n", main_task,edge2,tmp_input1,edgeW[edgeCount-1]);
+
+    }
+
+    tend = omp_get_wtime();
+    graphGenTime[7] += (tend - tstart);
+}
+
+
+void mat_sub(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[], char edge1_part3[], int task_id_1,
+            int edge2Format, char edge2_var[], char edge2_part1[], char edge2_func[], char edge2_part2[], char edge2_part3[], int task_id_2,
+            char input1[], char input2[], char output[], int row, int col, int block_width, int sub_id)
+{
+    /**********************************************
+    Input: X[M*N], Y[N*P]
+    Output: result[M*P]
+    nthrds : global variable, total # of threads
+    ***********************************************/
+
+    /* funciton code: 4 */
+    
+    double tstart, tend;
+    tstart = omp_get_wtime();
+
+    int i;
+    char i_string[8], task_id1_char[4], task_id2_char[4], sub_id_char[4];
+    char ary[150];
+        
+    myitoa(task_id_1, task_id1_char);
+    myitoa(task_id_2, task_id2_char);
+    myitoa(sub_id, sub_id_char);
+
+    // #### Hier #####
+    char main_task[150];
+    char tmp_input1[150];
+    char tmp_input2[150];
+    memory_chunk temp_chunk;
+
+    for(i = 0 ; i < nrowblks ; i++)
+    {
+        memset(&ary[0], 0, sizeof(ary));
+        strcat(ary, "SUB,");
+        strcat(ary, nrowblksString[i]);
+        strcat(ary, ",");
+        strcat(ary, sub_id_char);
+
+        // #### Hier #####
+        strcpy(main_task,ary);
+        
+        vertexName[strdup(ary)] = nodeCount;
+        vertexWeight[nodeCount] = block_width * col * sizeof(double);
+        nodeCount++;
+
+        if(edge1Format == 1) //edge coming from a single matrix 
+        {
+            memset(&ary[0], 0, sizeof(ary));
+            strcat(ary, edge1_var);
+            strcat(ary, ",");
+            strcat(ary, nrowblksString[i]);
+              
+            edgeU[edgeCount] = vertexName[ary];
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;        
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+
+        }
+        else //coming from another operation of format : func_(inp1, inp2, blk) 
+        {
+            memset(&ary[0], 0, sizeof(ary));
+            strcat(ary, edge1_func);
+            strcat(ary, ",");
+            strcat(ary, nrowblksString[i]);
+            strcat(ary, ",");
+            strcat(ary, task_id1_char);
+            //strcat(ary, ")");
+
+            edgeU[edgeCount] = vertexName[ary];
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+    
+        }
+
+        if(edge2Format == 1) // edge coming from a single matrix 
+        {
+            memset(&ary[0], 0, sizeof(ary));
+            strcat(ary, edge2_var);
+            strcat(ary, ",");
+            strcat(ary, nrowblksString[i]);
+              
+            edgeU[edgeCount] = vertexName[ary];
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input2,input2);
+            strcat(tmp_input2,",");
+            strcat(tmp_input2,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input2);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
+
+        }
+        else // coming from another operation of format : func_(inp1, inp2, blk) 
+        {
+            memset(&ary[0], 0, sizeof(ary));
+            strcat(ary, edge2_func);
+            strcat(ary, ",");
+            strcat(ary, nrowblksString[i]);
+            strcat(ary, ",");
+            strcat(ary, task_id2_char);
+            
+            edgeU[edgeCount] = vertexName[ary];
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input2,input2);
+            strcat(tmp_input2,",");
+            strcat(tmp_input2,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input2);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
+
+        }
+        
+    }
+
+    tend = omp_get_wtime();
+    graphGenTime[4] += (tend - tstart);
+}
+
+
+
+void mat_mult(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[], char edge1_part3[], int task_id_1,
+            int edge2Format, char edge2_var[], char edge2_part1[], char edge2_func[], char edge2_part2[], char edge2_part3[], int task_id_2,
+            char input1[], char input2[], char output[], int row, int col, int block_width)
+{
+    /* funciton code: 5 */
+    
+    string dummyString = "";
+    double tstart, tend;
+    int i, edge2_id;
+    char i_string[8], task_id1_char[4], task_id2_char[4];
+    char ary[150];
+       
+    myitoa(task_id_1, task_id1_char);
+    myitoa(task_id_2, task_id2_char);
+    
+    tstart = omp_get_wtime();
+    if(edge2Format == 1) // edge coming from a single matrix 
+    {
+        edge2_id = vertexName[edge2_var]; 
+    }
+
+    // #### Hier #####
+    char main_task[150];
+    char tmp_input1[150];
+    char tmp_input2[150];
+    memory_chunk temp_chunk;
+
+    for(i = 0 ; i < nrowblks ; i++)
+    {
+        memset(&ary[0], 0, sizeof(ary));
+        strcat(ary, "MULT,");
+        strcat(ary, nrowblksString[i]);
+
+        // #### Hier #####
+        strcpy(main_task,ary);
+        
+        vertexName[strdup(ary)] = nodeCount; 
+        vertexWeight[nodeCount] = block_width * col * sizeof(double);
+        nodeCount++;
+
+        if(edge1Format == 1) //edge coming from a single matrix 
+        {
+            memset(&ary[0], 0, sizeof(ary));
+            strcat(ary, edge1_var);
+            strcat(ary, ",");
+            strcat(ary, nrowblksString[i]);
+            
+            edgeU[edgeCount] = vertexName[ary];
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+        
+        }
+        else //coming from another operation of format : func_(inp1, inp2, blk) 
+        {
+            memset(&ary[0], 0, sizeof(ary));
+            strcat(ary, edge1_func);
+            strcat(ary, ",");
+            strcat(ary, nrowblksString[i]);
+            strcat(ary, ",");
+            strcat(ary, task_id1_char);
+            
+            edgeU[edgeCount] = vertexName[ary];
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+        
+        }
+
+        if(edge2Format == 1) // edge coming from a single matrix 
+        {
+            edgeU[edgeCount] = edge2_id; 
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input2,input2);
+            strcpy(temp_chunk.memory_name,tmp_input2);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
+
+        }
+        else // coming from another operation of format : func_(inp1, inp2, blk)
+        {
+            memset(&ary[0], 0, sizeof(ary));
+            strcat(ary, edge2_func);
+            strcat(ary, ",");
+            strcat(ary, nrowblksString[i]);
+            strcat(ary, ",");
+            strcat(ary, task_id2_char);
+            
+            edgeU[edgeCount] = vertexName[ary];
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;        
+
+            // #### Hier #####
+            strcpy(tmp_input2,input2);
+            strcat(tmp_input2,",");
+            strcat(tmp_input2,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input2);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
+
+        }
+    }
+
+    tend = omp_get_wtime();
+    graphGenTime[5] += (tend - tstart);
+}
+
+
+void dot_mm(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[], char edge1_part3[], int task_id_1,
+            int edge2Format, char edge2_var[], char edge2_part1[], char edge2_func[], char edge2_part2[], char edge2_part3[], int task_id_2,
+            char input1[], char input2[], char output[], int row, int col, int block_width)
+{
+    /* funciton code: 5 */
+    int nbuf = 16, k, pseudo_tid, max_pesudo_tid = -1;
+
+    string dummyString = "";
+    double tstart, tend;
+    int i, edge2_id;
+    char i_string[8], task_id1_char[4], task_id2_char[4];
+    char ary[150];
+       
+    myitoa(task_id_1, task_id1_char);
+    myitoa(task_id_2, task_id2_char);
+
+    //added for DOT [RNRED,RNBUF] is moved from sum_sqrt to here
+    memset(&ary[0], 0, sizeof(ary));
+    strcat(ary, "RNRED,");
+    strcat(ary, "RNBUF");
+    
+    vertexName[strdup(ary)] = nodeCount;
+    vertexWeight[nodeCount] = col * sizeof(double);
+    int sumsqrt_buf_id = nodeCount;
+    printf("sumsqrt_buf_id : %d\n", sumsqrt_buf_id);
+    nodeCount++;
+
+    char *tempRNRED = (char *) malloc(50 * sizeof(char));
+    //Global Graph
+    strcpy(tempRNRED, ary);
+
+    //-------------
+    
+    tstart = omp_get_wtime();
+    if(edge2Format == 1) // edge coming from a single matrix 
+    {
+        edge2_id = vertexName[edge2_var]; 
+    }
+
+    // #### Hier #####
+    char main_task[150];
+    char tmp_input1[150];
+    char tmp_input2[150];
+    memory_chunk temp_chunk;
+
+    for(i = 0 ; i < nrowblks ; i++)
+    {
+        //memset(&ary[0], 0, sizeof(ary));
+        //strcat(ary, "MULT,");
+        //strcat(ary, nrowblksString[i]);
+
+        pseudo_tid = ((i % nbuf) > (nthreads - 1) ? 0 : (i % nbuf) );
+        k = pseudo_tid;
+        max_pesudo_tid = ((max_pesudo_tid > pseudo_tid) ? max_pesudo_tid : pseudo_tid );
+
+        memset(&ary[0], 0, sizeof(ary));
+        strcat(ary, "DOT,");
+        strcat(ary, nrowblksString[i]);
+        strcat(ary, ",");
+        strcat(ary, nrowblksString[k]);
+
+        // #### Hier #####
+        strcpy(main_task, ary);
+        
+        vertexName[strdup(ary)] = nodeCount; 
+        vertexWeight[nodeCount] = block_width * col * sizeof(double);
+        nodeCount++;
+
+        if(edge1Format == 1) //edge coming from a single matrix 
+        {
+            memset(&ary[0], 0, sizeof(ary));
+            strcat(ary, edge1_var);
+            strcat(ary, ",");
+            strcat(ary, nrowblksString[i]);
+            
+            edgeU[edgeCount] = vertexName[ary];
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+        
+        }
+        else //coming from another operation of format : func_(inp1, inp2, blk) 
+        {
+            memset(&ary[0], 0, sizeof(ary));
+            strcat(ary, edge1_func);
+            strcat(ary, ",");
+            strcat(ary, nrowblksString[i]);
+            strcat(ary, ",");
+            strcat(ary, task_id1_char);
+            
+            edgeU[edgeCount] = vertexName[ary];
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input1,input1);
+            strcat(tmp_input1,",");
+            strcat(tmp_input1,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input1);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+        
+        }
+
+        if(edge2Format == 1) // edge coming from a single matrix 
+        {
+            edgeU[edgeCount] = edge2_id; 
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;
+
+            // #### Hier #####
+            strcpy(tmp_input2,input2);
+            strcpy(temp_chunk.memory_name,tmp_input2);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
+
+        }
+        else // coming from another operation of format : func_(inp1, inp2, blk)
+        {
+            memset(&ary[0], 0, sizeof(ary));
+            strcat(ary, edge2_func);
+            strcat(ary, ",");
+            strcat(ary, nrowblksString[i]);
+            strcat(ary, ",");
+            strcat(ary, task_id2_char);
+            
+            edgeU[edgeCount] = vertexName[ary];
+            edgeV[edgeCount] = nodeCount - 1;
+            edgeW[edgeCount] = block_width * col * sizeof(double);
+            edgeCount++;        
+
+            // #### Hier #####
+            strcpy(tmp_input2,input2);
+            strcat(tmp_input2,",");
+            strcat(tmp_input2,nrowblksString[i]);
+
+            strcpy(temp_chunk.memory_name,tmp_input2);
+            temp_chunk.value = edgeW[edgeCount-1];
+
+            inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+            out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
+
+        }
+
+        //DOT --> RNRED
+        edgeU[edgeCount] = nodeCount - 1;
+        edgeV[edgeCount] = sumsqrt_buf_id;
+        edgeW[edgeCount] = nthreads * col * sizeof(double);
+        edgeCount++;
+
+        //need to add hier code here
+
+        // #### Hier #####
+        strcpy(tmp_input1, "RNBUF");
+    
+
+        strcpy(temp_chunk.memory_name,tmp_input1);
+        temp_chunk.value = edgeW[edgeCount-1];
+
+        inp_map[strdup(tempRNRED)][strdup(main_task)] = temp_chunk;
+        out_map[strdup(main_task)][strdup(tempRNRED)] = temp_chunk;
+
+        //printf("input_map[%s][%s] = %s %lf\n", tempRNRED,main_task,tmp_input1,edgeW[edgeCount-1]);
+    }
+    
+    //Global Graph
+    //strcpy(globalGraph[globalNodeCount], tempRNRED);
+    //globalNodeCount++;
+
+    free(tempRNRED);
+
+    tend = omp_get_wtime();
+    graphGenTime[5] += (tend - tstart);
+}
+
+void sum_sqrt(char edge1_part1[], char edge1_func[], char edge1_part2[], char edge1_part3[],
+            char edge2[], int edge2_id,
+            char input1[], char output[], int row, int col, int block_width)
+{
+    /* funciton code: 3 */
+    double tstart, tend;
+    tstart = omp_get_wtime();
+
+    int i, k;
+    int nbuf = 16;
+    int pseudo_tid, max_pesudo_tid = -1;
+
+    char i_string[8], k_string[4], task_id2_char[4];
+    char ary[150];
+
+    // #### Hier #####
+    char main_task[150];
+    char extra_task1[150];
+    char extra_task2[150];
+    char tmp_input1[150];
+    char tmp_input2[150];
+    memory_chunk temp_chunk;
+
+    memset(&ary[0], 0, sizeof(ary));
+    strcat(ary, "RNRED,");
+    strcat(ary, "RNBUF");
+    
+    vertexName[strdup(ary)] = nodeCount;
+    vertexWeight[nodeCount] = col * sizeof(double);
+    int sumsqrt_buf_id = nodeCount;
+    nodeCount++;
+
+    // #### Hier #####
+    strcpy(extra_task1, ary);
+
+    memset(&ary[0], 0, sizeof(ary));
+    strcat(ary, "SQRT,");
+    strcat(ary, output);
+
+    vertexName[strdup(ary)] = nodeCount;
+    vertexWeight[nodeCount] = col * sizeof(double);
+    int sqrt_id = nodeCount;
+    nodeCount++;
+
+    // #### Hier #####
+    strcpy(extra_task2, ary);
+
+    for(i = 0, k = 0 ; i < nrowblks ; i++, k++)
+    {
+        pseudo_tid = ((i % nbuf) > (nthreads - 1) ? 0 : (i % nbuf) );
+        k = pseudo_tid;
+        max_pesudo_tid = ((max_pesudo_tid > pseudo_tid) ? max_pesudo_tid : pseudo_tid );
+        
+        memset(&ary[0], 0, sizeof(ary));
+        strcat(ary, "COL,");
+        strcat(ary, nrowblksString[i]);
+        strcat(ary, ",");
+        strcat(ary, nrowblksString[k]);
+
+        vertexName[strdup(ary)] = nodeCount;
+        vertexWeight[nodeCount] = col * sizeof(double);
+        nodeCount++;
+
+        // #### Hier #####
+        strcpy(main_task, ary);
+
+        memset(&ary[0], 0, sizeof(ary));
+        strcat(ary, edge1_func);
+        strcat(ary, ",");
+        strcat(ary, nrowblksString[i]);
+
+
+        
+        edgeU[edgeCount] = vertexName[ary];
+        edgeV[edgeCount] = nodeCount - 1;
+        edgeW[edgeCount] = block_width * col * sizeof(double);
+        edgeCount++;
+
+        // #### Hier #####
+        strcpy(tmp_input1, input1);
+        strcat(tmp_input1, ",");
+        strcat(tmp_input1, nrowblksString[i]);
+
+        strcpy(temp_chunk.memory_name, tmp_input1);
+        temp_chunk.value = edgeW[edgeCount-1];
+
+        inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+        out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+        //printf("input_map[%s][%s] = %s %lf\n", main_task, ary, tmp_input1, edgeW[edgeCount-1]);
+
+        
+        //edge 2
+
+        edgeU[edgeCount] = nodeCount - 1;
+        edgeV[edgeCount] = sumsqrt_buf_id; 
+        edgeW[edgeCount] = col * sizeof(double);
+        edgeCount++;
+
+
+        // #### Hier #####
+        strcpy(tmp_input1, "RNBUF");
+
+
+        strcpy(temp_chunk.memory_name, tmp_input1);
+        temp_chunk.value = edgeW[edgeCount-1];
+
+        inp_map[strdup(extra_task1)][strdup(main_task)] = temp_chunk;
+        out_map[strdup(main_task)][strdup(extra_task1)] = temp_chunk;
+
+        //printf("input_map[%s][%s] = %s %lf\n", extra_task1, main_task, tmp_input1, edgeW[edgeCount-1]);
+
+
+
+
+    }
+
+    edgeU[edgeCount] = edge2_id; 
+    edgeV[edgeCount] = sumsqrt_buf_id; 
+    edgeW[edgeCount] = col * sizeof(double);
+    edgeCount++;
+
+
+
+    // #### Hier #####
+    strcpy(tmp_input1, "residualNorms");
+    
+
+    strcpy(temp_chunk.memory_name, tmp_input1);
+    temp_chunk.value = edgeW[edgeCount - 1];
+
+    inp_map[strdup(extra_task1)][strdup(edge2)] = temp_chunk;
+    out_map[strdup(edge2)][strdup(extra_task1)] = temp_chunk;
+
+    //printf("input_map[%s][%s] = %s %lf\n", extra_task1, edge2, tmp_input1, edgeW[edgeCount-1]);
+
+
+
+
+    edgeU[edgeCount] = sumsqrt_buf_id; 
+    edgeV[edgeCount] = sqrt_id;
+    edgeW[edgeCount] = col * sizeof(double);
+    edgeCount++;
+
+    tend = omp_get_wtime();
+    graphGenTime[8] += (tend - tstart);
+
+    // #### Hier #####
+    strcpy(tmp_input1, "RNBUF");
+    
+
+    strcpy(temp_chunk.memory_name,tmp_input1);
+    temp_chunk.value = edgeW[edgeCount-1];
+
+    inp_map[strdup(extra_task2)][strdup(extra_task1)] = temp_chunk;
+    out_map[strdup(extra_task1)][strdup(extra_task2)] = temp_chunk;
+
+    //printf("input_map[%s][%s] = %s %lf\n", extra_task2,extra_task1,tmp_input1,edgeW[edgeCount-1]);
+
+
+}
+
+void sum_sqrt_dot(char edge1_part1[], char edge1_func[], char edge1_part2[], char edge1_part3[],
+            char edge2[], int edge2_id,
+            char input1[], char output[], int row, int col, int block_width)
+{
+    /* funciton code: 3 */
+    double tstart, tend;
+    tstart = omp_get_wtime();
+
+    int i, k;
+    int nbuf = 16;
+    int pseudo_tid, max_pesudo_tid = -1;
+
+    char i_string[8], k_string[4], task_id2_char[4];
+    char ary[150];
+
+    // #### Hier #####
+    char main_task[150];
+    char extra_task1[150];
+    char extra_task2[150];
+    char tmp_input1[150];
+    char tmp_input2[150];
+    memory_chunk temp_chunk;
+
+    //memset(&ary[0], 0, sizeof(ary));
+    //strcat(ary, "RNRED,");
+    //strcat(ary, "RNBUF");
+    
+    //vertexName[strdup(ary)] = nodeCount;
+    //vertexWeight[nodeCount] = col * sizeof(double);
+    //int sumsqrt_buf_id = nodeCount;
+    //nodeCount++;
+
+    // #### Hier #####
+    //strcpy(extra_task1, ary);
+
+    char *tempRNRED = (char *) malloc(50 * sizeof(char));
+    //char *tempSQRT = (char *) malloc(50 * sizeof(char));
+
+    memset(&tempRNRED[0], 0, sizeof(tempRNRED)); //RNRED,RNBUF already added in dot_mm
+    strcat(tempRNRED, "RNRED,");
+    strcat(tempRNRED, "RNBUF");
+
+    // #### Hier #####
+    strcpy(extra_task1, tempRNRED);
+
+    memset(&ary[0], 0, sizeof(ary));
+    strcat(ary, "SQRT,");
+    strcat(ary, output);
+
+    vertexName[strdup(ary)] = nodeCount;
+    vertexWeight[nodeCount] = col * sizeof(double);
+    int sqrt_id = nodeCount;
+    nodeCount++;
+
+    //Global Graph
+    //strcpy(tempSQRT, ary);
+
+    // #### Hier #####
+    strcpy(extra_task2, ary);
+
+    /*for(i = 0, k = 0 ; i < nrowblks ; i++, k++)
+    {
+        pseudo_tid = ((i % nbuf) > (nthreads - 1) ? 0 : (i % nbuf) );
+        k = pseudo_tid;
+        max_pesudo_tid = ((max_pesudo_tid > pseudo_tid) ? max_pesudo_tid : pseudo_tid );
+        
+        memset(&ary[0], 0, sizeof(ary));
+        strcat(ary, "COL,");
+        strcat(ary, nrowblksString[i]);
+        strcat(ary, ",");
+        strcat(ary, nrowblksString[k]);
+
+        vertexName[strdup(ary)] = nodeCount;
+        vertexWeight[nodeCount] = col * sizeof(double);
+        nodeCount++;
+
+        // #### Hier #####
+        strcpy(main_task, ary);
+
+        memset(&ary[0], 0, sizeof(ary));
+        strcat(ary, edge1_func);
+        strcat(ary, ",");
+        strcat(ary, nrowblksString[i]);
+
+        edgeU[edgeCount] = vertexName[ary];
+        edgeV[edgeCount] = nodeCount - 1;
+        edgeW[edgeCount] = block_width * col * sizeof(double);
+        edgeCount++;
+
+        // #### Hier #####
+        strcpy(tmp_input1, input1);
+        strcat(tmp_input1, ",");
+        strcat(tmp_input1, nrowblksString[i]);
+
+        strcpy(temp_chunk.memory_name, tmp_input1);
+        temp_chunk.value = edgeW[edgeCount-1];
+
+        inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
+        out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
+
+        printf("input_map[%s][%s] = %s %lf\n", main_task, ary, tmp_input1, edgeW[edgeCount-1]);
+
+        //edge 2
+        edgeU[edgeCount] = nodeCount - 1;
+        edgeV[edgeCount] = sumsqrt_buf_id; 
+        edgeW[edgeCount] = col * sizeof(double);
+        edgeCount++;
+
+        // #### Hier #####
+        strcpy(tmp_input1, "RNBUF");
+        strcpy(temp_chunk.memory_name, tmp_input1);
+        temp_chunk.value = edgeW[edgeCount-1];
+
+        inp_map[strdup(extra_task1)][strdup(main_task)] = temp_chunk;
+        out_map[strdup(main_task)][strdup(extra_task1)] = temp_chunk;
+
+        printf("input_map[%s][%s] = %s %lf\n", extra_task1, main_task, tmp_input1, edgeW[edgeCount-1]);
+    }*/
+
+    edgeU[edgeCount] = edge2_id; 
+    edgeV[edgeCount] = vertexName[tempRNRED]; 
+    edgeW[edgeCount] = col * sizeof(double);
+    edgeCount++;
+
+    // #### Hier #####
+    //RESET,RN --> SQRT,RN
+    strcpy(tmp_input1, "residualNorms");
+    strcpy(temp_chunk.memory_name, tmp_input1);
+    temp_chunk.value = edgeW[edgeCount-1];
+
+    inp_map[strdup(ary)][strdup(edge2)] = temp_chunk;
+    out_map[strdup(edge2)][strdup(ary)] = temp_chunk;
+
+    //printf("input_map[%s][%s] = %s %lf\n", ary, edge2, tmp_input1, edgeW[edgeCount-1]);
+
+
+    //RNRED,RNBUF --> SQRT,RN
+    edgeU[edgeCount] = vertexName[tempRNRED];
+    printf("tempRNRED : %d\n", vertexName[tempRNRED]);
+    edgeV[edgeCount] = sqrt_id;
+    edgeW[edgeCount] = nthreads * col * sizeof(double);
+    edgeCount++;
+
+    tend = omp_get_wtime();
+    graphGenTime[8] += (tend - tstart);
+
+    // #### Hier #####
+    strcpy(tmp_input1, "RNBUF");
+    strcpy(temp_chunk.memory_name,tmp_input1);
+    temp_chunk.value = edgeW[edgeCount-1];
+
+    inp_map[strdup(ary)][strdup(tempRNRED)] = temp_chunk;
+    out_map[strdup(tempRNRED)][strdup(ary)] = temp_chunk;
+
+    //printf("input_map[%s][%s] = %s %lf\n", ary,tempRNRED,tmp_input1,edgeW[edgeCount-1]);
+
+    free(tempRNRED);
+    //free(tempSQRT);
+
 }
 
 void strrev(char *input, int length) 
@@ -1262,714 +3255,7 @@ void myitoa(int x, char* dest)
     str_rev(dest);
 }
 
-void spmm_blkcoord_csbTask(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[],
-            char input1[], char input2[], char output[], int row, int col, int p, int block_width, int currentBlockSize, int taskwait_node_no, int *actR_vertexNo, int **SPMM_vertexNo)
-{
-    int i, j, k;
-    int nbuf = 1; // how many partial SPMM results?
-    //int nnz = 20; //nnz in each csb block, for time-being it is set to 20
-    int pseudo_tid = 0, max_pesudo_tid = 0;
-    char ary[150];
 
-    double tstart, tend, t1, t2, fetch_time = 0, insert_time = 0, sprintf_time = 0, conversion_time = 0 ;
-    int total_insert = 0 , total_fetch = 0;
-    char i_string[8], j_string[8], k_string[4];
-    
-    int buf_setzero_node_no = -1;
-    int buf_reduction_node_no = -1;
-    int offset, modulus;
-
-    tstart = omp_get_wtime();
-
-    for(i = 0 ; i < nrowblks ; i++)
-    {
-        //t1 = omp_get_wtime();   
-     
-        memset(&ary[0], 0, sizeof(ary));
-        strcat(ary, "SETZERO,");
-        strcat(ary, nrowblksString[i]);
-        strcat(ary, ",1");
-     
-        //t2 = omp_get_wtime();
-        //sprintf_time += (t2 - t1);
-        //t1 = omp_get_wtime();
-
-        vertexName[strdup(ary)] = nodeCount;
-        vertexWeight[nodeCount] = block_width * currentBlockSize * sizeof(double);
-        buf_setzero_node_no = nodeCount; //saving it to use later in nested looop
-        nodeCount++;
-
-        //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
-
-        //t2 = omp_get_wtime();
-        //insert_time += (t2 - t1);
-        //total_insert++;
-        
-
-        //t1 = omp_get_wtime();
-        
-        //memset(&ary[0], 0, sizeof(ary));
-        //strcat(ary, "SPMMRED,");
-        //strcat(ary, nrowblksString[i]);
-        
-        //t2 = omp_get_wtime();
-        //sprintf_time += (t2 - t1);
-
-        //t1 = omp_get_wtime();
-
-        //vertexName[strdup(ary)] = nodeCount;
-        //vertexWeight[nodeCount] = block_width * currentBlockSize * sizeof(double);
-        //buf_reduction_node_no = nodeCount;
-        //nodeCount++; 
-
-        //t2 = omp_get_wtime();
-        //insert_time += (t2 - t1);
-        //total_insert++;
-       
-        
-
-        for(j = 0 ; j < ncolblks ; j++)
-        {
-            if(matrixBlock[i * ncolblks + j].nnz > 0)
-            {
-                pseudo_tid = ( (((i * ncolblks) + j) % nbuf) > (nthreads - 1) ? 0 : ( ((i * ncolblks) + j) % nbuf ) );
-                k = pseudo_tid;
-                max_pesudo_tid = ((max_pesudo_tid > pseudo_tid) ? max_pesudo_tid : pseudo_tid );
-                
-                //t1 = omp_get_wtime();
-                
-                memset(&ary[0], 0, sizeof(ary));
-                strcat(ary, "SPMM,");
-                strcat(ary, nrowblksString[i]);
-                strcat(ary, ",");
-                strcat(ary, nrowblksString[j]);
-                strcat(ary, ",");
-                strcat(ary, nrowblksString[k]);
-                //strcat(ary, ")");
-
-                //t2 = omp_get_wtime();
-                //sprintf_time += (t2 - t1);
-
-                //t1 = omp_get_wtime();
-
-                vertexName[strdup(ary)] = nodeCount;
-                vertexWeight[nodeCount] = block_width * currentBlockSize * sizeof(double);
-                SPMM_vertexNo[i][j] = nodeCount; //saving SPMM node number for later use
-                nodeCount++;
-
-                //Global Graph
-                strcpy(globalGraph[globalNodeCount], ary);
-                globalNodeCount++;
-
-                //t2 = omp_get_wtime();
-                //insert_time += (t2 - t1);
-                //total_insert++;
-                
-
-                //this will come from actR  
-                edgeU[edgeCount] = actR_vertexNo[j]; //SPMM(r,c) requires actR(c) 
-                edgeV[edgeCount] = nodeCount - 1;
-                edgeW[edgeCount] = block_width * currentBlockSize * sizeof(double) + matrixBlock[i * ncolblks + j].nnz * sizeof(double); //instead of adding _A(i,j) can we add the weight of _A(i,j) to actR(j) weight? 
-                edgeCount++;
-
-                //SETZERO AR to SPMM
-                edgeU[edgeCount] = buf_setzero_node_no; 
-                edgeV[edgeCount] = nodeCount - 1; 
-                edgeW[edgeCount] = block_width * p * sizeof(double); //single block of a particular partial buffer
-                edgeCount++;
-
-                //SPMM to SPMMRED
-                //edgeU[edgeCount] = nodeCount - 1; 
-                //edgeV[edgeCount] = buf_reduction_node_no;
-                //edgeW[edgeCount] = block_width * p * sizeof(double); //what should be the proper weight of the edges going out from SPMM task? should be on nnz of that block???
-                //edgeCount++;
-            }
-        }
-        //SETZERO(actAR) to SPMMRED
-        //edgeU[edgeCount] = SETZERO_SPMM_OUTPUT_vertexNo[i]; 
-        //edgeV[edgeCount] = buf_reduction_node_no;
-        //edgeW[edgeCount] = block_width * p * sizeof(double);
-        //edgeCount++;
-    }
-
-    tend = omp_get_wtime();
-    graphGenTime[2] += (tend - tstart);
-
-    //cout << "SPMM fetch time: " << fetch_time << " sec. " << "total_fetch: " << total_fetch << endl;
-    //cout << "SPMM insert time: " << insert_time << " sec. " << "total_insert: " << total_insert << endl;
-    ///cout << "SPMM sprintf time: " << sprintf_time << " sec." << endl;
-    //cout << "Conversion time: " << conversion_time << " sec." << endl;
-}
-
-void custom_dlacpy(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[], char edge1_part3[], int task_id,
-            char input1[], char output[], int row, int col, int block_width, int dlacpy_id)
-{
-    /* funciton code: 9 */
-    
-    double tstart, tend;
-    tstart = omp_get_wtime();
-    
-    int i;
-
-    char i_string[8], task_id1_char[4], dlacpy_id_char[4];
-    char ary[150];
-        
-    myitoa(task_id, task_id1_char);
-    myitoa(dlacpy_id, dlacpy_id_char);
-
-    for(i = 0 ; i < nrowblks ; i++)
-    {
-        memset(&ary[0], 0, sizeof(ary));
-        strcat(ary, "DLACPY,");
-        strcat(ary, nrowblksString[i]);
-        strcat(ary, ",");
-        strcat(ary, dlacpy_id_char);
-        
-        vertexName[strdup(ary)] = nodeCount;
-        vertexWeight[nodeCount] = block_width * col * sizeof(double);
-        nodeCount++;
-
-         //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
-
-
-        if(edge1Format == 1) //edge coming from a single matrix 
-        {
-            memset(&ary[0], 0, sizeof(ary));
-            strcat(ary, edge1_var);
-            strcat(ary, ",");
-            strcat(ary, nrowblksString[i]);
-            
-            edgeU[edgeCount] = vertexName[ary];
-            edgeV[edgeCount] = nodeCount - 1;
-            edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;
-
-        }
-        else //coming from another operation of format : func_(inp1, inp2, blk) 
-        {
-            memset(&ary[0], 0, sizeof(ary));
-            strcat(ary, edge1_func);
-            strcat(ary, ",");
-            strcat(ary, nrowblksString[i]);
-            strcat(ary, ",");
-            strcat(ary, task_id1_char);
-            
-            edgeU[edgeCount] = vertexName[ary];
-            edgeV[edgeCount] = nodeCount - 1;
-            edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;
-        }
-    }
-
-    tend = omp_get_wtime();
-    graphGenTime[9] += (tend - tstart);
-}
-
-//called only once before SPMM
-void custom_dlacpy_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[], char edge1_part3[], int task_id,
-            char input1[], char output[], int row, int col, int block_width, int dlacpy_id, int taskwait_node_no, int *actR_vertexNo)
-{
-    /* funciton code: 9 */
-    
-    double tstart, tend;
-    tstart = omp_get_wtime();
-
-    int i;
-    
-    char i_string[8], task_id1_char[4], dlacpy_id_char[4];
-    char ary[150];
-        
-    myitoa(task_id, task_id1_char);
-    myitoa(dlacpy_id, dlacpy_id_char);
-
-    for(i = 0 ; i < nrowblks ; i++)
-    {       
-        memset(&ary[0], 0, sizeof(ary));
-        strcat(ary, "DLACPY,");
-        strcat(ary, nrowblksString[i]);
-        strcat(ary, ",");
-        strcat(ary, dlacpy_id_char);
-        vertexName[strdup(ary)] = nodeCount;
-        vertexWeight[nodeCount] = block_width * col * sizeof(double);
-        actR_vertexNo[i] = nodeCount; //saving it for SPMM tasks
-        nodeCount++;
-
-         //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
-
-        if(edge1Format == 1) //edge coming from a single matrix 
-        {       
-            memset(&ary[0], 0, sizeof(ary));
-            strcat(ary, edge1_var);
-            strcat(ary, ",");
-            strcat(ary, nrowblksString[i]);   
-            
-            edgeU[edgeCount] = vertexName[ary];
-            edgeV[edgeCount] = nodeCount - 1;
-            edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;
-
-        }
-        else //coming from another operation of format : func_(inp1, inp2, blk) 
-        {
-            memset(&ary[0], 0, sizeof(ary));
-            strcat(ary, edge1_func);
-            strcat(ary, ",");
-            strcat(ary, nrowblksString[i]);
-            strcat(ary, ",");
-            strcat(ary, task_id1_char);
-
-            edgeU[edgeCount] = vertexName[ary];
-            edgeV[edgeCount] = nodeCount - 1;
-            edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;
-        }
-    }
-
-    tend = omp_get_wtime();
-    graphGenTime[9] += (tend - tstart);
-}
-
-
-
-
-
-
-void getActiveBlockVector(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[], char edge1_part3[], int task_id_1,
-            char edge2[], int edge2_id,
-            char input1[], char input2[], char output[], int row, int col, int currentBlockSize, int block_width, int get_id ) //edge2 is activeMask node
-{
-    /* funciton code: 6 */
-    
-    double tstart, tend;
-    tstart = omp_get_wtime();
-
-    int i;// edge2_id;
-    char i_string[8], task_id1_char[4], get_id_char[4];
-    char ary[150];
-        
-    myitoa(task_id_1, task_id1_char);
-    myitoa(get_id, get_id_char);
-
-    for(i = 0 ; i < nrowblks ; i++)
-    {
-        memset(&ary[0], 0, sizeof(ary));
-        strcat(ary, "GET,");
-        strcat(ary, nrowblksString[i]);
-        strcat(ary, ",");
-        strcat(ary, get_id_char);
-        
-        vertexName[strdup(ary)] = nodeCount;
-        vertexWeight[nodeCount] = block_width * currentBlockSize * sizeof(double);
-        nodeCount++;
-         //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
-
-        if(edge1Format == 1) //edge coming from a single matrix
-        {
-            memset(&ary[0], 0, sizeof(ary));
-            strcat(ary, edge1_var);
-            strcat(ary, ",");
-            strcat(ary, nrowblksString[i]);
-         
-            edgeU[edgeCount] = vertexName[ary];
-            edgeV[edgeCount] = nodeCount - 1;
-            edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;       
-        }
-        else //coming from another operation of format : func_(inp1, inp2, blk) 
-        {
-            memset(&ary[0], 0, sizeof(ary));
-            strcat(ary, edge1_func);
-            strcat(ary, ",");
-            strcat(ary, nrowblksString[i]);
-            strcat(ary, ",");
-            strcat(ary, task_id1_char);
-            
-            edgeU[edgeCount] = vertexName[ary];
-            edgeV[edgeCount] = nodeCount - 1;
-            edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;       
-        }
-
-        edgeU[edgeCount] = edge2_id;
-        edgeV[edgeCount] = nodeCount - 1;
-        edgeW[edgeCount] = block_width * col * sizeof(double);
-        edgeCount++;   
-    }
-
-    tend = omp_get_wtime();
-    graphGenTime[6] += (tend - tstart);
-}
-
-void updateBlockVector(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[], int task_id,
-            char edge2[], int edge2_id,
-            char input1[], char input2[], char output[], int row, int col, int currentBlockSize, int block_width, int update_id) //edge2 is activeMask node
-{ 
-    /* funciton code: 7 */
-    
-    double tstart, tend;
-    tstart = omp_get_wtime();
-    
-    int i;
-    char i_string[8], task_id1_char[4], update_id_char[4];
-    char ary[150];
-        
-    myitoa(task_id, task_id1_char);
-    myitoa(update_id, update_id_char);
-    
-    for(i = 0 ; i < nrowblks ; i++)
-    {
-        memset(&ary[0], 0, sizeof(ary));
-        strcat(ary, "UPDATE,");
-        strcat(ary, nrowblksString[i]);
-        strcat(ary, ",");
-        strcat(ary, update_id_char);
-        
-        vertexName[strdup(ary)] = nodeCount;
-        vertexWeight[nodeCount] = block_width * currentBlockSize * sizeof(double);
-        nodeCount++;
-
-         //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
-
-        if(edge1Format == 1) //edge coming from a single matrix 
-        {
-            memset(&ary[0], 0, sizeof(ary));
-            strcat(ary, edge1_var);
-            strcat(ary, ",");
-            strcat(ary, nrowblksString[i]);
-            
-            edgeU[edgeCount] = vertexName[ary];
-            edgeV[edgeCount] = nodeCount - 1;
-            edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;       
-        }
-        else //coming from another operation of format : func_(inp1, inp2, blk) 
-        {
-            memset(&ary[0], 0, sizeof(ary));
-            strcat(ary, edge1_func);
-            strcat(ary, ",");
-            strcat(ary, nrowblksString[i]);
-            strcat(ary, ",");
-            strcat(ary, task_id1_char);
-            
-            edgeU[edgeCount] = vertexName[ary];
-            edgeV[edgeCount] = nodeCount - 1;
-            edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;
-        }
-
-        edgeU[edgeCount] = edge2_id; 
-        edgeV[edgeCount] = nodeCount - 1;
-        edgeW[edgeCount] = block_width * col * sizeof(double);
-        edgeCount++; 
-    }
-
-    tend = omp_get_wtime();
-    graphGenTime[7] += (tend - tstart);
-}
-
-
-void mat_sub(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[], char edge1_part3[], int task_id_1,
-            int edge2Format, char edge2_var[], char edge2_part1[], char edge2_func[], char edge2_part2[], char edge2_part3[], int task_id_2,
-            char input1[], char input2[], char output[], int row, int col, int block_width, int sub_id)
-{
-    /**********************************************
-    Input: X[M*N], Y[N*P]
-    Output: result[M*P]
-    nthrds : global variable, total # of threads
-    ***********************************************/
-
-    /* funciton code: 4 */
-    
-    double tstart, tend;
-    tstart = omp_get_wtime();
-
-    int i;
-    char i_string[8], task_id1_char[4], task_id2_char[4], sub_id_char[4];
-    char ary[150];
-        
-    myitoa(task_id_1, task_id1_char);
-    myitoa(task_id_2, task_id2_char);
-    myitoa(sub_id, sub_id_char);
-
-    for(i = 0 ; i < nrowblks ; i++)
-    {
-        memset(&ary[0], 0, sizeof(ary));
-        strcat(ary, "SUB,");
-        strcat(ary, nrowblksString[i]);
-        strcat(ary, ",");
-        strcat(ary, sub_id_char);
-        
-        vertexName[strdup(ary)] = nodeCount;
-        vertexWeight[nodeCount] = block_width * col * sizeof(double);
-        nodeCount++;
-
-         //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
-
-        if(edge1Format == 1) //edge coming from a single matrix 
-        {
-            memset(&ary[0], 0, sizeof(ary));
-            strcat(ary, edge1_var);
-            strcat(ary, ",");
-            strcat(ary, nrowblksString[i]);
-              
-            edgeU[edgeCount] = vertexName[ary];
-            edgeV[edgeCount] = nodeCount - 1;
-            edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;        
-        }
-        else //coming from another operation of format : func_(inp1, inp2, blk) 
-        {
-            memset(&ary[0], 0, sizeof(ary));
-            strcat(ary, edge1_func);
-            strcat(ary, ",");
-            strcat(ary, nrowblksString[i]);
-            strcat(ary, ",");
-            strcat(ary, task_id1_char);
-            //strcat(ary, ")");
-
-            edgeU[edgeCount] = vertexName[ary];
-            edgeV[edgeCount] = nodeCount - 1;
-            edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;    
-        }
-
-        if(edge2Format == 1) // edge coming from a single matrix 
-        {
-            memset(&ary[0], 0, sizeof(ary));
-            strcat(ary, edge2_var);
-            strcat(ary, ",");
-            strcat(ary, nrowblksString[i]);
-              
-            edgeU[edgeCount] = vertexName[ary];
-            edgeV[edgeCount] = nodeCount - 1;
-            edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;
-        }
-        else // coming from another operation of format : func_(inp1, inp2, blk) 
-        {
-            memset(&ary[0], 0, sizeof(ary));
-            strcat(ary, edge2_func);
-            strcat(ary, ",");
-            strcat(ary, nrowblksString[i]);
-            strcat(ary, ",");
-            strcat(ary, task_id2_char);
-            
-            edgeU[edgeCount] = vertexName[ary];
-            edgeV[edgeCount] = nodeCount - 1;
-            edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;
-        }
-        
-    }
-
-    tend = omp_get_wtime();
-    graphGenTime[4] += (tend - tstart);
-}
-
-
-
-void mat_mult(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[], char edge1_part3[], int task_id_1,
-            int edge2Format, char edge2_var[], char edge2_part1[], char edge2_func[], char edge2_part2[], char edge2_part3[], int task_id_2,
-            char input1[], char input2[], char output[], int row, int col, int block_width)
-{
-    /* funciton code: 5 */
-    
-    string dummyString = "";
-    double tstart, tend;
-    int i, edge2_id;
-    char i_string[8], task_id1_char[4], task_id2_char[4];
-    char ary[150];
-       
-    myitoa(task_id_1, task_id1_char);
-    myitoa(task_id_2, task_id2_char);
-    
-    tstart = omp_get_wtime();
-    if(edge2Format == 1) // edge coming from a single matrix 
-    {
-        edge2_id = vertexName[edge2_var]; 
-    }
-    for(i = 0 ; i < nrowblks ; i++)
-    {
-        memset(&ary[0], 0, sizeof(ary));
-        strcat(ary, "MULT,");
-        strcat(ary, nrowblksString[i]);
-        
-        vertexName[strdup(ary)] = nodeCount; 
-        vertexWeight[nodeCount] = block_width * col * sizeof(double);
-        nodeCount++;
-
-        //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
-
-        if(edge1Format == 1) //edge coming from a single matrix 
-        {
-            memset(&ary[0], 0, sizeof(ary));
-            strcat(ary, edge1_var);
-            strcat(ary, ",");
-            strcat(ary, nrowblksString[i]);
-            
-            edgeU[edgeCount] = vertexName[ary];
-            edgeV[edgeCount] = nodeCount - 1;
-            edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;        
-        }
-        else //coming from another operation of format : func_(inp1, inp2, blk) 
-        {
-            memset(&ary[0], 0, sizeof(ary));
-            strcat(ary, edge1_func);
-            strcat(ary, ",");
-            strcat(ary, nrowblksString[i]);
-            strcat(ary, ",");
-            strcat(ary, task_id1_char);
-            
-            edgeU[edgeCount] = vertexName[ary];
-            edgeV[edgeCount] = nodeCount - 1;
-            edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;        
-        }
-
-        if(edge2Format == 1) // edge coming from a single matrix 
-        {
-            edgeU[edgeCount] = edge2_id; 
-            edgeV[edgeCount] = nodeCount - 1;
-            edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;        
-        }
-        else // coming from another operation of format : func_(inp1, inp2, blk)
-        {
-            memset(&ary[0], 0, sizeof(ary));
-            strcat(ary, edge2_func);
-            strcat(ary, ",");
-            strcat(ary, nrowblksString[i]);
-            strcat(ary, ",");
-            strcat(ary, task_id2_char);
-            
-            edgeU[edgeCount] = vertexName[ary];
-            edgeV[edgeCount] = nodeCount - 1;
-            edgeW[edgeCount] = block_width * col * sizeof(double);
-            edgeCount++;        
-        }
-    }
-
-    tend = omp_get_wtime();
-    graphGenTime[5] += (tend - tstart);
-}
-
-void sum_sqrt(char edge1_part1[], char edge1_func[], char edge1_part2[], char edge1_part3[],
-            char edge2[], int edge2_id,
-            char input1[], char output[], int row, int col, int block_width)
-{
-    /* funciton code: 3 */
-    double tstart, tend;
-    tstart = omp_get_wtime();
-
-    int i, k;
-    int nbuf = 16;
-    int pseudo_tid, max_pesudo_tid = -1;
-
-    char *tempRNRED = (char *) malloc(50 * sizeof(char));
-    char *tempSQRT = (char *) malloc(50 * sizeof(char));
-
-    char i_string[8], k_string[4], task_id2_char[4];
-    char ary[150];
-
-    memset(&ary[0], 0, sizeof(ary));
-    strcat(ary, "RNRED,");
-    strcat(ary, "RNBUF");
-    
-    vertexName[strdup(ary)] = nodeCount;
-    vertexWeight[nodeCount] = col * sizeof(double);
-    int sumsqrt_buf_id = nodeCount;
-    nodeCount++;
-
-    //Global Graph
-    strcpy(tempRNRED, ary);
-
-    memset(&ary[0], 0, sizeof(ary));
-    strcat(ary, "SQRT,");
-    strcat(ary, output);
-
-    vertexName[strdup(ary)] = nodeCount;
-    vertexWeight[nodeCount] = col * sizeof(double);
-    int sqrt_id = nodeCount;
-    nodeCount++;
-
-    //Global Graph
-    strcpy(tempSQRT, ary);
-
-    for(i = 0, k = 0 ; i < nrowblks ; i++, k++)
-    {
-        pseudo_tid = ((i % nbuf) > (nthreads - 1) ? 0 : (i % nbuf) );
-        k = pseudo_tid;
-        max_pesudo_tid = ((max_pesudo_tid > pseudo_tid) ? max_pesudo_tid : pseudo_tid );
-        
-        memset(&ary[0], 0, sizeof(ary));
-        strcat(ary, "COL,");
-        strcat(ary, nrowblksString[i]);
-        strcat(ary, ",");
-        strcat(ary, nrowblksString[k]);
-
-        vertexName[strdup(ary)] = nodeCount;
-        vertexWeight[nodeCount] = col * sizeof(double);
-        nodeCount++;
-
-        //Global Graph
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
-
-        memset(&ary[0], 0, sizeof(ary));
-        strcat(ary, edge1_func);
-        strcat(ary, ",");
-        strcat(ary, nrowblksString[i]);
-        
-        edgeU[edgeCount] = vertexName[ary];
-        edgeV[edgeCount] = nodeCount - 1;
-        edgeW[edgeCount] = block_width * col * sizeof(double);
-        edgeCount++;
-        
-        //edge 2
-
-        edgeU[edgeCount] = nodeCount - 1;
-        edgeV[edgeCount] = sumsqrt_buf_id; 
-        edgeW[edgeCount] = col * sizeof(double);
-        edgeCount++;
-    }
-
-    edgeU[edgeCount] = edge2_id; 
-    edgeV[edgeCount] = sumsqrt_buf_id; 
-    edgeW[edgeCount] = col * sizeof(double);
-    edgeCount++;
-
-    edgeU[edgeCount] = sumsqrt_buf_id; 
-    edgeV[edgeCount] = sqrt_id;
-    edgeW[edgeCount] = col * sizeof(double);
-    edgeCount++;
-
-    //Global Graph
-    strcpy(globalGraph[globalNodeCount], tempRNRED);
-    globalNodeCount++;
-    strcpy(globalGraph[globalNodeCount], tempSQRT);
-    globalNodeCount++;
-
-    free(tempRNRED);
-    free(tempSQRT);
-
-    tend = omp_get_wtime();
-    graphGenTime[8] += (tend - tstart);
-}
 
 //template<typename T>
 void read_custom(char* filename, double *&xrem)
@@ -2385,7 +3671,7 @@ double get_outgoing_memory_value(const char* task_name, const char* child_task_n
 
 void buildTaskInfoStruct_main(int nodeCount, char **graph , const char *loopType, int blksize , const char *matrixName)
 {
-    char taskName[20000], ary[200];
+    char taskName[200], ary[200];
     char buffer [33];
     char **splitParams;
     int partNo, tokenCount, priority;
@@ -2825,7 +4111,7 @@ void buildTaskInfoStruct_main(int nodeCount, char **graph , const char *loopType
 
 void buildTaskInfoStruct(struct TaskInfo *taskInfo, char *partFile)
 {
-    char taskName[20000], ary[200], structToStr[20000];
+    char taskName[200], ary[200], structToStr[2000];
     char buffer [33];
     char **splitParams;
     int partNo, tokenCount, priority, opCode, numParamsCount, strParamsCount;
