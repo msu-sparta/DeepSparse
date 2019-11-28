@@ -26,7 +26,7 @@
 #include <stdarg.h>
 #include <fcntl.h>
 
-#include "dgraphReader.h"
+#include "../part_inc/dgraphReader.h"
 
 #define PRINT_PROGRESS
 

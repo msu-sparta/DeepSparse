@@ -3,11 +3,11 @@
 #include <float.h>
 #include <assert.h>
 
-#include "rvcycle.h"
-#include "option.h"
-#include "utils.h"
-#include "undirPartitioning.h"
-#include "initialBisection.h"
+#include "../part_inc/rvcycle.h"
+#include "../part_inc/option.h"
+#include "../part_inc/utils.h"
+#include "../part_inc/undirPartitioning.h"
+#include "../part_inc/initialBisection.h"
 
 #ifdef dagP_SCOTCH
 #include "scotch.h"

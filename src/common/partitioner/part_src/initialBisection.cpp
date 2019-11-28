@@ -4,13 +4,13 @@
 #include <math.h>
 #include <assert.h>
 
-#include "dgraph.h"
-#include "utils.h"
-#include "initialBisection.h"
-#include "undirPartitioning.h"
-#include "dgraphBisection.h"
-#include "refinementBis.h"
-#include "rvcycle.h"
+#include "../part_inc/dgraph.h"
+#include "../part_inc/utils.h"
+#include "../part_inc/initialBisection.h"
+#include "../part_inc/undirPartitioning.h"
+#include "../part_inc/dgraphBisection.h"
+#include "../part_inc/refinementBis.h"
+#include "../part_inc/rvcycle.h"
 
 
 void iniBisGGG(MLGP_option opt, coarsen*  coars, ecType *edgecut, idxType *partcopy, MLGP_info* info)

@@ -5,8 +5,8 @@
 #include <math.h>
 #include <float.h>
 
-#include "clustering.h"
-#include "utils.h"
+#include "../part_inc/clustering.h"
+#include "../part_inc/utils.h"
 
 
 void computeMatchNOrder(dgraph *G, const MLGP_option opt, idxType *norder)

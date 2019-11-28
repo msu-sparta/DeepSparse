@@ -1,5 +1,5 @@
-#include "refinementBis.h"
-#include "dgraph.h"
+#include "../part_inc/refinementBis.h"
+#include "../part_inc/dgraph.h"
 
 
 int getBiggerPart(idxType inPartIdx, idxType outPartIdx, idxType *partsize, idxType** heap, idxType* hsize,  double* lb_pw, double* ub_pw, vwType maxvw, ecType *gain, int balNotOk, MLGP_option opt){

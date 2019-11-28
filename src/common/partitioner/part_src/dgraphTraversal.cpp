@@ -1,4 +1,4 @@
-#include "dgraphTraversal.h"
+#include "../part_inc/dgraphTraversal.h"
 
 void randTopSortOnParts(dgraph *G, idxType *part, idxType *toporder, idxType nbpart)
 {

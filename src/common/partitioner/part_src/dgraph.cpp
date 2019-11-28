@@ -1,6 +1,6 @@
-#include "dgraph.h"
-#include "utils.h"
-#include "dgraphReader.h"
+#include "../part_inc/dgraph.h"
+#include "../part_inc/utils.h"
+#include "../part_inc/dgraphReader.h"
 
 int computePartmatrix(dgraph *G, idxType *part, ecType** partmatrix, idxType node, idxType movetopart)
 {

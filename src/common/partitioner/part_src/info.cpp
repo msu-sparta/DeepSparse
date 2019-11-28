@@ -3,7 +3,7 @@
 #include <string.h>
 #include <limits.h>
 
-#include "info.h"
+#include "../part_inc/info.h"
 
 
 int significantTime(double t, int printdetail)

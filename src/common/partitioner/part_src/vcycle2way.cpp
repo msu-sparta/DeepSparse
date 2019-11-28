@@ -2,15 +2,15 @@
 #include <stdlib.h>
 #include <float.h>
 
-#include "initialBisection.h"
-#include "vcycle2way.h"
-#include "option.h"
-#include "utils.h"
-#include "dgraphReader.h"
-#include "debug.h"
-#include "clustering.h"
-#include "refinementBis.h"
-#include "info.h"
+#include "../part_inc/initialBisection.h"
+#include "../part_inc/vcycle2way.h"
+#include "../part_inc/option.h"
+#include "../part_inc/utils.h"
+#include "../part_inc/dgraphReader.h"
+#include "../part_inc/debug.h"
+#include "../part_inc/clustering.h"
+#include "../part_inc/refinementBis.h"
+#include "../part_inc/info.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"

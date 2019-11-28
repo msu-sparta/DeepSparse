@@ -9,7 +9,7 @@
 #include <stdarg.h>
 #include <fcntl.h>
 
-#include "dgraphReader.h"
+#include "../part_inc/dgraphReader.h"
 #include <map>
 #include <string>
 #include <vector>

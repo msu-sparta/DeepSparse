@@ -2,14 +2,14 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "rvcycle.h"
-#include "option.h"
-#include "utils.h"
-#include "info.h"
-#include "dgraph.h"
-#include "undirPartitioning.h"
-#include "rMLGP.h"
-#include "dgraphTraversal.h"
+#include "../part_inc/rvcycle.h"
+#include "../part_inc/option.h"
+#include "../part_inc/utils.h"
+#include "../part_inc/info.h"
+#include "../part_inc/dgraph.h"
+#include "../part_inc/undirPartitioning.h"
+#include "../part_inc/rMLGP.h"
+#include "../part_inc/dgraphTraversal.h"
 
 
 rcoarsen *initializeRCoarsen(coarsen* icoars)

@@ -1,4 +1,4 @@
-#include "dgraphBisection.h"
+#include "../part_inc/dgraphBisection.h"
 
 void fixAcyclicityBottom(dgraph* G, idxType *part, idxType outpartidx)
 {

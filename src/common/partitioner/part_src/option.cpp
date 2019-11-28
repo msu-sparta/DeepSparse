@@ -5,9 +5,9 @@
 #include <getopt.h>
 #include <sys/stat.h>
 
-#include "utils.h"
-#include "dgraph.h"
-#include "option.h"
+#include "../part_inc/utils.h"
+#include "../part_inc/dgraph.h"
+#include "../part_inc/option.h"
 
 
 /* for unified naming of functions */

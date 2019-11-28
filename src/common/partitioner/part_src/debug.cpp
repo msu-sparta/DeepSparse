@@ -1,4 +1,4 @@
-#include "debug.h"
+#include "../part_inc/debug.h"
 
 void createDGraph_example(dgraph* G)
 {

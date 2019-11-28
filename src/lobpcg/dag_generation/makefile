@@ -42,12 +42,21 @@ DGRAPHSRCS= $(DGRAPHOBJS:.o=.c)
 DGRAPHLIB=$(LIBDIR)/libdgraph.a
 #METISLIB=$(LIBDIR)/libmetis.a
 
+
+
 $(SRCDIR)/%.o: $(SRCDIR)/%.c $(INCDIR)/dgraph.h
 	$(CC) -c $< -o $@ $(CFLAGS) $(INCDIRA)
 
 #$(SRCDIR)/%.o: $(SRCDIR)/%.cpp $(INCDIR)/dgraph.h
 #	$(CXX) -c $< -o $@ $(CPPFLAGS) -std=c++11 -I$(INCDIR)
 
+all: $(LIBDIR)/libdgraph.a $(EXEDIR)/rMLGP
+
+
+$(LIBDIR)/libdgraph.a: $(DGRAPHOBJS) $(INCDIR)/dgraph.h
+	@mkdir -p $(@D)
+	$(AR) $@ $(DGRAPHOBJS)
+	$(RANLIB) $@
 
 $(EXEDIR)/rMLGP: $(SRCDIR)/rMLGP.o $(DGRAPHLIB) 
 	icpc -c lobpcg_part.cpp -o lobpcg_part.o -O3 -qopenmp -mkl -w 
