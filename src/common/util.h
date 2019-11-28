@@ -137,6 +137,18 @@ extern int** pseudo_tid_map;
 extern int small_block;
 
 
+// ##### Hier Partitioner DS ##### //
+int **pseudo_tid_map;
+int small_block;
+
+TaskDetail td;
+InOutVariable iov;
+task_allinout_memory all_mem_in_task;
+input_map inp_map;
+output_map out_map;
+
+char global_filename[1000];
+
 
 int split(const char *str, char c, char ***arr);
 void print_vector(vector<string> nodeName);

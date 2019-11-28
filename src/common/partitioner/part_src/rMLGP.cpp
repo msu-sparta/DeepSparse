@@ -1,8 +1,8 @@
-#include "utils.h"
-#include "dgraph.h"
-#include "dgraphReader.h"
-#include "rvcycle.h"
-#include "rMLGP.h"
+#include "../part_inc/utils.h"
+#include "../part_inc/dgraph.h"
+#include "../part_inc/dgraphReader.h"
+#include "../part_inc/rvcycle.h"
+#include "../part_inc/rMLGP.h"
 
 dgraph main_graph;
 

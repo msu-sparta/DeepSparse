@@ -51,7 +51,7 @@ $(SRCDIR)/%.o: $(SRCDIR)/%.c $(INCDIR)/dgraph.h
 
 $(EXEDIR)/rMLGP: $(SRCDIR)/rMLGP.o $(DGRAPHLIB) 
 	icpc -c lobpcg_part.cpp -o lobpcg_part.o -O3 -qopenmp -mkl -w 
-	icpc -o lobpcg_part.x lobpcg_part.o $(SRCDIR)/rMLGP.o $(LIBDIR)libdgraph.a -qopenmp -mkl -std=C++11 -O3  -L$(LIBDIR) -L$(METISLIBDIR)  -ldgraph -lm -I$(INCDIR) -I$(METISHDIR)
+	icpc -o lobpcg_part.x lobpcg_part.o $(SRCDIR)/rMLGP.o $(LIBDIR)/libdgraph.a -qopenmp -mkl -std=C++11 -O3  -L$(LIBDIR) -L$(METISLIBDIR)  -ldgraph -lm -I$(INCDIR) -I$(METISHDIR)
 	#@mkdir -p $(@D)
 	#$(CC) -o $@ $^ $(CFLAGS) $(LIBDIRA)  $(LIBSA) $(INCDIRA)
 

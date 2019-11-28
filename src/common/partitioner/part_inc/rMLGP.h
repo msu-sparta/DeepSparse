@@ -2,10 +2,10 @@
 #define RMLGP_H_
 
 
-#include "utils.h"
-#include "dgraph.h"
-#include "dgraphReader.h"
-#include "rvcycle.h"
+#include "../part_inc/utils.h"
+#include "../part_inc/dgraph.h"
+#include "../part_inc/dgraphReader.h"
+#include "../part_inc/rvcycle.h"
  //#include "../lobpcg_gen_graph_v30.h"
 
 //#include "../lobpcg_gen_graph_v28.h"
