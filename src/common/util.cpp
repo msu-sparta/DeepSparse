@@ -206,6 +206,8 @@ void mat_addition(int edge1Format, char edge1_var[], char edge1_part1[], char ed
         vertexName[strdup(ary)] = nodeCount;
         vertexWeight[nodeCount] =  block_width * col * sizeof(double);
         nodeCount++;
+
+        
         
         strcpy(main_task,ary);
 
@@ -231,7 +233,7 @@ void mat_addition(int edge1Format, char edge1_var[], char edge1_part1[], char ed
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
         else //coming from another operation of format : func_(inp1, inp2, blk) 
         {
@@ -257,7 +259,7 @@ void mat_addition(int edge1Format, char edge1_var[], char edge1_part1[], char ed
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
 
 
         }
@@ -279,7 +281,7 @@ void mat_addition(int edge1Format, char edge1_var[], char edge1_part1[], char ed
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
 
         }
         else // coming from another operation of format : func_(inp1, inp2, blk) 
@@ -306,7 +308,7 @@ void mat_addition(int edge1Format, char edge1_var[], char edge1_part1[], char ed
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
 
         }
     }
@@ -344,7 +346,7 @@ void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[
         edge2_id = vertexName[edge2_var];
     }
 
-    //printf("inside XY function edge1_var = %s edge2_var = %s\n", edge1_var,edge2_var);
+    printf("inside XY function edge1_var = %s edge2_var = %s\n", edge1_var,edge2_var);
 
     // #### Hier #####
     char main_task[100];
@@ -394,7 +396,7 @@ void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
         else
         {
@@ -421,7 +423,7 @@ void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
 
         if(edge2Format == 1) //whole edge2_var
@@ -441,7 +443,7 @@ void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[
             inp_map[strdup(main_task)][strdup(edge2_var)] = temp_chunk;
             out_map[strdup(edge2_var)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,edge2_var,tmp_input2,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,edge2_var,tmp_input2,edgeW[edgeCount-1]);
 
 
         }
@@ -487,7 +489,7 @@ void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[
             inp_map[strdup(main_task)][strdup(edge2_var)] = temp_chunk;
             out_map[strdup(edge2_var)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,edge2_var,tmp_input2,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,edge2_var,tmp_input2,edgeW[edgeCount-1]);
 
         }
     }
@@ -574,7 +576,7 @@ void _XY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
         else
         {
@@ -601,7 +603,7 @@ void _XY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
 
         if(edge2Format == 1) //whole edge2_var
@@ -620,7 +622,7 @@ void _XY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
             inp_map[strdup(main_task)][strdup(edge2_var)] = temp_chunk;
             out_map[strdup(edge2_var)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,edge2_var,tmp_input2,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,edge2_var,tmp_input2,edgeW[edgeCount-1]);
 
 
         }
@@ -664,7 +666,7 @@ void _XY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
             inp_map[strdup(main_task)][strdup(edge2_var)] = temp_chunk;
             out_map[strdup(edge2_var)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,edge2_var,tmp_input2,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,edge2_var,tmp_input2,edgeW[edgeCount-1]);
 
         }
     }
@@ -740,7 +742,7 @@ void _XY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
 
 
              
@@ -786,7 +788,7 @@ void _XY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
                     inp_map[strdup(main_task)][strdup(spmm_task)] = temp_chunk;
                     out_map[strdup(spmm_task)][strdup(main_task)] = temp_chunk;
 
-                    //printf("input_map[%s][%s] = %s %lf\n", main_task,spmm_task,tmp_input1,edgeW[edgeCount-1]);
+                    printf("input_map[%s][%s] = %s %lf\n", main_task,spmm_task,tmp_input1,edgeW[edgeCount-1]);
 
 
                 }
@@ -808,7 +810,7 @@ void _XY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
         inp_map[strdup(main_task)][strdup(edge2_var)] = temp_chunk;
         out_map[strdup(edge2_var)][strdup(main_task)] = temp_chunk;
 
-        //printf("input_map[%s][%s] = %s %lf\n", main_task,edge2_var,tmp_input1,edgeW[edgeCount-1]);
+        printf("input_map[%s][%s] = %s %lf\n", main_task,edge2_var,tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -919,7 +921,7 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);        
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);        
         }
         else
         {
@@ -944,7 +946,7 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
 
 
         }
@@ -974,7 +976,7 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);      
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);      
         }
         else
         {
@@ -999,7 +1001,7 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
         for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
         {
@@ -1027,7 +1029,7 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
             inp_map[strdup(ary)][strdup(main_task)] = temp_chunk;
             out_map[strdup(main_task)][strdup(ary)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", ary,main_task,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", ary,main_task,tmp_input1,edgeW[edgeCount-1]);
 
         }
     }
@@ -1140,7 +1142,7 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);        
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);        
         }
         else
         {
@@ -1165,7 +1167,7 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
 
 
         }
@@ -1195,7 +1197,7 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);      
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);      
         }
         else
         {   
@@ -1220,7 +1222,7 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
 
         for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
@@ -1247,7 +1249,7 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             inp_map[strdup(ary)][strdup(main_task)] = temp_chunk;
             out_map[strdup(main_task)][strdup(ary)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", ary,main_task,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", ary,main_task,tmp_input1,edgeW[edgeCount-1]);
 
         }
     }
@@ -1349,7 +1351,7 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);        
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);        
         }
         else
         {
@@ -1374,7 +1376,7 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
 
 
         }
@@ -1404,7 +1406,7 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);      
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);      
         }
         else
         {
@@ -1429,7 +1431,7 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
         for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
         {
@@ -1455,7 +1457,7 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             inp_map[strdup(ary)][strdup(main_task)] = temp_chunk;
             out_map[strdup(main_task)][strdup(ary)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", ary,main_task,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", ary,main_task,tmp_input1,edgeW[edgeCount-1]);
 
         }
     }
@@ -1577,7 +1579,7 @@ void  _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_
                     out_map[strdup(spmm_task)][strdup(main_task)] = temp_chunk;
 
 
-                    //printf("input_map[%s][%s] = %s %lf\n",main_task,spmm_task, tmp_input1,edgeW[edgeCount-1]);
+                    printf("input_map[%s][%s] = %s %lf\n",main_task,spmm_task, tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -1607,7 +1609,7 @@ void  _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
 
         if(edge2Format == 2)
@@ -1635,7 +1637,7 @@ void  _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
         else
         {
@@ -1660,7 +1662,7 @@ void  _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
         for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
         {
@@ -1686,7 +1688,7 @@ void  _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_
             inp_map[strdup(ary)][strdup(main_task)] = temp_chunk;
             out_map[strdup(main_task)][strdup(ary)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", ary,main_task,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", ary,main_task,tmp_input1,edgeW[edgeCount-1]);
 
         }
     }
@@ -1736,6 +1738,8 @@ void spmm_blkcoord_csbTask(int edge1Format, char edge1_var[], char edge1_part1[]
 
         // #### Hier #####
         strcpy(extra_task2, ary);
+
+        printf("%s\n", extra_task2 );
      
         //t2 = omp_get_wtime();
         //sprintf_time += (t2 - t1);
@@ -1782,6 +1786,8 @@ void spmm_blkcoord_csbTask(int edge1Format, char edge1_var[], char edge1_part1[]
                 max_pesudo_tid = ((max_pesudo_tid > pseudo_tid) ? max_pesudo_tid : pseudo_tid );
                 
                 //t1 = omp_get_wtime();
+
+                printf("inside spmm block calc k = %d\n", k);
                 
                 memset(&ary[0], 0, sizeof(ary));
                 strcat(ary, "SPMM,");
@@ -1792,9 +1798,12 @@ void spmm_blkcoord_csbTask(int edge1Format, char edge1_var[], char edge1_part1[]
                 strcat(ary, nrowblksString[k]);
 
                 // #### Hier #####
+                printf("pseudo_tid_map[0][0] = %d\n", pseudo_tid_map[0][0]);
                 pseudo_tid_map[i][j] = k;
                 strcpy(main_task, ary);
                 //strcat(ary, ")");
+
+                printf("%s\n", main_task);
 
                 //t2 = omp_get_wtime();
                 //sprintf_time += (t2 - t1);
@@ -1838,7 +1847,7 @@ void spmm_blkcoord_csbTask(int edge1Format, char edge1_var[], char edge1_part1[]
                 inp_map[strdup(main_task)][strdup(extra_task1)] = temp_chunk;
                 out_map[strdup(extra_task1)][strdup(main_task)] = temp_chunk;
 
-                //printf("input_map[%s][%s] = %s %lf\n", main_task,extra_task1,tmp_input1,edgeW[edgeCount-1]);
+                printf("input_map[%s][%s] = %s %lf\n", main_task,extra_task1,tmp_input1,edgeW[edgeCount-1]);
 
 
                 //SETZERO AR to SPMM
@@ -1857,7 +1866,7 @@ void spmm_blkcoord_csbTask(int edge1Format, char edge1_var[], char edge1_part1[]
                 inp_map[strdup(main_task)][strdup(extra_task2)] = temp_chunk;
                 out_map[strdup(extra_task2)][strdup(main_task)] = temp_chunk;
 
-                //printf("input_map[%s][%s] = %s %lf\n", main_task,extra_task2,tmp_input1,edgeW[edgeCount-1]);
+                printf("input_map[%s][%s] = %s %lf\n", main_task,extra_task2,tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -1945,7 +1954,7 @@ void custom_dlacpy(int edge1Format, char edge1_var[], char edge1_part1[], char e
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
 
 
         }
@@ -1974,7 +1983,7 @@ void custom_dlacpy(int edge1Format, char edge1_var[], char edge1_part1[], char e
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
 
         }
     }
@@ -2045,7 +2054,7 @@ void custom_dlacpy_v1(int edge1Format, char edge1_var[], char edge1_part1[], cha
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
 
 
         }
@@ -2074,7 +2083,7 @@ void custom_dlacpy_v1(int edge1Format, char edge1_var[], char edge1_part1[], cha
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
 
         }
     }
@@ -2150,7 +2159,7 @@ void getActiveBlockVector(int edge1Format, char edge1_var[], char edge1_part1[],
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
         else //coming from another operation of format : func_(inp1, inp2, blk) 
         {
@@ -2177,7 +2186,7 @@ void getActiveBlockVector(int edge1Format, char edge1_var[], char edge1_part1[],
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
 
         edgeU[edgeCount] = edge2_id;
@@ -2193,7 +2202,7 @@ void getActiveBlockVector(int edge1Format, char edge1_var[], char edge1_part1[],
         inp_map[strdup(main_task)][strdup(edge2)] = temp_chunk;
         out_map[strdup(edge2)][strdup(main_task)] = temp_chunk;
 
-        //printf("input_map[%s][%s] = %s %lf\n", main_task,edge2,tmp_input1,edgeW[edgeCount-1]);
+        printf("input_map[%s][%s] = %s %lf\n", main_task,edge2,tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -2265,7 +2274,7 @@ void updateBlockVector(int edge1Format, char edge1_var[], char edge1_part1[], ch
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -2295,7 +2304,7 @@ void updateBlockVector(int edge1Format, char edge1_var[], char edge1_part1[], ch
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
 
         }
 
@@ -2312,7 +2321,7 @@ void updateBlockVector(int edge1Format, char edge1_var[], char edge1_part1[], ch
         inp_map[strdup(main_task)][strdup(edge2)] = temp_chunk;
         out_map[strdup(edge2)][strdup(main_task)] = temp_chunk;
 
-        //printf("input_map[%s][%s] = %s %lf\n", main_task,edge2,tmp_input1,edgeW[edgeCount-1]);
+        printf("input_map[%s][%s] = %s %lf\n", main_task,edge2,tmp_input1,edgeW[edgeCount-1]);
 
     }
 
@@ -2388,7 +2397,7 @@ void mat_sub(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
 
         }
         else //coming from another operation of format : func_(inp1, inp2, blk) 
@@ -2417,7 +2426,7 @@ void mat_sub(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
     
         }
 
@@ -2444,7 +2453,7 @@ void mat_sub(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
 
         }
         else // coming from another operation of format : func_(inp1, inp2, blk) 
@@ -2472,7 +2481,7 @@ void mat_sub(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
 
         }
         
@@ -2547,7 +2556,7 @@ void mat_mult(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         
         }
         else //coming from another operation of format : func_(inp1, inp2, blk) 
@@ -2575,7 +2584,7 @@ void mat_mult(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         
         }
 
@@ -2594,7 +2603,7 @@ void mat_mult(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
 
         }
         else // coming from another operation of format : func_(inp1, inp2, blk)
@@ -2622,7 +2631,7 @@ void mat_mult(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
 
         }
     }
@@ -2723,7 +2732,7 @@ void dot_mm(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         
         }
         else //coming from another operation of format : func_(inp1, inp2, blk) 
@@ -2751,7 +2760,7 @@ void dot_mm(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         
         }
 
@@ -2770,7 +2779,7 @@ void dot_mm(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
 
         }
         else // coming from another operation of format : func_(inp1, inp2, blk)
@@ -2798,7 +2807,7 @@ void dot_mm(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
+            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input2,edgeW[edgeCount-1]);
 
         }
 
@@ -2820,7 +2829,7 @@ void dot_mm(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
         inp_map[strdup(tempRNRED)][strdup(main_task)] = temp_chunk;
         out_map[strdup(main_task)][strdup(tempRNRED)] = temp_chunk;
 
-        //printf("input_map[%s][%s] = %s %lf\n", tempRNRED,main_task,tmp_input1,edgeW[edgeCount-1]);
+        printf("input_map[%s][%s] = %s %lf\n", tempRNRED,main_task,tmp_input1,edgeW[edgeCount-1]);
     }
     
     //Global Graph
@@ -2922,7 +2931,7 @@ void sum_sqrt(char edge1_part1[], char edge1_func[], char edge1_part2[], char ed
         inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
         out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-        //printf("input_map[%s][%s] = %s %lf\n", main_task, ary, tmp_input1, edgeW[edgeCount-1]);
+        printf("input_map[%s][%s] = %s %lf\n", main_task, ary, tmp_input1, edgeW[edgeCount-1]);
 
         
         //edge 2
@@ -2943,7 +2952,7 @@ void sum_sqrt(char edge1_part1[], char edge1_func[], char edge1_part2[], char ed
         inp_map[strdup(extra_task1)][strdup(main_task)] = temp_chunk;
         out_map[strdup(main_task)][strdup(extra_task1)] = temp_chunk;
 
-        //printf("input_map[%s][%s] = %s %lf\n", extra_task1, main_task, tmp_input1, edgeW[edgeCount-1]);
+        printf("input_map[%s][%s] = %s %lf\n", extra_task1, main_task, tmp_input1, edgeW[edgeCount-1]);
 
 
 
@@ -2967,7 +2976,7 @@ void sum_sqrt(char edge1_part1[], char edge1_func[], char edge1_part2[], char ed
     inp_map[strdup(extra_task1)][strdup(edge2)] = temp_chunk;
     out_map[strdup(edge2)][strdup(extra_task1)] = temp_chunk;
 
-    //printf("input_map[%s][%s] = %s %lf\n", extra_task1, edge2, tmp_input1, edgeW[edgeCount-1]);
+    printf("input_map[%s][%s] = %s %lf\n", extra_task1, edge2, tmp_input1, edgeW[edgeCount-1]);
 
 
 
@@ -2990,7 +2999,7 @@ void sum_sqrt(char edge1_part1[], char edge1_func[], char edge1_part2[], char ed
     inp_map[strdup(extra_task2)][strdup(extra_task1)] = temp_chunk;
     out_map[strdup(extra_task1)][strdup(extra_task2)] = temp_chunk;
 
-    //printf("input_map[%s][%s] = %s %lf\n", extra_task2,extra_task1,tmp_input1,edgeW[edgeCount-1]);
+    printf("input_map[%s][%s] = %s %lf\n", extra_task2,extra_task1,tmp_input1,edgeW[edgeCount-1]);
 
 
 }
@@ -3128,7 +3137,7 @@ void sum_sqrt_dot(char edge1_part1[], char edge1_func[], char edge1_part2[], cha
     inp_map[strdup(ary)][strdup(edge2)] = temp_chunk;
     out_map[strdup(edge2)][strdup(ary)] = temp_chunk;
 
-    //printf("input_map[%s][%s] = %s %lf\n", ary, edge2, tmp_input1, edgeW[edgeCount-1]);
+    printf("input_map[%s][%s] = %s %lf\n", ary, edge2, tmp_input1, edgeW[edgeCount-1]);
 
 
     //RNRED,RNBUF --> SQRT,RN
@@ -3149,7 +3158,7 @@ void sum_sqrt_dot(char edge1_part1[], char edge1_func[], char edge1_part2[], cha
     inp_map[strdup(ary)][strdup(tempRNRED)] = temp_chunk;
     out_map[strdup(tempRNRED)][strdup(ary)] = temp_chunk;
 
-    //printf("input_map[%s][%s] = %s %lf\n", ary,tempRNRED,tmp_input1,edgeW[edgeCount-1]);
+    printf("input_map[%s][%s] = %s %lf\n", ary,tempRNRED,tmp_input1,edgeW[edgeCount-1]);
 
     free(tempRNRED);
     //free(tempSQRT);

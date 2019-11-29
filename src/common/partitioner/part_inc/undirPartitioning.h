@@ -2,7 +2,10 @@
 #define UNDIRPARTIONING_H_
 
 #ifdef dagP_METIS
-#include "metis.h"
+//#include "metis.h"
+#include "/opt/software/METIS/5.1.0-intel-2017.01/include/metis.h"
+
+
 
 void dgraph_to_metis(dgraph* G, idx_t* in, idx_t* adj, idx_t* vw, idx_t* adjw);
 #else
