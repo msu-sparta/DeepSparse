@@ -132,9 +132,7 @@ typedef std::unordered_map<const char*, memory_chunk, my_hash, eqstr> internal_m
 typedef std::unordered_map<const char* , internal_map, my_hash, eqstr> input_map;
 typedef std::unordered_map<const char* , internal_map , my_hash, eqstr> output_map;
 
-///here
-extern int** pseudo_tid_map;
-extern int small_block;
+
 
 
 // ##### Hier Partitioner DS ##### //
@@ -148,6 +146,8 @@ extern input_map inp_map;
 extern output_map out_map;
 
 extern char global_filename[1000];
+
+
 
 
 int split(const char *str, char c, char ***arr);

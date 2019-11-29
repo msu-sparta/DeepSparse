@@ -63,6 +63,8 @@ int main(int argc, char *argv[]){
     
     printf("Finsihed Converting CUS TO CSB\n");
 
+    small_block = atoi(argv[4]);
+
 
     #pragma omp parallel
     #pragma omp master
@@ -107,11 +109,11 @@ int main(int argc, char *argv[]){
     vertexName.max_load_factor(0.25);
 
     //allocating memory for global graph
-    globalGraph = (char **) malloc(guessNodeCount * sizeof(char *));
+    /*globalGraph = (char **) malloc(guessNodeCount * sizeof(char *));
     for (i = 0 ; i < guessNodeCount ; i++)
     {
         globalGraph[i] = (char*) malloc(100 * sizeof(char));
-    }
+    }*/
 
     nonloop(blocksize, block_width, argc, argv);
     firstloop(blocksize, block_width, argc, argv);
@@ -145,7 +147,7 @@ void  nonloop(int blocksize, int block_width, int argc, char *argv[])
 
     edgeCount = 0 ; 
     nodeCount = 0 ; 
-    globalNodeCount = 0 ;
+    //globalNodeCount = 0 ;
 
 
     char main_task[100];
@@ -495,7 +497,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
 
     edgeCount = 0 ; 
     nodeCount = 0 ; 
-    globalNodeCount = 0 ; 
+//    globalNodeCount = 0 ; 
 
 
     char main_task[100];
@@ -1423,7 +1425,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
 
     edgeCount = 0 ; 
     nodeCount = 0 ; 
-    globalNodeCount = 0 ; 
+//    globalNodeCount = 0 ; 
 
 
     printf("Rows: %d, Cols: %d\n", M, N);

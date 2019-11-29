@@ -33,7 +33,7 @@ LIBDIRA=-L$(LIBDIR) -L$(METISLIBDIR)
 INCDIRA=-I$(INCDIR) -I$(METISHDIR)
 
 
-BINS=$(EXEDIR)/partDGraph $(EXEDIR)/kernighan $(EXEDIR)/metis $(EXEDIR)/MLGP $(EXEDIR)/INIPART $(EXEDIR)/rMLGP $(EXEDIR)/rMLGPlive $(EXEDIR)/ginfo
+BINS=$(EXEDIR)/metis $(EXEDIR)/rMLGP 
 DGRAPHOBJS= $(SRCDIR)/dgraph.o $(SRCDIR)/dgraphTraversal.o $(SRCDIR)/utils.o $(SRCDIR)/info.o $(SRCDIR)/undirPartitioning.o $(SRCDIR)/option.o $(SRCDIR)/debug.o $(SRCDIR)/clustering.o $(SRCDIR)/dgraphReader.o $(SRCDIR)/dgraphDotReader.o $(SRCDIR)/vcycle2way.o $(SRCDIR)/initialBisection.o $(SRCDIR)/rvcycle.o $(SRCDIR)/dgraphBisection.o $(SRCDIR)/refinementBis.o
 
 
@@ -59,8 +59,9 @@ $(LIBDIR)/libdgraph.a: $(DGRAPHOBJS) $(INCDIR)/dgraph.h
 	$(RANLIB) $@
 
 $(EXEDIR)/rMLGP: $(SRCDIR)/rMLGP.o $(DGRAPHLIB) 
-	icpc -c lobpcg_part.cpp -o lobpcg_part.o -O3 -qopenmp -mkl -w 
-	icpc -o lobpcg_part.x lobpcg_part.o $(SRCDIR)/rMLGP.o $(LIBDIR)/libdgraph.a -qopenmp -mkl -std=C++11 -O3  -L$(LIBDIR) -L$(METISLIBDIR)  -ldgraph -lm -I$(INCDIR) -I$(METISHDIR)
+	icpc -c ../../common/util.cpp  -qopenmp
+	icpc -c lobpcg_part.cpp util.o -O3 -qopenmp -mkl -w 
+	icpc -o lobpcg_part.x lobpcg_part.o $(SRCDIR)/rMLGP.o $(LIBDIR)/libdgraph.a util.o -qopenmp -mkl -std=C++11 -O3  -L$(LIBDIR) -L$(METISLIBDIR)  -ldgraph -lm -I$(INCDIR) -I$(METISHDIR)
 	#@mkdir -p $(@D)
 	#$(CC) -o $@ $^ $(CFLAGS) $(LIBDIRA)  $(LIBSA) $(INCDIRA)
 

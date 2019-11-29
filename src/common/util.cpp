@@ -32,7 +32,7 @@ int total_func = 14;
 double *graphGenTime;
 
 // ##### Hier Partitioner DS ##### //
-int **pseudo_tid_map;
+/*int **pseudo_tid_map;
 int small_block;
 
 TaskDetail td;
@@ -43,26 +43,11 @@ output_map out_map;
 
 char global_filename[1000];
 
+*/
 
+//int **pseudo_tid_map;
+//int small_block;
 
-
-
-/* global graph for OpenMP scheduler */
-char **globalGraph;
-int globalNodeCount = 0;
-
-
-// ##### Hier Partitioner DS ##### //
-int **pseudo_tid_map;
-int small_block;
-
-TaskDetail td; 
-InOutVariable iov;
-task_allinout_memory all_mem_in_task;
-input_map inp_map;
-output_map out_map;
-
-char global_filename[1000];
 
 
 

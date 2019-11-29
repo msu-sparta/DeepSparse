@@ -720,7 +720,11 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
     FILE* mem_out = fopen("mem_out.txt","w");
     FILE* mem_in = fopen("mem_in.txt","w");
 
+    if(wblk == small_block){
 
+    make_new_table_file(rcoars, my_partition_topsort,"nonloop",matrix_name,wblk,wblk,opt.nbPart);
+    return ;
+}
     myprint();
 
     //get the new block info
