@@ -341,14 +341,14 @@ void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[
     myitoa(task_id_2, task_id2_char);
     myitoa(xy_id, xy_id_char);
 
-    printf("edgeCount in _XY  = %d nodeCount = %d edge1Format = %d edge2Format = %d\n", edgeCount, nodeCount, edge1Format, edge2Format);
+    //printf("edgeCount in _XY  = %d nodeCount = %d edge1Format = %d edge2Format = %d\n", edgeCount, nodeCount, edge1Format, edge2Format);
 
     if(edge2Format == 1) 
     {
         edge2_id = vertexName[edge2_var];
     }
 
-    printf("inside XY function edge1_var = %s edge2_var = %s\n", edge1_var,edge2_var);
+    //printf("inside XY function edge1_var = %s edge2_var = %s\n", edge1_var,edge2_var);
 
     // #### Hier #####
     char main_task[100];
@@ -388,7 +388,7 @@ void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * N * sizeof(double);
             
-            printf("in XY edgeU[%d] = %d edgeV[%d] = %d \n", edgeCount,edgeU[edgeCount],edgeCount,edgeV[edgeCount]);
+            //printf("in XY edgeU[%d] = %d edgeV[%d] = %d \n", edgeCount,edgeU[edgeCount],edgeCount,edgeV[edgeCount]);
 
 
             edgeCount++;
@@ -405,7 +405,7 @@ void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
         else
         {
@@ -420,7 +420,7 @@ void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * N * sizeof(double);
 
-            printf("in XY edgeU[%d] = %d edgeV[%d] = %d \n", edgeCount,edgeU[edgeCount],edgeCount,edgeV[edgeCount]);
+            //printf("in XY edgeU[%d] = %d edgeV[%d] = %d \n", edgeCount,edgeU[edgeCount],edgeCount,edgeV[edgeCount]);
 
             edgeCount++;
             
@@ -435,7 +435,7 @@ void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[
             inp_map[strdup(main_task)][strdup(ary)] = temp_chunk;
             out_map[strdup(ary)][strdup(main_task)] = temp_chunk;
 
-            printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[%s][%s] = %s %lf\n", main_task,ary,tmp_input1,edgeW[edgeCount-1]);
         }
 
         if(edge2Format == 1) //whole edge2_var
@@ -444,7 +444,7 @@ void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[
             edgeV[edgeCount] = nodeCount - 1;
             edgeW[edgeCount] = block_width * N * sizeof(double);
        
-            printf("in XY edgeU[%d] = %d edgeV[%d] = %d \n", edgeCount,edgeU[edgeCount],edgeCount,edgeV[edgeCount]);
+            //printf("in XY edgeU[%d] = %d edgeV[%d] = %d \n", edgeCount,edgeU[edgeCount],edgeCount,edgeV[edgeCount]);
 
 
             edgeCount++; 

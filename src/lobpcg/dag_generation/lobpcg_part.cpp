@@ -570,13 +570,13 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
 
 
 
-        printf("\n\n\n\n after first XY\n\n\n ");
+        /*printf("\n\n\n\n after first XY\n\n\n ");
         for (std::pair<const char*, int> element : vertexName)
         {
         // std::cout << element.first << " :: " << element.second << std::endl;
           printf("%d = %s \n",element.second,element.first);
         
-        }
+        }*/
 
         //sub 1
         // part-2: blockVectorR = blockVectorAX - blockVectorR
@@ -1325,7 +1325,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
     for (std::pair<const char*, int> element : vertexName)
     {
         // std::cout << element.first << " :: " << element.second << std::endl;
-          printf("%d = %s \n",element.second,element.first);
+        //  printf("%d = %s \n",element.second,element.first);
         //  element.first.copy(vertex_name_string[element.second],element.first.length());
         //  vertex_name_string[element.second][element.first.length()] = '\0';
         //  printf("i = %d %s\n",element.second,vertex_name_string[element.second]);
@@ -1349,11 +1349,11 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
     opt.use_binary_input = 0;
     printf("Calling run_rMLGP from main\n");
 
-    for(i = 0 ; i < edgeCount ; i++){
+    /*for(i = 0 ; i < edgeCount ; i++){
 
 
         printf("%s --> %s (%.4lf)\n",vertex_name_string[edgeU[i]],vertex_name_string[edgeV[i]],edgeW[i]);
-    }
+    }*/
     
     //run_rMLGP(opt.file_name, opt, edgeU, edgeV, edgeW, edgeCount, nodeCount, &vertex_name_string[0], vertexWeight, numrows, numcols, nrowblks, ncolblks, block_width);
 
