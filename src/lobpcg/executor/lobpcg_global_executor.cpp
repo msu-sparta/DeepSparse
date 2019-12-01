@@ -574,11 +574,11 @@ int main(int argc, char *argv[])
     } //end parallel
 
     free(taskInfo_nonLoop);
- //   printf("After nonloop part \n");
- //    for(i = 0 ; i < blocksize ; i++)
-//    {
-//        cout << lambda[i * blocksize + i] << endl;
-//    }
+    printf("After nonloop part \n");
+     for(i = 0 ; i < blocksize ; i++)
+    {
+        cout << lambda[i * blocksize + i] << endl;
+    }
 
 
     free(gramXAX); 
@@ -1587,7 +1587,13 @@ int main(int argc, char *argv[])
 
     //printf("\nargv[6]: %s\n", argv[4]);
 
-    
+     printf("After firstloop part \n");
+     for(i = 0 ; i < blocksize ; i++)
+    {
+        cout << lambda[i * blocksize + i] << endl;
+    }
+
+   
     
     //if(0 > 1){
 

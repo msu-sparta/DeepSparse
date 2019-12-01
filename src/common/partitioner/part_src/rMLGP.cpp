@@ -721,8 +721,17 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
     FILE* mem_in = fopen("mem_in.txt","w");
 
     if(wblk == small_block){
+    if(loopType == 0)
+        make_new_table_file(rcoars, my_partition_topsort,"nonloop",matrix_name,wblk,wblk,opt.nbPart);
 
-    make_new_table_file(rcoars, my_partition_topsort,"nonloop",matrix_name,wblk,wblk,opt.nbPart);
+    if(loopType == 1)
+        make_new_table_file(rcoars, my_partition_topsort,"firstloop",matrix_name,wblk,wblk,opt.nbPart);
+
+
+    if(loopType == 2)
+        make_new_table_file(rcoars, my_partition_topsort,"secondloop",matrix_name,wblk,wblk,opt.nbPart);
+
+
     return ;
 }
     myprint();

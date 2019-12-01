@@ -28,6 +28,19 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[]);
 void secondloop(int blocksize , int block_width, int argc, char *argv[]);
 
 
+// ##### Hier Partitioner DS ##### //
+/*int **pseudo_tid_map;
+int small_block;
+
+TaskDetail td;
+InOutVariable iov;
+task_allinout_memory all_mem_in_task;
+input_map inp_map;
+output_map out_map;
+
+char global_filename[1000];
+
+*/
 
 
 int main(int argc, char *argv[]){
@@ -116,8 +129,8 @@ int main(int argc, char *argv[]){
     }*/
 
     nonloop(blocksize, block_width, argc, argv);
-    //firstloop(blocksize, block_width, argc, argv);
-    //secondloop(blocksize, block_width, argc, argv);
+    firstloop(blocksize, block_width, argc, argv);
+    secondloop(blocksize, block_width, argc, argv);
 
 
 
@@ -140,6 +153,8 @@ void  nonloop(int blocksize, int block_width, int argc, char *argv[])
     
     M = numrows;
     N = numcols;
+
+    vertexName.clear();
 
     
 
@@ -218,7 +233,7 @@ void  nonloop(int blocksize, int block_width, int argc, char *argv[])
     inp_map["CHOL,XBX"]["RED,XBXBUF,0"] = temp_chunk;
     out_map["RED,XBXBUF,0"]["CHOL,XBX"] = temp_chunk;
 
-    printf("input_map[CHOL,XBX][RED,XBXBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+    //printf("input_map[CHOL,XBX][RED,XBXBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
     
@@ -239,7 +254,7 @@ void  nonloop(int blocksize, int block_width, int argc, char *argv[])
     inp_map["DLACPY,0,20"]["CHOL,XBX"] = temp_chunk;
     out_map["CHOL,XBX"]["DLACPY,0,20"] = temp_chunk;
 
-    printf("input_map[DLACPY,0,20][CHOL,XBX] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+    //printf("input_map[DLACPY,0,20][CHOL,XBX] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -263,7 +278,7 @@ void  nonloop(int blocksize, int block_width, int argc, char *argv[])
     inp_map["INV,XBX"]["DLACPY,0,20"] = temp_chunk;
     out_map["DLACPY,0,20"]["INV,XBX"] = temp_chunk;
 
-    printf("input_map[INV,XBX][DLACPY,0,20] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+    //printf("input_map[INV,XBX][DLACPY,0,20] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -316,7 +331,7 @@ void  nonloop(int blocksize, int block_width, int argc, char *argv[])
     inp_map["SPEUPDATE,XAX"]["RED,XBXBUF,0"] = temp_chunk;
     out_map["RED,XAXBUF,0"]["SPEUPDATE,XBX"] = temp_chunk;
 
-    printf("input_map[SPEUPDATE,XBX][RED,XAXBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+    //printf("input_map[SPEUPDATE,XBX][RED,XAXBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -339,7 +354,7 @@ void  nonloop(int blocksize, int block_width, int argc, char *argv[])
     inp_map["EIGEN"]["SPEUPDATE,XAX"] = temp_chunk;
     out_map["SPEUPDATE,XAX"]["EIGEN"] = temp_chunk;
 
-    printf("input_map[EIGEN][SPEUPDATE,XAX] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+    //printf("input_map[EIGEN][SPEUPDATE,XAX] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -417,8 +432,8 @@ void  nonloop(int blocksize, int block_width, int argc, char *argv[])
     processArgs_rMLGP(argc, argv, &opt);
     opt.co_stop_size = 30;
     opt.co_stop_level = 1000;
-      opt.conpar = 0;
-    // opt.inipart = 11;
+    opt.conpar = 0;
+    opt.inipart = 11;
     opt.use_binary_input = 0;
     printf("Calling run_rMLGP from main\n");
     
@@ -463,6 +478,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
     M = numrows;
     N = numcols;
 
+    vertexName.clear();
 
 
     ////initialize edgeCount and nodeCount to zero
@@ -502,7 +518,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
     int xty_id, xy_id, dlacpy_id;
     char ary[150], i_string[8];
 
-    
+    printf("\n\n\nfirstloop\n\n\n\n");    
 
     for(iterationNumber = 1 ; iterationNumber <= 1 ; iterationNumber++)
     {
@@ -543,6 +559,8 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
         t2 = omp_get_wtime();
         graphGenTime[11] += (t2 - t1);
 
+
+        printf("before XY call in first loop nodeount = %d\n", nodeCount);
         //_XY(blockVectorX, lambda, blockVectorR, M, blocksize, blocksize, block_width);
         //xy 1
         xy_id = 1;
@@ -550,6 +568,15 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
             1, "_lambda", "null", "null", "null", "null", -1,
             "_X", "_lambda", "blockVectorR", M, blocksize, blocksize, block_width, xy_id);
 
+
+
+        printf("\n\n\n\n after first XY\n\n\n ");
+        for (std::pair<const char*, int> element : vertexName)
+        {
+        // std::cout << element.first << " :: " << element.second << std::endl;
+          printf("%d = %s \n",element.second,element.first);
+        
+        }
 
         //sub 1
         // part-2: blockVectorR = blockVectorAX - blockVectorR
@@ -608,7 +635,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
         inp_map["RESET,actMask"]["SQRT,RN"] = temp_chunk;
         out_map["SQRT,RN"]["RESET,actMask"] = temp_chunk;
 
-        printf("input_map[RESET,actMask][SQRT,RN] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+        //printf("input_map[RESET,actMask][SQRT,RN] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -635,7 +662,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
         inp_map["CONV,actMask"]["RESET,actMask"] = temp_chunk;
         out_map["RESET,actMask"]["CONV,actMask"] = temp_chunk;
 
-        printf("input_map[CONV,actMask][RESET,actMask] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+        //printf("input_map[CONV,actMask][RESET,actMask] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -682,7 +709,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
             out_map["CONV,actMask"][ary] = temp_chunk;
             
 
-            printf("input_map[%s][CONV,actMask] = %s %lf\n",ary,tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[%s][CONV,actMask] = %s %lf\n",ary,tmp_input1,edgeW[edgeCount-1]);
 
 
              
@@ -747,7 +774,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
         inp_map["CHOL,RBR"][strdup(ary)] = temp_chunk;
         out_map[strdup(ary)]["CHOL,RBR"] = temp_chunk;
 
-        printf("input_map[CHOL,RBR][%s] = %s %lf\n", ary,tmp_input1,edgeW[edgeCount-1]);
+        //printf("input_map[CHOL,RBR][%s] = %s %lf\n", ary,tmp_input1,edgeW[edgeCount-1]);
 
 
         //complex task 2
@@ -771,7 +798,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
         out_map["CHOL,RBR"]["INV,RBR"] = temp_chunk;
 
 
-        printf("input_map[INV,RBR][CHOL,RBR] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+        //printf("input_map[INV,RBR][CHOL,RBR] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
         
 
 
@@ -1013,7 +1040,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
         inp_map["TRANS,RAR"]["RED,RARBUF,0"] = temp_chunk;
         out_map["RED,RARBUF,0"]["TRANS,RAR"] = temp_chunk;
 
-        printf("input_map[TRANS,RAR][RED,RARBUF] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+        //printf("input_map[TRANS,RAR][RED,RARBUF] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
         
         vertexName[strdup("SPEUPDATE,RAR")] = nodeCount;
@@ -1036,7 +1063,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
         inp_map["SPEUPDATE,RAR"]["RED,RARBUF,0"] = temp_chunk;
         out_map["RED,RARBUF,0"]["SPEUPDATE,RAR"] = temp_chunk;
 
-        printf("input_map[SPEUPDATE,RAR][RED,RARBUF] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+        //printf("input_map[SPEUPDATE,RAR][RED,RARBUF] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
         edgeU[edgeCount] = nodeCount - 2; //vertexName["transGramRAR(0)_TRANS(gramRAR)"]; -> 2nd last insert
@@ -1051,7 +1078,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
         inp_map["SPEUPDATE,RAR"]["TRANS,RAR"] = temp_chunk;
         out_map["TRANS,RAR"]["SPEUPDATE,RAR"] = temp_chunk;
 
-        printf("input_map[SPEUPDATE,RAR][TRANS,RAR] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+        //printf("input_map[SPEUPDATE,RAR][TRANS,RAR] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -1087,7 +1114,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
             inp_map["CONSTRUCTGA"]["_lambda"] = temp_chunk;
             out_map["_lambda"]["CONSTRUCTGA"] = temp_chunk;
 
-            printf("input_map[CONSTRUCTGA][_lambda] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[CONSTRUCTGA][_lambda] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
             
             //gramXAR -> gramXAR(0)_REDUCTION(gramXARBUF);
@@ -1105,7 +1132,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
             inp_map["CONSTRUCTGA"]["RED,XARBUF,0"] = temp_chunk;
             out_map["RED,XARBUF,0"]["CONSTRUCTGA"] = temp_chunk;
 
-            printf("input_map[CONSTRUCTGA][RED,XARBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[CONSTRUCTGA][RED,XARBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
             
@@ -1123,7 +1150,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
             inp_map["CONSTRUCTGA"]["SPEUPDATE,RAR"] = temp_chunk;
             out_map["SPEUPDATE,RAR"]["CONSTRUCTGA"] = temp_chunk;
 
-            printf("input_map[CONSTRUCTGA][SPEUPDATE,RAR] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[CONSTRUCTGA][SPEUPDATE,RAR] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -1146,7 +1173,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
             inp_map["CONSTRUCTGB"]["CONV,actMask"] = temp_chunk;
             out_map["CONV,actMask"]["CONSTRUCTGB"] = temp_chunk;
 
-            printf("input_map[CONSTRUCTGB][CONV,actMask] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[CONSTRUCTGB][CONV,actMask] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -1176,7 +1203,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
         inp_map["EIGEN"]["CONSTRUCTGA"] = temp_chunk;
         out_map["CONSTRUCTGA"]["EIGEN"] = temp_chunk;
 
-        printf("input_map[EIGEN][CONSTRUCTGA] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+        //printf("input_map[EIGEN][CONSTRUCTGA] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -1194,7 +1221,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
         inp_map["EIGEN"]["CONSTRUCTGB"] = temp_chunk;
         out_map["CONSTRUCTGB"]["EIGEN"] = temp_chunk;
 
-        printf("input_map[EIGEN][CONSTRUCTGB] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+        //printf("input_map[EIGEN][CONSTRUCTGB] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
         t2 = omp_get_wtime();
@@ -1283,43 +1310,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
     cout << "map size: " << vertexName.size() << endl; 
 
     
-    
-    //writing graph in dot format in file
 
-    /*std::ofstream graph_file("MatA100-firstloop-graph-v30.dot");
-    graph_file << "digraph G {" << endl;
-    for(i = 0 ; i < nodeCount ; i++)
-    {
-        string name= "";
-        
-        for (auto it = vertexName.begin(); it != vertexName.end(); ++it )
-            if (it->second == i)
-                name = it->first;
-
-        if(name != "")
-        {
-            std::size_t found = name.find("SPMM");
-            
-            if (found != std::string::npos)
-                graph_file << i + 1 << " [label=\"" << name << "\", color=deepskyblue, style = filled];" << endl;  
-            else  
-                graph_file << i + 1 << " [label=\"" << name << "\", color=salmon2, style = filled];" << endl;
-        }
-        //else
-        //{
-        //    graph_file << i + 1 << " [label=" << name << ", color=salmon2, style = filled];" << endl;
-        //}
-    }
-    for(i = 0 ; i < edgeCount ; i++)
-    {
-        graph_file << edgeU[i] + 1 << " ->"<< edgeV[i] + 1 << " ;" << endl;
-    }
-
-    graph_file << "}" << endl; 
-
-    printf("Finish writig dot file\n");*/
-
-    //exit(1); 
 
 
     char** vertex_name_string;
@@ -1334,7 +1325,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
     for (std::pair<const char*, int> element : vertexName)
     {
         // std::cout << element.first << " :: " << element.second << std::endl;
-        //  printf("%d = %s \n",element.second,element.first);
+          printf("%d = %s \n",element.second,element.first);
         //  element.first.copy(vertex_name_string[element.second],element.first.length());
         //  vertex_name_string[element.second][element.first.length()] = '\0';
         //  printf("i = %d %s\n",element.second,vertex_name_string[element.second]);
@@ -1353,10 +1344,16 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
     processArgs_rMLGP(argc, argv, &opt);
     opt.co_stop_size = 30;
     opt.co_stop_level = 1000;
-     // opt.conpar = 0;
-    // opt.inipart = 11;
+    opt.conpar = 0;
+    opt.inipart = 11;
     opt.use_binary_input = 0;
     printf("Calling run_rMLGP from main\n");
+
+    for(i = 0 ; i < edgeCount ; i++){
+
+
+        printf("%s --> %s (%.4lf)\n",vertex_name_string[edgeU[i]],vertex_name_string[edgeV[i]],edgeW[i]);
+    }
     
     //run_rMLGP(opt.file_name, opt, edgeU, edgeV, edgeW, edgeCount, nodeCount, &vertex_name_string[0], vertexWeight, numrows, numcols, nrowblks, ncolblks, block_width);
 
@@ -1406,7 +1403,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
     nodeCount = 0 ; 
 //    globalNodeCount = 0 ; 
 
-
+    vertexName.clear();
 
     pseudo_tid_map = (int**)calloc(nrowblks+1,sizeof(int*));
 
@@ -1559,7 +1556,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
         inp_map["RESET,actMask"]["SQRT,RN"] = temp_chunk;
         out_map["SQRT,RN"]["RESET,actMask"] = temp_chunk;
 
-        printf("input_map[RESET,actMask][SQRT,RN] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+        //printf("input_map[RESET,actMask][SQRT,RN] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
                 
         memset(&ary[0], 0, sizeof(ary));
@@ -1583,7 +1580,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
         inp_map["CONV,actMask"]["RESET,actMask"] = temp_chunk;
         out_map["RESET,actMask"]["CONV,actMask"] = temp_chunk;
 
-        printf("input_map[CONV,actMask][RESET,actMask] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+        //printf("input_map[CONV,actMask][RESET,actMask] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -1632,7 +1629,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
             out_map["CONV,actMask"][ary] = temp_chunk;
             
 
-            printf("input_map[%s][CONV,actMask] = %s %lf\n",ary,tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[%s][CONV,actMask] = %s %lf\n",ary,tmp_input1,edgeW[edgeCount-1]);
         }
 
         t2 = omp_get_wtime();
@@ -1694,7 +1691,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
         inp_map["CHOL,RBR"][strdup(ary)] = temp_chunk;
         out_map[strdup(ary)]["CHOL,RBR"] = temp_chunk;
 
-        printf("input_map[CHOL,RBR][%s] = %s %lf\n", ary,tmp_input1,edgeW[edgeCount-1]);
+        //printf("input_map[CHOL,RBR][%s] = %s %lf\n", ary,tmp_input1,edgeW[edgeCount-1]);
 
 
         //complex task 2
@@ -1718,7 +1715,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
         out_map["CHOL,RBR"]["INV,RBR"] = temp_chunk;
 
 
-        printf("input_map[INV,RBR][CHOL,RBR] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+        //printf("input_map[INV,RBR][CHOL,RBR] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
         
 
 
@@ -1849,7 +1846,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
             inp_map["CHOL,PBP"]["RED,PBPBUF,0"] = temp_chunk;
             out_map["RED,PBPBUF,0"]["CHOL,PBP"] = temp_chunk;
 
-            printf("input_map[CHOL,PBP][RED,PBPBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[CHOL,PBP][RED,PBPBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -1871,7 +1868,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
             inp_map["INV,PBP"]["CHOL,PBP"] = temp_chunk;
             out_map["CHOL,PBP"]["INV,PBP"] = temp_chunk;
 
-            printf("input_map[INV,PBP][CHOL,PBP] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[INV,PBP][CHOL,PBP] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
             t2 = omp_get_wtime();
@@ -1983,7 +1980,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
         inp_map["TRANS,RAR"]["RED,RARBUF,0"] = temp_chunk;
         out_map["RED,RARBUF,0"]["TRANS,RAR"] = temp_chunk;
 
-        printf("input_map[TRANS,RAR][RED,RARBUF] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+        //printf("input_map[TRANS,RAR][RED,RARBUF] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
         
         vertexName[strdup("SPEUPDATE,RAR")] = nodeCount;
@@ -2005,7 +2002,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
         inp_map["SPEUPDATE,RAR"]["RED,RARBUF,0"] = temp_chunk;
         out_map["RED,RARBUF,0"]["SPEUPDATE,RAR"] = temp_chunk;
 
-        printf("input_map[SPEUPDATE,RAR][RED,RARBUF] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+        //printf("input_map[SPEUPDATE,RAR][RED,RARBUF] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
         edgeU[edgeCount] = nodeCount - 2; //vertexName["transGramRAR(0)_TRANS(gramRAR)"]; -> 2nd last insert
@@ -2020,7 +2017,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
         inp_map["SPEUPDATE,RAR"]["TRANS,RAR"] = temp_chunk;
         out_map["TRANS,RAR"]["SPEUPDATE,RAR"] = temp_chunk;
 
-        printf("input_map[SPEUPDATE,RAR][TRANS,RAR] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+        //printf("input_map[SPEUPDATE,RAR][TRANS,RAR] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -2081,7 +2078,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
             inp_map["SPEUPDATE,PAP"]["RED,PAPBUF"] = temp_chunk;
             out_map["RED,PAPBUF"]["SPEUPDATE,PAP"] = temp_chunk;
 
-            printf("input_map[SPEUPDATE,PAP][RED,PAPBUF] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[SPEUPDATE,PAP][RED,PAPBUF] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -2107,7 +2104,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
             inp_map["CONSTRUCTGA1"]["_lambda"] = temp_chunk;
             out_map["_lambda"]["CONSTRUCTGA1"] = temp_chunk;
 
-            printf("input_map[CONSTRUCTGA1][_lambda] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[CONSTRUCTGA1][_lambda] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
             //gramXAR -> gramXAR(0)_REDUCTION(gramXARBUF);
@@ -2125,7 +2122,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
             inp_map["CONSTRUCTGA1"]["RED,XAPBUF,0"] = temp_chunk;
             out_map["RED,XAPBUF,0"]["CONSTRUCTGA1"] = temp_chunk;
 
-            printf("input_map[CONSTRUCTGA1][RED,XAPBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[CONSTRUCTGA1][RED,XAPBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -2144,7 +2141,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
             inp_map["CONSTRUCTGA1"]["RED,XARBUF,0"] = temp_chunk;
             out_map["RED,XARBUF,0"]["CONSTRUCTGA1"] = temp_chunk;
 
-            printf("input_map[CONSTRUCTGA1][RED,XARBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[CONSTRUCTGA1][RED,XARBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
             
             vertexName[strdup("CONSTRUCTGA2")] = nodeCount;
@@ -2167,7 +2164,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
             inp_map["CONSTRUCTGA2"]["CONSTRUCTGA1"] = temp_chunk;
             out_map["CONSTRUCTGA1"]["CONSTRUCTGA2"] = temp_chunk;
 
-            printf("input_map[CONSTRUCTGA2][CONSTRUCTGA1] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[CONSTRUCTGA2][CONSTRUCTGA1] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
             //CONSTRUCTGA2 <- gramXAR  gramXAP gramRAR gramRAP           
@@ -2187,7 +2184,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
             inp_map["CONSTRUCTGA2"]["RED,XAPBUF,0"] = temp_chunk;
             out_map["RED,XARPBUF,0"]["CONSTRUCTGA2"] = temp_chunk;
 
-            printf("input_map[CONSTRUCTGA2][RED,XAPBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[CONSTRUCTGA2][RED,XAPBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -2206,7 +2203,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
             inp_map["CONSTRUCTGA2"]["RED,XARBUF,0"] = temp_chunk;
             out_map["RED,XARBUF,0"]["CONSTRUCTGA2"] = temp_chunk;
 
-            printf("input_map[CONSTRUCTGA2][RED,XARBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[CONSTRUCTGA2][RED,XARBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -2227,7 +2224,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
             inp_map["CONSTRUCTGA2"]["SPEUPDATE,RAR"] = temp_chunk;
             out_map["SPEUPDATE,RAR"]["CONSTRUCTGA2"] = temp_chunk;
 
-            printf("input_map[CONSTRUCTGA2][SPEUPDATE,RAR] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[CONSTRUCTGA2][SPEUPDATE,RAR] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -2246,7 +2243,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
             inp_map["CONSTRUCTGA2"]["SPEUPDATE,PAP"] = temp_chunk;
             out_map["SPEUPDATE,PAP"]["CONSTRUCTGA2"] = temp_chunk;
 
-            printf("input_map[CONSTRUCTGA2][SPEUPDATE,PAP] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[CONSTRUCTGA2][SPEUPDATE,PAP] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -2264,7 +2261,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
             inp_map["CONSTRUCTGA2"]["RED,RAPBUF,0"] = temp_chunk;
             out_map["RED,RAPBUF,0"]["CONSTRUCTGA2"] = temp_chunk;
 
-            printf("input_map[CONSTRUCTGA2][RED,RAPBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[CONSTRUCTGA2][RED,RAPBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
             t2 = omp_get_wtime();
@@ -2310,7 +2307,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
             inp_map["CONSTRUCTGB"]["RED,XBPBUF,0"] = temp_chunk;
             out_map["RED,XBPBUF,0"]["CONSTRUCTGB"] = temp_chunk;
 
-            printf("input_map[CONSTRUCTGB][RED,XBPBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[CONSTRUCTGB][RED,XBPBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
             edgeU[edgeCount] = vertexName["RED,RBPBUF,0"];
             edgeV[edgeCount] = CONSTRUCTGB_id; //vertexName["CONSTRUCTGB"];
@@ -2325,7 +2322,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
             inp_map["CONSTRUCTGB"]["RED,RBPBUF,0"] = temp_chunk;
             out_map["RED,RBPBUF,0"]["CONSTRUCTGB"] = temp_chunk;
 
-            printf("input_map[CONSTRUCTGB][RED,RBPBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+            //printf("input_map[CONSTRUCTGB][RED,RBPBUF,0] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -2356,7 +2353,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
         inp_map["EIGEN"]["CONSTRUCTGA2"] = temp_chunk;
         out_map["CONSTRUCTGA2"]["EIGEN"] = temp_chunk;
 
-        printf("input_map[EIGEN][CONSTRUCTGA2] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+        //printf("input_map[EIGEN][CONSTRUCTGA2] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -2375,7 +2372,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
         inp_map["EIGEN"]["CONSTRUCTGB"] = temp_chunk;
         out_map["CONSTRUCTGB"]["EIGEN"] = temp_chunk;
 
-        printf("input_map[EIGEN][CONSTRUCTGB] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
+        //printf("input_map[EIGEN][CONSTRUCTGB] = %s %lf\n",tmp_input1,edgeW[edgeCount-1]);
 
 
         t2 = omp_get_wtime();
@@ -2525,8 +2522,8 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
     processArgs_rMLGP(argc, argv, &opt);
     opt.co_stop_size = 30;
     opt.co_stop_level = 1000;
-     // opt.conpar = 0;
-    // opt.inipart = 11;
+     opt.conpar = 0;
+    opt.inipart = 11;
     opt.use_binary_input = 0;
     printf("Calling run_rMLGP from main\n");
     

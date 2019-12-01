@@ -1,6 +1,6 @@
 CC=icpc 
-CPPFLAGS= -O3 -w -qopenmp -DdagP_METIS
-CFLAGS = -O3 -w -qopenmp -DdagP_METIS
+CPPFLAGS= -O3 -w -qopenmp #-DdagP_METIS
+CFLAGS = -O3 -w -qopenmp #-DdagP_METIS
 
 
 
@@ -48,7 +48,7 @@ DGRAPHLIB=$(LIBDIR)/libdgraph.a
 
 #@echo "hello world"
 
-$(SRCDIR)/%.o: $(SRCDIR)/%.c $(INCDIR)/dgraph.h
+$(SRCDIR)/%.o: $(SRCDIR)/%.cpp $(INCDIR)/dgraph.h
 	$(CC) -c $< -o $@ $(CFLAGS) $(INCDIRA) -I$(METISHDIR)
 
 
