@@ -43,12 +43,15 @@ output_map out_map;
 
 char global_filename[1000];
 
+double total_memory_limit; 
+
 
 
 //int **pseudo_tid_map;
 //int small_block;
 
-
+char **globalGraph;
+int globalNodeCount;
 
 
 
@@ -3296,10 +3299,10 @@ void read_custom(char* filename, double *&xrem)
     cout<<"non zero: "<<nnonzero<<endl;
 
     colptrs = new int[numcols + 1];
-        irem = new int[nnonzero];
+    irem = new int[nnonzero];
         //xrem = new T[nnonzero];
-        xrem = new double[nnonzero];
-        float *txrem = new float[nnonzero];
+    xrem = new double[nnonzero];
+    float *txrem = new float[nnonzero];
     cout << "Memory allocation finished" << endl;
 
     fread(colptrs, sizeof(int), numcols+1, fp);
@@ -3432,8 +3435,11 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
     for(c = 0 ; c < numcols ; c++)
     {
         k1 = colptrs[c]+1;
-        k2 = colptrs[c + 1] - 1+1;
+        k2 = colptrs[c + 1] - 1+1; 
         blkc = ceil((c + 1) / (float)wblk);
+
+        //:wq
+        cout<<"K1: "<<k1<<" K2: "<<k2<<" blkc: "<<blkc<<endl;
 
         for(k = k1 - 1 ; k < k2 ; k++)
         {
@@ -3447,6 +3453,9 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
             top[blkr-1][blkc-1]=top[blkr-1][blkc-1]+1;
         }
     }
+
+
+    printf("allocated memory from each block\n\n");
 
     for(i = 0 ; i < nrowblks ; i++)
     {
@@ -3479,8 +3488,10 @@ void get_new_csb_block(int newWblk, int*** nnzBlock, int* nrowblocks, int* ncolb
     //read_custom<double>(global_filename, newXrem);
     //csc2blkcoord<double>(newMatrixBlock, newXrem);
 
-    read_custom(global_filename, newXrem);
+    //read_custom(global_filename, newXrem);
     csc2blkcoord(newMatrixBlock, newXrem);
+
+    printf("new blks created in get new csb blk\n");
 
     int total_spmm_blocks = 0;
 

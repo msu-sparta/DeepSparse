@@ -438,6 +438,28 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
 
     my_generate_graph_fazlay(&G, file_name,opt.use_binary_input, edge_u, edge_v, edge_weight, edgeCount, vertexCount,vertexName,vertexWeight);
 
+    
+
+
+    ////////////////partinfo file ////////////////
+
+    
+    FILE* partInfo ;
+    int prev_part = -1;
+    char new_fname[100];
+    char loopname[100];
+    char partinfo_file_name[200];
+
+
+
+    if(loopType == 0 ) strcpy(loopname,"nonloop");
+    else if(loopType == 1 )strcpy(loopname,"firstloop");
+    else if(loopType == 2 )strcpy(loopname,"secondloop");
+
+
+    ////////////////////////////////////////////////
+
+
     for(int i = 0 ; i < G.nEdge ; i++){
     //  printf("out[%d] = %d\n",i,G.out[i]);
     }
@@ -564,23 +586,6 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
         latencies[r] = computeLatency(&G, rcoars->coars->part, 1.0, 11.0);
 
         printf("Final run %d\t%d\t%d\t%lf\t%lf\t%lf\n", r, G.nVrtx, G.nEdge, edgecut[r], nbcomm[r], latencies[r]);
-        // printf("Times\t%.3lf\t%.3lf\t%.3lf\t%.3lf\n", info.timing_coars, info.timing_inipart, info.timing_uncoars,info.timing_global);
-
-
-        // int maxsize = printPartWeights(&G, rcoars->coars->part);
-        // printf("Partition:\n\tEdgecut: %d\n\tBalance: %f\n\tVCycle depth: %d\n\tVertex Contraction: %.3f\n\tEdge Contraction: %.3f\n\tEdge Weight Contraction: %.3f\nTimes in seconds:\n\tCoarsening: %.3lf\n\tInitial Partition: %.3lf\n\tUncoarsening: %.3lf\n\tTotal: %.3lf\n", (int) edgecut[r], (double) maxsize / (G.totvw/opt.nbPart), info->info->coars_depth, (double) info->info->nbnodes_coars_tab[info->info->coars_depth] / (double) G.nVrtx, (double) info->info->nbedges_coars_tab[info->info->coars_depth] / (double) G.nEdge,  (double) ((double) (int) info->info->coarse_ew/ (double) G.nEdge),  info->timing_coars, info->timing_inipart, info->timing_uncoars,info->timing_global);
-
-
-        // for (i=0; i<opt.nbPart; i++)
-        //     opt.ub[i] = opt.ub[i] * opt.ratio;
-
-        
-
-        // TODO: Add appropriate functions for these if necessary
-
-        // print_info_part(rcoars->coars->graph, rcoars->coars->part, opt);
-        // print_info_part_file(rcoars->coars->graph, rcoars->coars->part, opt);
-        // checkAcyclicity(rcoars->coars->graph, rcoars->coars->part, opt.nbPart);
 
         if (opt.debug) {
             isAcyclic = checkAcyclicity(&G, rcoars->coars->part, opt.nbPart);
@@ -679,12 +684,6 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
             p_part = rcoars->coars->part[my_partition_topsort[i]];
         }
          fprintf(original_graph_partition,"%s %d %d\n",vertexName[my_partition_topsort[i]-1],rcoars->coars->part[my_partition_topsort[i]],rcoars->coars->graph->nVrtx-i);
-        //printf("partition top sort[%d] = %d part = %d nodename = %s\n",i,my_partition_topsort[i],rcoars->coars->part[my_partition_topsort[i]],rcoars->coars->graph->vertices[my_partition_topsort[i]-1]);
-        // if(vertexName[my_partition_topsort[i]-1][0] == 'S' && vertexName[my_partition_topsort[i]-1][1] == 'P' &&vertexName[my_partition_topsort[i]-1][2] == 'M' &&
-        //     vertexName[my_partition_topsort[i]-1][3] == 'M' && vertexName[my_partition_topsort[i]-1][4]==',')
-           // //fprintf(file,"topsort[%d] = %d part = %d noden = %s\n",i,my_partition_topsort[i],rcoars->coars->part[my_partition_topsort[i]],vertexName[my_partition_topsort[i]-1]);
-        //     fprintf(file,"%s %d\n",vertexName[my_partition_topsort[i]-1],rcoars->coars->part[my_partition_topsort[i]]);
-        // //fprintf(file,"%d %d\n",my_partition_topsort[i],rcoars->coars->part[my_partition_topsort[i]]);
     }
     fclose(original_graph_partition);
 
@@ -717,10 +716,57 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
     }
 
 
+
+
     FILE* mem_out = fopen("mem_out.txt","w");
     FILE* mem_in = fopen("mem_in.txt","w");
 
+
+
+/////////////// if large blk and small blk are same , dont refine the graph/////////
+
+
+
     if(wblk == small_block){
+
+
+//////// write partinfo file for large blk == small blk/////////
+
+
+
+    
+
+    sprintf(partinfo_file_name,"%s_%dk_%dk_part%d_%s_partinfo.txt",matrix_name,wblk/1024,wblk/1024,opt.nbPart,loopname);
+
+
+
+
+    partInfo = fopen(partinfo_file_name,"w");
+
+    fprintf(partInfo, "%d\n", distinct_part_count+1);
+
+
+    for(i = 1, j = rcoars->coars->graph->nVrtx-1 ; i <= rcoars->coars->graph->nVrtx ; i++, j--)
+    {
+        
+        //non-priority
+        //fprintf(refined_graph_partition,"%s %d\n",newVertexName[my_small_partition_topsort[i]-1],small_rcoarse->coars->part[my_small_partition_topsort[i]]);
+
+        //priority
+        if(rcoars->coars->part[my_partition_topsort[i]] != prev_part){
+
+            prev_part = rcoars->coars->part[my_partition_topsort[i]];
+            fprintf(partInfo,"%d\n", i-1);
+
+
+        }
+    }
+
+    fclose(partInfo);
+
+
+
+
     if(loopType == 0)
         make_new_table_file(rcoars, my_partition_topsort,"nonloop",matrix_name,wblk,wblk,opt.nbPart);
 
@@ -730,6 +776,7 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
 
     if(loopType == 2)
         make_new_table_file(rcoars, my_partition_topsort,"secondloop",matrix_name,wblk,wblk,opt.nbPart);
+
 
 
     return ;
@@ -893,19 +940,25 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
 
     printf("\n\nloop type = %d large_block = %d small block %d\n", loopType,starting_block_size,small_block);
     FILE* refined_new;
-    int prev_part = -1;
-    char new_fname[100];
-    char loopname[100];
-    if(loopType == 0 ) strcpy(loopname,"nonloop");
-    else if(loopType == 1 )strcpy(loopname,"firstloop");
-    else if(loopType == 2 )strcpy(loopname,"secondloop");
+    prev_part = -1;
+
+    //if(loopType == 0 ) strcpy(loopname,"nonloop");
+    //else if(loopType == 1 )strcpy(loopname,"firstloop");
+    //else if(loopType == 2 )strcpy(loopname,"secondloop");
     //refined_new = fopen("refined_new.txt","w");
     FILE* part_topsort = fopen("part_topsort.txt","w");
-    char partinfo_file_name[200];
+
+//////small blk partinfo file///////////////
+
 
     sprintf(partinfo_file_name,"%s_%dk_%dk_part%d_%s_partinfo.txt",matrix_name,starting_block_size/1024,wblk/1024,opt.nbPart,loopname);
 
-    FILE* partInfo = fopen(partinfo_file_name,"w");
+
+
+
+    partInfo = fopen(partinfo_file_name,"w");
+
+
     fprintf(partInfo, "%d\n", distinct_part_count+1);
 
     for(i = 1, j = small_rcoarse->coars->graph->nVrtx-1 ; i <= small_rcoarse->coars->graph->nVrtx ; i++, j--)
@@ -934,12 +987,6 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
 
 
         
-        // //printf("partition top sort[%d] = %d part = %d nodename = %s\n",i,my_partition_topsort[i],rcoars->coars->part[my_partition_topsort[i]],rcoars->coars->graph->vertices[my_partition_topsort[i]-1]);
-        // if(newVertexName[my_small_partition_topsort[i]-1][0] == 'S' && newVertexName[my_small_partition_topsort[i]-1][1] == 'P' && newVertexName[my_small_partition_topsort[i]-1][2] == 'M' &&
-        //     newVertexName[my_small_partition_topsort[i]-1][3] == 'M' && newVertexName[my_small_partition_topsort[i]-1][4]==',')
-        //    //fprintf(file,"topsort[%d] = %d part = %d noden = %s\n",i,my_partition_topsort[i],rcoars->coars->part[my_partition_topsort[i]],vertexName[my_partition_topsort[i]-1]);
-        //     fprintf(small_file,"%s %d\n",newVertexName[my_small_partition_topsort[i]-1],small_rcoarse->coars->part[my_small_partition_topsort[i]]);
-        // //fprintf(file,"%d %d\n",my_partition_topsort[i],rcoars->coars->part[my_partition_topsort[i]]);
     }
 
 

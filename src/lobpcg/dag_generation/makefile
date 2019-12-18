@@ -6,10 +6,10 @@ CFLAGS = -O3 -w -qopenmp #-DdagP_METIS
 
 EXEDIR_DAG=../exe
 
-#lobpcg_global: 
-#	$(CC)  -c ../../common/util.cpp  -fopenmp
-#	$(CC)  -c lobpcg_global.cpp   util.o -fopenmp
-#	$(CC) -o $(EXEDIR_DAG)/lobpcg_global.x util.o lobpcg_global.o -fopenmp
+lobpcg_global: 
+	$(CC)  -c ../../common/util.cpp  -fopenmp
+	$(CC)  -c lobpcg_global.cpp   util.o -fopenmp
+	$(CC) -o $(EXEDIR_DAG)/lobpcg_global.x util.o lobpcg_global.o -fopenmp
 
 
 

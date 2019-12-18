@@ -98,6 +98,11 @@ extern double *graphGenTime; //not now
 extern char **globalGraph;
 extern int globalNodeCount;
 
+extern double total_memory_limit;
+
+
+///////
+
 
 
 

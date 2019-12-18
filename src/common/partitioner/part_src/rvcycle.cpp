@@ -572,8 +572,7 @@ rcoarsen* rVCycle(dgraph *G, MLGP_option opt, rMLGP_info* info, int *resultingNb
 
 
 
-     if(total_memory < 33554432 * 2) //32 MB for haswell L3 data cache
- //   if(total_memory < 12884901888.0)
+     if(total_memory < total_memory_limit) //32 MB for haswell L3 data cache
 //      if(total_memory < 134217728) //128 MB 
 //    if(total_memory < 536870912) // 512 MB
     {

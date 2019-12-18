@@ -29,5 +29,14 @@ lobpcg_global:
 	$(CC) $(CFLAGS) -o $(EXEDIR)/lobpcg_global_executor.x exec_util.o lobpcg_global_executor.o matrix_ops.o vector_ops.o  -g $(LINKER_INT32)
 
 
+lobpcg_part: 
+	$(CC) $(CFLAGS) -c ../../common/exec_util.cpp    -g $(LINKER_INT32)
+	$(CC) $(CFLAGS) -c ../../common/matrix_ops.cpp exec_util.o    -g $(LINKER_INT32)
+	$(CC) $(CFLAGS) -c ../../common/vector_ops.cpp exec_util.o    -g $(LINKER_INT32)
+	$(CC) $(CFLAGS) -c lobpcg_part_executor.cpp   exec_util.o matrix_ops.o vector_ops.o  -g $(LINKER_INT32)
+	$(CC) $(CFLAGS) -o $(EXEDIR)/lobpcg_part_executor.x exec_util.o lobpcg_part_executor.o matrix_ops.o vector_ops.o  -g $(LINKER_INT32)
+
+
+
 clean: 
 	rm -rf *.o 

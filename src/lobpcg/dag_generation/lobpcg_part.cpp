@@ -78,6 +78,8 @@ int main(int argc, char *argv[]){
 
     small_block = atoi(argv[4]);
 
+    total_memory_limit = atof(argv[5]);
+
 
     #pragma omp parallel
     #pragma omp master
