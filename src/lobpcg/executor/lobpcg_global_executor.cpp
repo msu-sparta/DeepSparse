@@ -18,6 +18,11 @@ int main(int argc, char *argv[])
     s >> blocksize;
     stringstream s1(argv[2]);
     s1 >> block_width;
+    if(argc == 8)
+    {
+        stringstream sIter(argv[7]);
+        sIter >> maxIterations;
+    }
     
 
     int currentBlockSize = blocksize, prevCurrentBlockSize = blocksize;

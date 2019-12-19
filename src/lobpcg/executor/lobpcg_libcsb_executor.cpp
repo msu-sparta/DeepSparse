@@ -22,6 +22,12 @@ int main(int argc, char *argv[])
     s >> blocksize;
     stringstream s1(argv[2]);
     s1 >> block_width;
+    if(argc == 5)
+    {
+        stringstream sIter(argv[4]);
+        sIter >> maxIterations;
+    }
+
     cout << "Block Size: " << blocksize << " Block Width: " << block_width << endl;
 
     int currentBlockSize = blocksize, prevCurrentBlockSize = blocksize;
