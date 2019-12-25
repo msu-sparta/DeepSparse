@@ -210,6 +210,9 @@ void mat_addition(int edge1Format, char edge1_var[], char edge1_part1[], char ed
         vertexWeight[nodeCount] =  block_width * col * sizeof(double);
         nodeCount++;
 
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
+
 
         
         strcpy(main_task,ary);
@@ -377,6 +380,9 @@ void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[
         vertexName[strdup(ary)] = nodeCount;
         vertexWeight[nodeCount] = block_width * P * sizeof(double);
         nodeCount++;
+
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
 
 
      
@@ -572,6 +578,9 @@ void _XY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
         vertexWeight[nodeCount] = block_width * P * sizeof(double);
         nodeCount++;
 
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
+
         if(edge1Format == 1)
         {
             memset(&ary[0], 0, sizeof(ary));
@@ -735,6 +744,9 @@ void _XY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
         vertexWeight[nodeCount] = block_width * P * sizeof(double);
         nodeCount++;
 
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
+
         // #### Hier #####
         strcpy(main_task,ary);
 
@@ -889,6 +901,9 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
         else
             vertexWeight[nodeCount] = block_width * p * sizeof(double); 
         nodeCount++;
+
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
     }
 
     for(i = 0, k = 0 ; i < nrowblks ; i++, k++)
@@ -914,6 +929,9 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
         else
             vertexWeight[nodeCount] = block_width * p * sizeof(double);
         nodeCount++;
+
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
 
         if(edge1Format == 2) //coming from another task
         {
@@ -1106,6 +1124,9 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
         else
             vertexWeight[nodeCount] = block_width * p * sizeof(double);
         nodeCount++;
+
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
     }
 
     for(i = 0, k = 0 ; i < nrowblks ; i++, k++)
@@ -1135,6 +1156,9 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
         else
             vertexWeight[nodeCount] = block_width * p * sizeof(double);
         nodeCount++;
+
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
 
         if(edge1Format == 2) //coming from another task
         {
@@ -1318,6 +1342,9 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
         else
             vertexWeight[nodeCount] = block_width * p * sizeof(double);
         nodeCount++;
+
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
     }
 
     for(i = 0, k = 0 ; i < nrowblks ; i++, k++)
@@ -1344,6 +1371,9 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
         else
             vertexWeight[nodeCount] = block_width * p * sizeof(double);
         nodeCount++;
+
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
 
         if(edge1Format == 2) //coming from another task
         {
@@ -1525,6 +1555,10 @@ void  _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_
         else
             vertexWeight[nodeCount] = block_width * p * sizeof(double);
         nodeCount++;
+
+
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
     }
 
     for(i = 0, k = 0 ; i < nrowblks ; i++, k++)
@@ -1546,6 +1580,9 @@ void  _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_
         
         vertexName[strdup(ary)] = nodeCount;
         nodeCount++;
+
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
 
         if( (i * block_width + block_width) > row)
             vertexWeight[nodeCount] = (row - i * block_width) * p * sizeof(double);
@@ -1720,6 +1757,7 @@ void  _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_
 void spmm_blkcoord_csbTask(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[], char edge1_part2[],
             char input1[], char input2[], char output[], int row, int col, int p, int block_width, int currentBlockSize, int taskwait_node_no, int *actR_vertexNo, int **SPMM_vertexNo)
 {
+    //printf("inside spmm_blkcoord_csbTask function\n");
     int i, j, k;
     int nbuf = 1; // how many partial SPMM results?
     //int nnz = 20; //nnz in each csb block, for time-being it is set to 20
@@ -1758,7 +1796,7 @@ void spmm_blkcoord_csbTask(int edge1Format, char edge1_var[], char edge1_part1[]
         // #### Hier #####
         strcpy(extra_task2, ary);
 
-        //printf("%s\n", extra_task2 );
+        printf("%s\n", extra_task2 );
      
         //t2 = omp_get_wtime();
         //sprintf_time += (t2 - t1);
@@ -1768,6 +1806,12 @@ void spmm_blkcoord_csbTask(int edge1Format, char edge1_var[], char edge1_part1[]
         vertexWeight[nodeCount] = block_width * currentBlockSize * sizeof(double);
         buf_setzero_node_no = nodeCount; //saving it to use later in nested looop
         nodeCount++;
+
+
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
+
+        //printf("vertexName set\n");
 
         //t2 = omp_get_wtime();
         //insert_time += (t2 - t1);
@@ -1800,6 +1844,9 @@ void spmm_blkcoord_csbTask(int edge1Format, char edge1_var[], char edge1_part1[]
         {
             if(matrixBlock[i * ncolblks + j].nnz > 0)
             {
+
+                //printf("nthreads = %d\n", nthreads);
+
                 pseudo_tid = ( (((i * ncolblks) + j) % nbuf) > (nthreads - 1) ? 0 : ( ((i * ncolblks) + j) % nbuf ) );
                 k = pseudo_tid;
                 max_pesudo_tid = ((max_pesudo_tid > pseudo_tid) ? max_pesudo_tid : pseudo_tid );
@@ -1807,6 +1854,7 @@ void spmm_blkcoord_csbTask(int edge1Format, char edge1_var[], char edge1_part1[]
                 //t1 = omp_get_wtime();
 
                 //printf("inside spmm block calc k = %d\n", k);
+                //printf(" %s sizeof ary %d i =%d j = %d\n", nrowblksString[k], sizeof(ary),i,j);
                 
                 memset(&ary[0], 0, sizeof(ary));
                 strcat(ary, "SPMM,");
@@ -1834,6 +1882,9 @@ void spmm_blkcoord_csbTask(int edge1Format, char edge1_var[], char edge1_part1[]
                 vertexWeight[nodeCount] = block_width * currentBlockSize * sizeof(double);
                 SPMM_vertexNo[i][j] = nodeCount; //saving SPMM node number for later use
                 nodeCount++;
+
+                strcpy(globalGraph[globalNodeCount], ary);
+                globalNodeCount++;
 
                 //t2 = omp_get_wtime();
                 //insert_time += (t2 - t1);
@@ -1950,6 +2001,9 @@ void custom_dlacpy(int edge1Format, char edge1_var[], char edge1_part1[], char e
         vertexWeight[nodeCount] = block_width * col * sizeof(double);
         nodeCount++;
 
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
+
         if(edge1Format == 1) //edge coming from a single matrix 
         {
             memset(&ary[0], 0, sizeof(ary));
@@ -2045,6 +2099,9 @@ void custom_dlacpy_v1(int edge1Format, char edge1_var[], char edge1_part1[], cha
         vertexWeight[nodeCount] = block_width * col * sizeof(double);
         actR_vertexNo[i] = nodeCount; //saving it for SPMM tasks
         nodeCount++;
+
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
 
         // #### Hier #####
         strcpy(main_task,ary);
@@ -2152,6 +2209,9 @@ void getActiveBlockVector(int edge1Format, char edge1_var[], char edge1_part1[],
         vertexName[strdup(ary)] = nodeCount;
         vertexWeight[nodeCount] = block_width * currentBlockSize * sizeof(double);
         nodeCount++;
+
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
 
         
 
@@ -2269,6 +2329,9 @@ void updateBlockVector(int edge1Format, char edge1_var[], char edge1_part1[], ch
         vertexName[strdup(ary)] = nodeCount;
         vertexWeight[nodeCount] = block_width * currentBlockSize * sizeof(double);
         nodeCount++;
+
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
 
         if(edge1Format == 1) //edge coming from a single matrix 
         {
@@ -2392,6 +2455,10 @@ void mat_sub(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
         vertexName[strdup(ary)] = nodeCount;
         vertexWeight[nodeCount] = block_width * col * sizeof(double);
         nodeCount++;
+
+
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
 
         if(edge1Format == 1) //edge coming from a single matrix 
         {
@@ -2552,6 +2619,9 @@ void mat_mult(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_
         vertexWeight[nodeCount] = block_width * col * sizeof(double);
         nodeCount++;
 
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
+
         if(edge1Format == 1) //edge coming from a single matrix 
         {
             memset(&ary[0], 0, sizeof(ary));
@@ -2687,6 +2757,10 @@ void dot_mm(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
     printf("sumsqrt_buf_id : %d\n", sumsqrt_buf_id);
     nodeCount++;
 
+
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
+
     char *tempRNRED = (char *) malloc(50 * sizeof(char));
     //Global Graph
     strcpy(tempRNRED, ary);
@@ -2727,6 +2801,9 @@ void dot_mm(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
         vertexName[strdup(ary)] = nodeCount; 
         vertexWeight[nodeCount] = block_width * col * sizeof(double);
         nodeCount++;
+
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
 
         if(edge1Format == 1) //edge coming from a single matrix 
         {
@@ -2893,6 +2970,9 @@ void sum_sqrt(char edge1_part1[], char edge1_func[], char edge1_part2[], char ed
     int sumsqrt_buf_id = nodeCount;
     nodeCount++;
 
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
+
     // #### Hier #####
     strcpy(extra_task1, ary);
 
@@ -2904,6 +2984,9 @@ void sum_sqrt(char edge1_part1[], char edge1_func[], char edge1_part2[], char ed
     vertexWeight[nodeCount] = col * sizeof(double);
     int sqrt_id = nodeCount;
     nodeCount++;
+
+            strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
 
     // #### Hier #####
     strcpy(extra_task2, ary);
@@ -2923,6 +3006,9 @@ void sum_sqrt(char edge1_part1[], char edge1_func[], char edge1_part2[], char ed
         vertexName[strdup(ary)] = nodeCount;
         vertexWeight[nodeCount] = col * sizeof(double);
         nodeCount++;
+
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
 
         // #### Hier #####
         strcpy(main_task, ary);
@@ -3076,6 +3162,9 @@ void sum_sqrt_dot(char edge1_part1[], char edge1_func[], char edge1_part2[], cha
     vertexWeight[nodeCount] = col * sizeof(double);
     int sqrt_id = nodeCount;
     nodeCount++;
+
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
 
     //Global Graph
     //strcpy(tempSQRT, ary);
@@ -3439,7 +3528,7 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
         blkc = ceil((c + 1) / (float)wblk);
 
         //:wq
-        cout<<"K1: "<<k1<<" K2: "<<k2<<" blkc: "<<blkc<<endl;
+        //cout<<"K1: "<<k1<<" K2: "<<k2<<" blkc: "<<blkc<<endl;
 
         for(k = k1 - 1 ; k < k2 ; k++)
         {

@@ -109,6 +109,14 @@ int main(int argc, char *argv[]){
         globalGraph[i] = (char*) malloc(100 * sizeof(char));
     }
 
+
+    pseudo_tid_map = (int**)calloc(nrowblks+1,sizeof(int*));
+
+    for(i = 0 ; i <= nrowblks ; i++)
+    {
+        pseudo_tid_map[i] = (int*) calloc(nrowblks + 1 , sizeof(int));
+    }
+
     nonloop(blocksize, block_width);
     firstloop(blocksize, block_width);
     secondloop(blocksize, block_width);
@@ -1937,10 +1945,10 @@ void secondloop(int blocksize, int block_width)
 
 
 
-    for(i = 0 ; i < 10 ; i++){
+/*    for(i = 0 ; i < 10 ; i++){
     	printf("%s\n",globalGraph[i]);
     }
-    buildTaskInfoStruct_main(globalNodeCount, globalGraph , "secondloop", blocksize , "msdoor");
+*/    buildTaskInfoStruct_main(globalNodeCount, globalGraph , "secondloop", blocksize , "msdoor");
 
 }
 
