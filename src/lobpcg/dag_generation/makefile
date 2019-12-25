@@ -19,12 +19,12 @@ AR=ar rv
 RANLIB=ranlib
 
 #nersc
-#METISLIBDIR=/usr/common/software/metis/5.1.0/lib
-#METISHDIR=/usr/common/software/metis/5.1.0/include
+METISLIBDIR=/usr/common/software/metis/5.1.0/lib
+METISHDIR=/usr/common/software/metis/5.1.0/include
 
 #hpcc
-METISLIBDIR=/opt/software/METIS/5.1.0-intel-2017.01/lib
-METISHDIR=/opt/software/METIS/5.1.0-intel-2017.01/include
+#METISLIBDIR=/opt/software/METIS/5.1.0-intel-2017.01/lib
+#METISHDIR=/opt/software/METIS/5.1.0-intel-2017.01/include
 
 
 INCDIR=../../common/partitioner/part_inc
@@ -70,7 +70,7 @@ $(LIBDIR)/libdgraph.a: $(DGRAPHOBJS) $(INCDIR)/dgraph.h
 $(EXEDIR)/rMLGP: $(SRCDIR)/rMLGP.o $(DGRAPHLIB) 
 	$(CC) $(CFLAGS) -c ../../common/util.cpp  
 	$(CC) $(CFLAGS)  -c lobpcg_part.cpp util.o 
-	$(CC) $(CFLAGS)  -o lobpcg_part.x lobpcg_part.o $(SRCDIR)/rMLGP.o $(LIBDIR)/libdgraph.a util.o  -L$(LIBDIR) -L$(METISLIBDIR)  -ldgraph -lm -I$(INCDIR) -I$(METISHDIR)
+	$(CC) $(CFLAGS)  -o $(EXEDIR_DAG)/lobpcg_part.x lobpcg_part.o $(SRCDIR)/rMLGP.o $(LIBDIR)/libdgraph.a util.o  -L$(LIBDIR) -L$(METISLIBDIR)  -ldgraph -lm -I$(INCDIR) -I$(METISHDIR)
 	#@mkdir -p $(@D)
 	#$(CC) -o $@ $^ $(CFLAGS) $(LIBDIRA)  $(LIBSA) $(INCDIRA)
 
