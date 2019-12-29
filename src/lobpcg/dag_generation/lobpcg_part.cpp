@@ -124,11 +124,11 @@ int main(int argc, char *argv[]){
     vertexName.max_load_factor(0.25);
 
     //allocating memory for global graph
-    /*globalGraph = (char **) malloc(guessNodeCount * sizeof(char *));
+    globalGraph = (char **) malloc(guessNodeCount * sizeof(char *));
     for (i = 0 ; i < guessNodeCount ; i++)
     {
         globalGraph[i] = (char*) malloc(100 * sizeof(char));
-    }*/
+    }
 
     nonloop(blocksize, block_width, argc, argv);
     firstloop(blocksize, block_width, argc, argv);

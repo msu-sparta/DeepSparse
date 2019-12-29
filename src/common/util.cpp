@@ -902,8 +902,8 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
             vertexWeight[nodeCount] = block_width * p * sizeof(double); 
         nodeCount++;
 
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
+        //strcpy(globalGraph[globalNodeCount], ary);
+        //globalNodeCount++;
     }
 
     for(i = 0, k = 0 ; i < nrowblks ; i++, k++)
@@ -1071,6 +1071,21 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
         }
     }
 
+    //For global graph only 
+    for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
+    {
+        memset(&ary[0], 0, sizeof(ary));
+        strcat(ary, "RED,");
+        strcat(ary, output);
+        strcat(ary, "BUF,");
+        strcat(ary, nrowblksString[l]);
+
+        //Global Graph
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
+    }
+
+
     tend = omp_get_wtime();
     graphGenTime[0] += (tend - tstart);
 
@@ -1125,8 +1140,8 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             vertexWeight[nodeCount] = block_width * p * sizeof(double);
         nodeCount++;
 
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
+        //strcpy(globalGraph[globalNodeCount], ary);
+        //globalNodeCount++;
     }
 
     for(i = 0, k = 0 ; i < nrowblks ; i++, k++)
@@ -1297,6 +1312,20 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
         }
     }
 
+        //For global graph only 
+    for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
+    {
+        memset(&ary[0], 0, sizeof(ary));
+        strcat(ary, "RED,");
+        strcat(ary, output);
+        strcat(ary, "BUF,");
+        strcat(ary, nrowblksString[l]);
+
+        //Global Graph
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
+    }
+
     tend = omp_get_wtime();
     graphGenTime[0] += (tend - tstart);
 }
@@ -1343,8 +1372,8 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             vertexWeight[nodeCount] = block_width * p * sizeof(double);
         nodeCount++;
 
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
+        //strcpy(globalGraph[globalNodeCount], ary);
+        //globalNodeCount++;
     }
 
     for(i = 0, k = 0 ; i < nrowblks ; i++, k++)
@@ -1511,6 +1540,21 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
         }
     }
 
+
+        //For global graph only 
+    for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
+    {
+        memset(&ary[0], 0, sizeof(ary));
+        strcat(ary, "RED,");
+        strcat(ary, output);
+        strcat(ary, "BUF,");
+        strcat(ary, nrowblksString[l]);
+
+        //Global Graph
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
+    }
+
     tend = omp_get_wtime();
     graphGenTime[0] += (tend - tstart);   
 }
@@ -1557,8 +1601,8 @@ void  _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_
         nodeCount++;
 
 
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
+        //strcpy(globalGraph[globalNodeCount], ary);
+        //globalNodeCount++;
     }
 
     for(i = 0, k = 0 ; i < nrowblks ; i++, k++)
@@ -1748,6 +1792,23 @@ void  _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_
 
         }
     }
+
+
+        //For global graph only 
+    for(j = 0, l = 0 ; j < col ; j = j + block_width, l++)
+    {
+        memset(&ary[0], 0, sizeof(ary));
+        strcat(ary, "RED,");
+        strcat(ary, output);
+        strcat(ary, "BUF,");
+        strcat(ary, nrowblksString[l]);
+
+        //Global Graph
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
+    }
+
+
     tend = omp_get_wtime();
     graphGenTime[0] += (tend - tstart);
 }
@@ -2758,8 +2819,8 @@ void dot_mm(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
     nodeCount++;
 
 
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
+    //    strcpy(globalGraph[globalNodeCount], ary);
+    //    globalNodeCount++;
 
     char *tempRNRED = (char *) malloc(50 * sizeof(char));
     //Global Graph
@@ -2929,8 +2990,8 @@ void dot_mm(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
     }
     
     //Global Graph
-    //strcpy(globalGraph[globalNodeCount], tempRNRED);
-    //globalNodeCount++;
+    strcpy(globalGraph[globalNodeCount], tempRNRED);
+    globalNodeCount++;
 
     free(tempRNRED);
 
@@ -2953,6 +3014,10 @@ void sum_sqrt(char edge1_part1[], char edge1_func[], char edge1_part2[], char ed
     char i_string[8], k_string[4], task_id2_char[4];
     char ary[150];
 
+
+    char *tempRNRED = (char *) malloc(50 * sizeof(char));
+    char *tempSQRT = (char *) malloc(50 * sizeof(char));
+
     // #### Hier #####
     char main_task[150];
     char extra_task1[150];
@@ -2960,6 +3025,9 @@ void sum_sqrt(char edge1_part1[], char edge1_func[], char edge1_part2[], char ed
     char tmp_input1[150];
     char tmp_input2[150];
     memory_chunk temp_chunk;
+
+
+
 
     memset(&ary[0], 0, sizeof(ary));
     strcat(ary, "RNRED,");
@@ -2970,8 +3038,13 @@ void sum_sqrt(char edge1_part1[], char edge1_func[], char edge1_part2[], char ed
     int sumsqrt_buf_id = nodeCount;
     nodeCount++;
 
-        strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
+        //Global Graph
+    strcpy(tempRNRED, ary);
+
+
+
+//        strcpy(globalGraph[globalNodeCount], ary);
+//        globalNodeCount++;
 
     // #### Hier #####
     strcpy(extra_task1, ary);
@@ -2985,8 +3058,11 @@ void sum_sqrt(char edge1_part1[], char edge1_func[], char edge1_part2[], char ed
     int sqrt_id = nodeCount;
     nodeCount++;
 
-            strcpy(globalGraph[globalNodeCount], ary);
-        globalNodeCount++;
+//            strcpy(globalGraph[globalNodeCount], ary);
+//        globalNodeCount++;
+
+        //Global Graph
+    strcpy(tempSQRT, ary);
 
     // #### Hier #####
     strcpy(extra_task2, ary);
@@ -3103,6 +3179,16 @@ void sum_sqrt(char edge1_part1[], char edge1_func[], char edge1_part2[], char ed
 
     inp_map[strdup(extra_task2)][strdup(extra_task1)] = temp_chunk;
     out_map[strdup(extra_task1)][strdup(extra_task2)] = temp_chunk;
+
+
+        //Global Graph
+    strcpy(globalGraph[globalNodeCount], tempRNRED);
+    globalNodeCount++;
+    strcpy(globalGraph[globalNodeCount], tempSQRT);
+    globalNodeCount++;
+
+    free(tempRNRED);
+    free(tempSQRT);
 
     //printf("input_map[%s][%s] = %s %lf\n", extra_task2,extra_task1,tmp_input1,edgeW[edgeCount-1]);
 
