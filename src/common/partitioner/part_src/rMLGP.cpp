@@ -14,7 +14,9 @@ int processArgs_rMLGP(int argc, char **argv, MLGP_option* opt)
         u_errexit("%s: There is a problem with the arguments.\n", argv[0]);
     }
 
-    initMLGPoptions(opt, atoi(argv[2]));
+//    initMLGPoptions(opt, atoi(argv[2]));
+    initMLGPoptions(opt, atoi(argv[6]));
+    
     processMLGPargs(argc, argv, opt);
 
     // if ((opt->nbPart<1) || !isPowOfTwo(opt->nbPart)) {

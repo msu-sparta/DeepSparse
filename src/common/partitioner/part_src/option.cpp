@@ -386,7 +386,11 @@ int processMLGPargs(int argc, char **argv, MLGP_option* opt)
     strncpy(opt->out_file, opt->file_name, PATH_MAX);
     strcat(opt->out_file, "_MLGP.out");
 
-    opt->nbPart = atoi(argv[2]);
+/////set part count 
+
+    //opt->nbPart = atoi(argv[2]);
+
+    opt->nbPart = atoi(argv[6]);
 
     static struct option long_options[] =
     {
