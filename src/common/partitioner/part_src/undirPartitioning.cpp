@@ -13,8 +13,10 @@
 #include "scotch.h"
 #endif
 
+#include "metis.h"
 
-#if defined(dagP_SCOTCH) || defined(dagP_METIS)
+
+//#if defined(dagP_SCOTCH) || defined(dagP_METIS)
 void dgraph_to_metis(dgraph* G, idx_t* in, idx_t* adj, idx_t* vw, idx_t* adjw)
 {
     idxType i,j,k=0;
@@ -33,14 +35,14 @@ void dgraph_to_metis(dgraph* G, idx_t* in, idx_t* adj, idx_t* vw, idx_t* adjw)
     }
     in[G->nVrtx] = k;
 }
-#endif
+//#endif
 
 void undirPartitioningLibrary(dgraph* G, idxType* part, const MLGP_option opt, int seed)
 {
     //This function partition a graph using Metis or Scotch with fixing the acyclicity
     //It can be used with more than 2 partitions
     //It is meant to be use in Constraint-Partitioning but re-used as initial partitioning.
-#if defined(dagP_SCOTCH) || defined(dagP_METIS)
+//#if defined(dagP_SCOTCH) || defined(dagP_METIS)
 
     idx_t nVertices = (idx_t) G->nVrtx;
     idx_t nEdges = (idx_t) G->nEdge;
@@ -101,9 +103,9 @@ void undirPartitioningLibrary(dgraph* G, idxType* part, const MLGP_option opt, i
 #endif
         break;
         case UNDIR_METIS: ;
-#ifndef dagP_METIS
-            u_errexit("Please compile with Metis");
-#else
+//#ifndef dagP_METIS
+//            u_errexit("Please compile with Metis");
+//#else
             idx_t options[METIS_NOPTIONS];
             METIS_SetDefaultOptions(options);
             options[METIS_OPTION_SEED] = (idx_t) seed;
@@ -133,7 +135,7 @@ void undirPartitioningLibrary(dgraph* G, idxType* part, const MLGP_option opt, i
             if (ret!=METIS_OK) {
                 fprintf(stderr, "Metis failed with error code:%d\n", ret);
             }
-#endif
+//#endif
         break;
     }
 
@@ -153,10 +155,10 @@ void undirPartitioningLibrary(dgraph* G, idxType* part, const MLGP_option opt, i
     free(vw);
     free(adjw);
     free(part_metis);
-#else
-    UNUSED(G); UNUSED(part); UNUSED(opt); UNUSED(seed);
-    u_errexit("Function 'undirPartitioningLibrary' is called, but code is not linked with MeTiS or Scotch!");
-#endif
+//#else
+//    UNUSED(G); UNUSED(part); UNUSED(opt); UNUSED(seed);
+//    u_errexit("Function 'undirPartitioningLibrary' is called, but code is not linked with MeTiS or Scotch!");
+//#endif
 }
 
 void undirBisectionRandom(dgraph* graph, idxType* part)
