@@ -81,6 +81,8 @@ int main(int argc, char *argv[]){
     total_memory_limit = atof(argv[5]);
 
 
+
+
     #pragma omp parallel
     #pragma omp master
     {
@@ -441,7 +443,7 @@ void  nonloop(int blocksize, int block_width, int argc, char *argv[])
     
     //run_rMLGP(opt.file_name, opt, edgeU, edgeV, edgeW, edgeCount, nodeCount, &vertex_name_string[0], vertexWeight, numrows, numcols, nrowblks, ncolblks, block_width);
 
-     run_rMLGP(opt.file_name, opt, edgeU, edgeV, edgeW, edgeCount, nodeCount, (const char**) &vertex_name_string[0], vertexWeight,0,"msdoor");
+     run_rMLGP(opt.file_name, opt, edgeU, edgeV, edgeW, edgeCount, nodeCount, (const char**) &vertex_name_string[0], vertexWeight,0,argv[7]);
 
 
     printf("run_rMLGP Finshed\n");
@@ -1359,7 +1361,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
     
     //run_rMLGP(opt.file_name, opt, edgeU, edgeV, edgeW, edgeCount, nodeCount, &vertex_name_string[0], vertexWeight, numrows, numcols, nrowblks, ncolblks, block_width);
 
-    run_rMLGP(opt.file_name, opt, edgeU, edgeV, edgeW, edgeCount, nodeCount, (const char**) &vertex_name_string[0], vertexWeight,1,"msdoor");
+    run_rMLGP(opt.file_name, opt, edgeU, edgeV, edgeW, edgeCount, nodeCount, (const char**) &vertex_name_string[0], vertexWeight,1,argv[7]);
 
 
     printf("run_rMLGP Finshed\n");
@@ -2530,7 +2532,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
     printf("Calling run_rMLGP from main\n");
     
     //run_rMLGP(opt.file_name, opt, edgeU, edgeV, edgeW, edgeCount, nodeCount, &vertex_name_string[0], vertexWeight, numrows, numcols, nrowblks, ncolblks, block_width);
-    run_rMLGP(opt.file_name, opt, edgeU, edgeV, edgeW, edgeCount, nodeCount, &vertex_name_string[0], vertexWeight, 2, "msdoor");
+    run_rMLGP(opt.file_name, opt, edgeU, edgeV, edgeW, edgeCount, nodeCount, &vertex_name_string[0], vertexWeight, 2, argv[7]);
     printf("run_rMLGP Finshed\n");
     //run_rMLGP(opt.file_name, opt);
 
