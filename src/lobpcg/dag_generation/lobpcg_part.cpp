@@ -435,7 +435,7 @@ void  nonloop(int blocksize, int block_width, int argc, char *argv[])
     opt.co_stop_size = 30;
     opt.co_stop_level = 1000;
     //opt.conpar = 0;
-    //opt.inipart = 13;
+    opt.inipart = 13;
     opt.use_binary_input = 0;
     printf("Calling run_rMLGP from main\n");
     
@@ -1347,7 +1347,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
     opt.co_stop_size = 30;
     opt.co_stop_level = 1000;
     //opt.conpar = 0;
-    //opt.inipart = 13;
+    opt.inipart = 13;
     opt.use_binary_input = 0;
     printf("Calling run_rMLGP from main\n");
 
@@ -2525,7 +2525,7 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
     opt.co_stop_size = 30;
     opt.co_stop_level = 1000;
     //opt.conpar = 0;
-    //opt.inipart = 13;
+    opt.inipart = 13;
     opt.use_binary_input = 0;
     printf("Calling run_rMLGP from main\n");
     

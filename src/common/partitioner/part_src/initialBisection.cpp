@@ -172,10 +172,11 @@ void undirAcyclicBisectionGGG(ecType* edgecut, coarsen* coars, idxType* part, ML
 
 void initialBisection(MLGP_option opt, coarsen*  coars, MLGP_info* info)
 {
-    int tryAll[] = {IP_UNDIR, IP_GGG_TWO};
+    //int tryAll[] = {IP_UNDIR, IP_GGG_TWO};
+    int tryAll[] = { IP_GGG_TWO};
     int ntryAll = sizeof(tryAll)/sizeof(tryAll[0]);
 
-    //printf("initialBisection function called with inipart = %d\n",opt.inipart);
+    printf("initialBisection function called with inipart = %d\n",opt.inipart);
 
 
     idxType* partcopy = (idxType*) malloc(sizeof(idxType)*(coars->graph->nVrtx + 1));

@@ -1,6 +1,6 @@
 CC=icpc 
-CPPFLAGS= -O3 -w -qopenmp #-DdagP_METIS
-CFLAGS = -O3 -w -qopenmp #-DdagP_METIS
+CPPFLAGS= -O3 -w -qopenmp -static -s -Llib -DdagP_METIS
+CFLAGS = -O3 -w -qopenmp -static -s -Llib -DdagP_METIS
 
 
 
@@ -49,7 +49,7 @@ DGRAPHLIB=$(LIBDIR)/libdgraph.a
 #@echo "hello world"
 
 $(SRCDIR)/%.o: $(SRCDIR)/%.cpp $(INCDIR)/dgraph.h
-	$(CC) -c $< -o $@ $(CFLAGS) $(INCDIRA) -I$(METISHDIR) -L$(METISLIBDIR) 
+	$(CC) -c $< -o $@ $(CFLAGS) $(INCDIRA) -I$(METISHDIR) -L$(METISLIBDIR) -lmetis 
 
 
 #$(SRCDIR)/%.o: $(SRCDIR)/%.cpp $(INCDIR)/dgraph.h
@@ -58,10 +58,10 @@ $(SRCDIR)/%.o: $(SRCDIR)/%.cpp $(INCDIR)/dgraph.h
 all: $(LIBDIR)/libdgraph.a $(EXEDIR)/rMLGP #$(EXEDIR)/metis
 
 
-$(LIBDIR)/libdgraph.a: $(DGRAPHOBJS) $(INCDIR)/dgraph.h
+$(LIBDIR)/libdgraph.a: $(DGRAPHOBJS) $(INCDIR)/dgraph.h 
 	@mkdir -p $(@D)
 	$(AR) $@ $(DGRAPHOBJS)
-	$(RANLIB) $@
+	$(RANLIB) $@ 
 
 #$(EXEDIR)/metis: $(SRCDIR)/metis.o $(DGRAPHLIB)
 #	@mkdir -p $(@D)
@@ -70,7 +70,7 @@ $(LIBDIR)/libdgraph.a: $(DGRAPHOBJS) $(INCDIR)/dgraph.h
 $(EXEDIR)/rMLGP: $(SRCDIR)/rMLGP.o $(DGRAPHLIB) 
 	$(CC) $(CFLAGS) -c ../../common/util.cpp  -I$(METISHDIR) -L$(METISLIBDIR)
 	$(CC) $(CFLAGS)  -c lobpcg_part.cpp util.o -I$(METISHDIR) -L$(METISLIBDIR)
-	$(CC) $(CFLAGS)  -o $(EXEDIR_DAG)/lobpcg_part.x lobpcg_part.o $(SRCDIR)/rMLGP.o $(LIBDIR)/libdgraph.a util.o  -L$(LIBDIR) -L$(METISLIBDIR)  -ldgraph -lm -I$(INCDIR) -I$(METISHDIR)
+	$(CC) $(CFLAGS)  -o $(EXEDIR_DAG)/lobpcg_part.x lobpcg_part.o $(SRCDIR)/rMLGP.o $(LIBDIR)/libdgraph.a util.o  -L$(LIBDIR) -L$(METISLIBDIR)  -ldgraph -lm  -I$(INCDIR) -I$(METISHDIR)
 	#@mkdir -p $(@D)
 	#$(CC) -o $@ $^ $(CFLAGS) $(LIBDIRA)  $(LIBSA) $(INCDIRA)
 

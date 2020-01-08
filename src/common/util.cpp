@@ -1857,7 +1857,7 @@ void spmm_blkcoord_csbTask(int edge1Format, char edge1_var[], char edge1_part1[]
         // #### Hier #####
         strcpy(extra_task2, ary);
 
-        printf("%s\n", extra_task2 );
+        //printf("%s\n", extra_task2 );
      
         //t2 = omp_get_wtime();
         //sprintf_time += (t2 - t1);

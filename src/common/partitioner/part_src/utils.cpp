@@ -47,8 +47,10 @@ void* umalloc(long size, char* msg)
 void shuffleArray(idxType size, idxType* toBeShuffled, idxType cnt){
     idxType i,j,tmp;
     while(cnt>0){
-        j = uRandom(size);
-        i = uRandom(size);
+        //j = uRandom(size);
+        //i = uRandom(size);
+        i = rand() % size;
+        j = rand() % size;
         tmp = toBeShuffled[i];
         toBeShuffled[i] = toBeShuffled[j];
         toBeShuffled[j] = tmp;
