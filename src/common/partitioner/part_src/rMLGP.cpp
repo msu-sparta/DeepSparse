@@ -49,12 +49,12 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
     //    vertexName_file = fopen("vertexName.txt","w");
 
 
-    FILE* vertexName_file ;
+    //FILE* vertexName_file ;
     char vertex_filename[150];
 
     sprintf(vertex_filename,"%s_%dk_%dk_part%d_%s.txt",matrix_name,large_blk/1024,small_blk/1024,partCount,loopname);
 
-    vertexName_file = fopen(vertex_filename,"w");
+    //vertexName_file = fopen(vertex_filename,"w");
 
 
 
@@ -75,7 +75,7 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
     {
         
         //non-priority
-        fprintf(vertexName_file,"%s 0\n",rcoarse->coars->graph->vertices[my_partition_topsort[i]-1]);
+        //fprintf(vertexName_file,"%s 0\n",rcoarse->coars->graph->vertices[my_partition_topsort[i]-1]);
 
         //ptttttt
         //get_task_name(rcoarse->coars->graph->vertices[my_partition_topsort[i]-1],task);
@@ -423,7 +423,7 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
     }
 
     fclose(task_table);
-    fclose(vertexName_file);
+    //fclose(vertexName_file);
 
 
 }
@@ -493,28 +493,28 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
     // get_input_output(G.vertices[100],input1,input2,output);
 
     // printf("\n\n\n node %s inp_1 %s inp_2 %s output %s \n\n",G.vertices[100],input1,input2,output);
-    FILE* large_graph = fopen("large_graph.txt","w");
+    //FILE* large_graph = fopen("large_graph.txt","w");
     for (i = 1;i<=G.nVrtx ; i++){
         for(j = G.inStart[i] ; j <= G.inEnd[i]; j++){
             //printf("%d ---> %d\n",G->in[j],i);
             fill_allinout_memory_map(G.vertices[i-1],G.vertices[G.in[j]-1],G.ecIn[j]);
-            fprintf(large_graph,"%s --> %s;\n",vertexName[G.in[j]-1],vertexName[i-1]);	
+            //fprintf(large_graph,"%s --> %s;\n",vertexName[G.in[j]-1],vertexName[i-1]);	
             
 
         }
     }
 
-    fclose(large_graph);
+    //fclose(large_graph);
 
 
 /////////outgoing edge count for large graph//////////
-	FILE* out_edge_part_large_graph = fopen("out_edge_part_large_graph.txt","w");
+	//FILE* out_edge_part_large_graph = fopen("out_edge_part_large_graph.txt","w");
 	long int tot_out_edge_large = 0;
 	for (i = 1;i<=G.nVrtx ; i++){
-		fprintf(out_edge_part_large_graph,"(%d)%s --> %d\n",i,G.vertices[i-1],G.outEnd[i]-G.outStart[i]+1);
+		//fprintf(out_edge_part_large_graph,"(%d)%s --> %d\n",i,G.vertices[i-1],G.outEnd[i]-G.outStart[i]+1);
 		tot_out_edge_large += G.outEnd[i]-G.outStart[i]+1;
 	}
-	fclose(out_edge_part_large_graph);
+	//fclose(out_edge_part_large_graph);
 
 	printf("\ntotal outgoing edge coarse graph = %ld\n",tot_out_edge_large);
 
@@ -640,33 +640,33 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
 
 
 
-    FILE *file;
-    FILE *different_part;
-    FILE *same_part;
-    FILE *graph_lookup_100;
-    FILE *graph_lookup_99;
-    char name_tmp[200];
-    sprintf(name_tmp,".rMLGP.part.%d.seed.%d", opt.nbPart, opt.seed);
-    char res_name[200];
-    strcpy(res_name, file_name);
-    strcat(res_name, name_tmp);
-    strcat(res_name,".txt");
-    file = fopen(res_name, "w");
-    different_part = fopen("different_part.txt","w");
-    same_part = fopen("same_part.txt","w");
-    graph_lookup_100 = fopen("graph_lookup_100.txt","w");
-    graph_lookup_99 = fopen("graph_lookup_99.txt","w");
+    //FILE *file;
+    //FILE *different_part;
+    //FILE *same_part;
+    //FILE *graph_lookup_100;
+    //FILE *graph_lookup_99;
+    //char name_tmp[200];
+    //sprintf(name_tmp,".rMLGP.part.%d.seed.%d", opt.nbPart, opt.seed);
+    //char res_name[200];
+    //strcpy(res_name, file_name);
+    //strcat(res_name, name_tmp);
+    //strcat(res_name,".txt");
+    //file = fopen(res_name, "w");
+    //different_part = fopen("different_part.txt","w");
+    //same_part = fopen("same_part.txt","w");
+    //graph_lookup_100 = fopen("graph_lookup_100.txt","w");
+    //graph_lookup_99 = fopen("graph_lookup_99.txt","w");
 //    idxType i;
 
 
 
-    FILE *original_graph_partition  = fopen("original_graph_partition.txt","w");
+    //FILE *original_graph_partition  = fopen("original_graph_partition.txt","w");
     //for (i=1; i<=rcoars->coars->graph->nVrtx; i++){
 //  fprintf(file, "%s = part %d\n",G.vertices[i], (int) rcoars->coars->part[i]);
 //  fprintf(original_graph_partition, "%s = part %d\n",rcoars->coars->graph->vertices[i-1], (int) rcoars->coars->part[i]);
     //}
 
-    fprintf(file, "%d\n", partcount);
+    //fprintf(file, "%d\n", partcount);
     int p_part = -1;
     int distinct_part_count = 0;
 
@@ -685,9 +685,9 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
             distinct_part_count++;
             p_part = rcoars->coars->part[my_partition_topsort[i]];
         }
-         fprintf(original_graph_partition,"%s %d %d\n",vertexName[my_partition_topsort[i]-1],rcoars->coars->part[my_partition_topsort[i]],rcoars->coars->graph->nVrtx-i);
+         //fprintf(original_graph_partition,"%s %d %d\n",vertexName[my_partition_topsort[i]-1],rcoars->coars->part[my_partition_topsort[i]],rcoars->coars->graph->nVrtx-i);
     }
-    fclose(original_graph_partition);
+    //fclose(original_graph_partition);
 
     int* processed_coarsened = (int*) calloc(rcoars->coars->graph->nVrtx+1 , sizeof(int));
 
@@ -720,8 +720,8 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
 
 
 
-    FILE* mem_out = fopen("mem_out.txt","w");
-    FILE* mem_in = fopen("mem_in.txt","w");
+    //FILE* mem_out = fopen("mem_out.txt","w");
+    //FILE* mem_in = fopen("mem_in.txt","w");
 
 
 
@@ -1083,15 +1083,15 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
 
 
 
-    fclose(file);
-    fclose(different_part);
-    fclose(same_part);
-    fclose(mem_out);
-    fclose(mem_in);
+    //fclose(file);
+    //fclose(different_part);
+    //fclose(same_part);
+    //fclose(mem_out);
+    //fclose(mem_in);
     fclose(small_mem_out);
     fclose(small_mem_in);
-    fclose(graph_lookup_100);
-    fclose(graph_lookup_99);
+    //fclose(graph_lookup_100);
+    //fclose(graph_lookup_99);
     fclose(small_file);
 
     free(save_ub);
