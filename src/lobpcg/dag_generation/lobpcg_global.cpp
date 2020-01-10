@@ -19,11 +19,11 @@ using namespace std;
 
 
 
-void  nonloop(int blocksize, int block_width);
+void  nonloop(int blocksize, int block_width, char *matrix_name);
 
-void firstloop(int blocksize , int block_width);
+void firstloop(int blocksize , int block_width, char *matrix_name);
 
-void secondloop(int blocksize , int block_width);
+void secondloop(int blocksize , int block_width, char *matrix_name);
 
 
 int main(int argc, char *argv[]){
@@ -117,9 +117,9 @@ int main(int argc, char *argv[]){
         pseudo_tid_map[i] = (int*) calloc(nrowblks + 1 , sizeof(int));
     }
 
-    nonloop(blocksize, block_width);
-    firstloop(blocksize, block_width);
-    secondloop(blocksize, block_width);
+    nonloop(blocksize, block_width, argv[4]);
+    firstloop(blocksize, block_width, argv[4]);
+    secondloop(blocksize, block_width, argv[4]);
 
 
 
@@ -128,7 +128,7 @@ int main(int argc, char *argv[]){
 
 
 
-void  nonloop(int blocksize, int block_width)
+void  nonloop(int blocksize, int block_width, char *matrix_name)
 {
 
 	int M, N, index = 0;
@@ -332,7 +332,7 @@ void  nonloop(int blocksize, int block_width)
     cout << "globalNodeCount: " << globalNodeCount << endl;
 
 
-    buildTaskInfoStruct_main(globalNodeCount, globalGraph , "nonloop", blocksize , "msdoor");
+    buildTaskInfoStruct_main(globalNodeCount, globalGraph , "nonloop", blocksize , matrix_name);
 
 
 }
@@ -349,7 +349,7 @@ void  nonloop(int blocksize, int block_width)
 
     //cout << "USHRT_MAX: " << USHRT_MAX << " INT_MAX: " << INT_MAX << " LONG_MAX: " << LONG_MAX << endl;
     //exit(1);
-void firstloop(int blocksize , int block_width){
+void firstloop(int blocksize , int block_width, char *matrix_name){
     int M, N, index = 0;
     int currentBlockSize;
     int iterationNumber = 2, maxIterations = 2;
@@ -1057,7 +1057,7 @@ void firstloop(int blocksize , int block_width){
     cout << "Edge Count: " << edgeCount << endl;
     cout << "map size: " << vertexName.size() << endl; 
 
-    buildTaskInfoStruct_main(globalNodeCount, globalGraph , "firstloop", blocksize , "msdoor");
+    buildTaskInfoStruct_main(globalNodeCount, globalGraph , "firstloop", blocksize , matrix_name);
 
 
     
@@ -1071,7 +1071,7 @@ void firstloop(int blocksize , int block_width){
 
 
 
-void secondloop(int blocksize, int block_width)
+void secondloop(int blocksize, int block_width, char *matrix_name)
 {
     /*
         usage: ./lobpcg_gen_graph_v24.x  <nblk> <block_width> 
@@ -1948,7 +1948,7 @@ void secondloop(int blocksize, int block_width)
 /*    for(i = 0 ; i < 10 ; i++){
     	printf("%s\n",globalGraph[i]);
     }
-*/    buildTaskInfoStruct_main(globalNodeCount, globalGraph , "secondloop", blocksize , "msdoor");
+*/    buildTaskInfoStruct_main(globalNodeCount, globalGraph , "secondloop", blocksize , matrix_name);
 
 }
 

@@ -13,8 +13,6 @@
 #include "scotch.h"
 #endif
 
-#include "metis.h"
-
 
 #if defined(dagP_SCOTCH) || defined(dagP_METIS)
 void dgraph_to_metis(dgraph* G, idx_t* in, idx_t* adj, idx_t* vw, idx_t* adjw)
@@ -107,7 +105,7 @@ void undirPartitioningLibrary(dgraph* G, idxType* part, const MLGP_option opt, i
             u_errexit("Please compile with Metis");
 #else
             idx_t options[METIS_NOPTIONS];
-            //METIS_SetDefaultOptions(options);
+            METIS_SetDefaultOptions(options);
             options[METIS_OPTION_SEED] = (idx_t) seed;
             options[METIS_OPTION_NCUTS] = 1;
             real_t* targetPartWeights = (real_t*) umalloc (nParts * sizeof(real_t), "targetPartWeights");
@@ -120,9 +118,9 @@ void undirPartitioningLibrary(dgraph* G, idxType* part, const MLGP_option opt, i
             }
 
             t0 = -u_wseconds();
-            //ret = METIS_PartGraphKway(&nVertices, &nWeights, xadj, adjncy,
-            //                          vw, NULL, adjw, &nParts, targetPartWeights,
-            //                          NULL, options, &objval, part_metis);
+            ret = METIS_PartGraphKway(&nVertices, &nWeights, xadj, adjncy,
+                                      vw, NULL, adjw, &nParts, targetPartWeights,
+                                      NULL, options, &objval, part_metis);
             if (opt.print >=PD_LOW)
                 printf("\t\tJust metis:\t\t%d\n",objval);
 

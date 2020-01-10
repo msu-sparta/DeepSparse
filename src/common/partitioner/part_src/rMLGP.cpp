@@ -562,10 +562,6 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
     else
         usRandom(opt.seed);
 
-
-
-
-
     for (r = 0; r<opt.runs; r++) {
         int isAcyclic;
         rMLGP_info* info = (rMLGP_info*)  malloc (sizeof (rMLGP_info));
@@ -574,9 +570,6 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
 
         //dummy try, make conpar value 0
         // opt.conpar = 0;
-
-            /////////before any runs/////////
-        printf("\n\nbefore run inipart value = %d\n",opt.inipart);
 
         rcoars =  rVCycle(&G, opt, info, &partcount);
 

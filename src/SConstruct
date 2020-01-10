@@ -1,0 +1,302 @@
+#-*-python-*-
+
+import string
+import os
+import sys
+
+
+## Make it colorful ......
+
+colors = {
+    'white':    "\033[1;37m",
+    'yellow':   "\033[1;33m",
+    'green':    "\033[1;32m",
+    'blue':     "\033[1;34m",
+    'cyan':     "\033[1;36m",
+    'red':      "\033[1;31m",
+    'purple':   "\033[95m",
+    'magenta':  "\033[1;35m",
+    'black':      "\033[1;30m",
+    'darkwhite':  "\033[0;37m",
+    'darkyellow': "\033[0;33m",
+    'darkgreen':  "\033[0;32m",
+    'darkblue':   "\033[0;34m",
+    'darkcyan':   "\033[0;36m",
+    'darkred':    "\033[0;31m",
+    'darkmagenta':"\033[0;35m",
+    'darkblack':  "\033[0;30m",
+    'end':        "\033[0;0m"
+}
+
+
+#If the output is not a terminal, remove the colors
+if not sys.stdout.isatty():
+   for key, value in colors.items():
+      colors[key] = ''
+
+
+
+def DumpEnv( env, key = None, header = None, footer = None ):
+  import pprint
+  pp = pprint.PrettyPrinter( indent = 2 )
+  if key:
+     dict = env.Dictionary( key )
+  else:
+     dict = env.Dictionary()
+     if header:
+        print(header)
+     pp.pprint( dict )
+     if footer:
+        print(footer)
+
+
+vars = Variables('config.py')
+vars.AddVariables(
+  ('metis', "set to 1 to build with metis", 0),
+  ('scotch', "set to 1 to build with scotch", 0),
+  BoolVariable('debug', "set to 1 to build in debug mode", 0),
+  ('debug_flags', "additional debug flags", None),
+  BoolVariable('m64', "set to 1 to build 64-bit", 1),
+  ('CC', "set C compiler", 'cc'),
+  ('CXX', 'Forces C++ compiler', None),
+  ('defines', 'List any additional preprocessor defines here', ''),
+  ('CCFLAGS', 'Forces C compiler flags', None),
+  ('CXXFLAGS', 'Forces C++ compiler flags', None),
+  ('LINK', 'Forces linker ', None),
+  ('LINKFLAGS', 'Forces linker flags', None),
+  ('extincludes', 'List any additional include paths for extensions here', None),
+  ('extlibs', 'List any additional link libraries for extensions here', None),
+  ('extlibpath', 'List any additional link paths for extensions here', None),
+  ('extdefines', 'List any additional preprocessor defines for extensions here', None),
+)
+
+envC = Environment(variables=vars, ENV = os.environ)
+
+name = os.uname()[0]
+arch = os.uname()[4]
+print(name, arch)
+
+force32v64 = 0
+if (name == 'Darwin') or (name == 'Linux'):
+   force32v64 = 1
+   if (int(envC.get('m64', 1))==1):
+      arch = 'x86_64'
+   else:
+      arch = 'i386'
+platform = name + "-" + ''.join(arch.split())
+
+print("%sBuilding for platform <%s" % (colors['red'], colors['darkred']), platform, "%s>%s" % (colors['red'], colors['end']))
+
+
+compile_source_message = '%sCompiling %s==> %s$SOURCE%s' % \
+   (colors['blue'], colors['purple'], colors['darkgreen'], colors['end'])
+
+compile_shared_source_message = '%sCompiling shared %s==> %s$SOURCE%s' % \
+   (colors['blue'], colors['purple'], colors['darkred'], colors['end'])
+
+link_program_message = '%sLinking Program %s==> %s$TARGET%s' % \
+   (colors['red'], colors['purple'], colors['darkblack'], colors['end'])
+
+link_library_message = '%sLinking Static Library %s==> %s$TARGET%s' % \
+   (colors['red'], colors['purple'], colors['darkmagenta'], colors['end'])
+
+ranlib_library_message = '%sRanlib Library %s==> %s$TARGET%s' % \
+   (colors['red'], colors['purple'], colors['darkmagenta'], colors['end'])
+
+link_shared_library_message = '%sLinking Shared Library %s==> %s$TARGET%s' % \
+   (colors['red'], colors['purple'], colors['darkmagenta'], colors['end'])
+
+java_library_message = '%sCreating Java Archive %s==> %s$TARGET%s' % \
+   (colors['red'], colors['purple'], colors['darkgreen'], colors['end'])
+tar_message = '%sCreating Tar Archive %s==> %s$TARGET%s' % \
+   (colors['red'], colors['purple'], colors['darkmagenta'], colors['end'])
+
+
+#include = "#/src/common:#/src/recBisection:#/src/runtime".split(':')
+include = "#/common/partitioner/part_inc"
+#lib = "#/lib"
+lib = "#/common/partitioner/part_lib/"
+#bin = "#/exe"
+bin = "#/lobpcg/exe"
+
+env = Environment(variables=vars, ENV = os.environ, TARFLAGS = '-c -z',
+  CXXCOMSTR = compile_source_message,
+  CCCOMSTR = compile_source_message,
+  SHCCCOMSTR = compile_shared_source_message,
+  SHCXXCOMSTR = compile_shared_source_message,
+  ARCOMSTR = link_library_message,
+  RANLIBCOMSTR = ranlib_library_message,
+  SHLINKCOMSTR = link_shared_library_message,
+  JARCOMSTR = java_library_message,
+  JAVACCOMSTR = compile_source_message,
+  TARCOMSTR = tar_message,
+  PLATFORM = platform,
+  BINDIR = bin,
+  INCDIR = include,
+  LIBDIR = lib,
+  CPPPATH = [include],
+  LIBPATH = [lib]
+)
+
+env.Help(vars.GenerateHelpText(env))
+
+print ("%sCompiler %s %s" % (colors['blue'], env['CXX'], colors['end']) )
+
+
+metis = int(env.get('metis', 0))
+scotch = int(env.get('scotch', 0))
+debug_mode = env.get('debug', 0)
+debug_flags = env.get('debug_flags', 0)
+defines_st = env.get('defines')
+
+libs = []
+defines = defines_st.split(' ')
+
+if debug_mode:
+    print("%sDebug%s build..." % (colors['green'],colors['end']))
+    defines.append('_DEBUG')
+    env['CCFLAGS'] = env['CCFLAGS'] + ' -g'
+    if debug_flags:
+        env['CCFLAGS'] = env['CCFLAGS'] + ' ' + debug_flags
+else:
+    print("%sRelease%s build..." % (colors['green'],colors['end']))
+    env['CCFLAGS'] = env['CCFLAGS'] + ' -O3'
+
+if metis == 1:
+   defines.append('dagP_METIS')
+
+if scotch == 1:
+   defines.append('dagP_SCOTCH')
+
+if debug_mode >= 2:
+   defines.append('_DEBUG1')
+if debug_mode >= 3:
+   defines.append('_DEBUG2')
+if debug_mode >= 4:
+   defines.append('_DEBUG3')
+
+
+if force32v64:
+   m64 = int(env.get('m64', 1))
+   if m64:
+      env['CCFLAGS'] = env['CCFLAGS'] + ' -m64'
+      env['CXXFLAGS'] = env['CXXFLAGS'] + '-std=c++11 -m64'
+      env['LINKFLAGS'] = env['LINKFLAGS'] + ' -m64'
+   else:
+      env['CCFLAGS'] = env['CCFLAGS'] + ' -m32'
+      env['CXXFLAGS'] = env['CXXFLAGS'] + '-std=c++11 -m32'
+      env['LINKFLAGS'] = env['LINKFLAGS'] + ' -m32'
+
+env['CXXFLAGS'] = env['CXXFLAGS'] + ' -qopenmp'
+env['LINKFLAGS'] = env['LINKFLAGS'] + ' -qopenmp'
+env['CCFLAGS'] = env['CCFLAGS'] + ' -qopenmp'
+
+
+# add -fPIC for x86_64-bit
+if os.uname()[4] == 'x86_64':
+    env['CCFLAGS'] = env['CCFLAGS'] + ' -fPIC'
+
+if name == 'Darwin':
+   env['SHLINKFLAGS'] = '$LINKFLAGS -dynamic'
+   env['SHLIBSUFFIX'] = '.dylib'
+   env['CCFLAGS'] = env['CCFLAGS'] + '-Wall -Wstrict-prototypes -Wno-unused-variable -Wno-unused-parameter  -Werror-implicit-function-declaration -W'
+
+elif name == 'Linux':
+   env['CCFLAGS'] = env['CCFLAGS'] + '-Wall -Wstrict-prototypes -Wno-unused-variable  -Werror-implicit-function-declaration -W'
+   env.Append(LINKFLAGS =['-static'])
+   if debug_mode==0:
+         env.Append(LINKFLAGS =['-s'])
+
+
+env.Append(CPPDEFINES=defines)
+
+#env.Append(CPPPATH=['#/src'])
+env.Append(CPPPATH=['#/common/'])
+
+dgraphlibs = ['dgraph']
+libs.extend(dgraphlibs);
+env.Append(LIBS = libs)
+
+
+dgraphlibname = 'libdgraph.a'
+
+env['dgraphlibname'] = dgraphlibname
+env['dgraphlibs'] = dgraphlibs
+
+Export("env")
+
+###
+### external libraries
+###
+extincludes = env.get('extincludes')
+extlibs = env.get('extlibs')
+extlibpath = env.get('extlibpath')
+extdefines = env.get('extdefines')
+
+if extincludes:
+    env.Append(CPPPATH=extincludes.split(':'))
+if extlibs:
+    added = extlibs.split(' ')
+    env.Append(LIBS = added)
+if extlibpath:
+    env.Append(LIBPATH=extlibpath.split(':'))
+if extdefines:
+    env.Append(CPPDEFINES=extdefines.split(' '))
+
+env.Append(LIBS = ['m'])
+
+
+#dgraphlibsrcs = Split("""common/dgraph.cpp common/dgraphTraversal.cpp
+#  common/utils.cpp common/info.cpp common/undirPartitioning.cpp
+#  common/option.cpp common/debug.cpp common/clustering.cpp
+#  common/dgraphReader.cpp common/dgraphDotReader.cpp
+#  recBisection/vcycle2way.cpp recBisection/initialBisection.cpp
+#  recBisection/rvcycle.cpp recBisection/dgraphBisection.cpp recBisection/refinementBis.cpp""")
+dgraphlibsrcs = Split("""dgraph.cpp dgraphTraversal.cpp
+  utils.cpp info.cpp undirPartitioning.cpp
+  option.cpp debug.cpp clustering.cpp
+  dgraphReader.cpp dgraphDotReader.cpp
+  vcycle2way.cpp initialBisection.cpp
+  rvcycle.cpp dgraphBisection.cpp refinementBis.cpp""")
+  
+
+#dgraphlibsrcs = [os.path.join('#/src', x) for x in dgraphlibsrcs]
+dgraphlibsrcs = [os.path.join('#/common/partitioner/part_src', x) for x in dgraphlibsrcs]
+
+#l = env.StaticLibrary('lib/'+dgraphlibname, dgraphlibsrcs)
+l = env.StaticLibrary(lib+dgraphlibname, dgraphlibsrcs)
+
+env.Alias('dgraphlib', l)
+
+#rmlgpo = env.Object('src/recBisection/rMLGP.o', 'src/recBisection/rMLGP.cpp')
+rmlgpo = env.Object('common/partitioner/part_src/rMLGP.o', 'common/partitioner/part_src/rMLGP.cpp')
+#lobpcgo = env.Object('exe/lobpcg_gen_graph_v30.o', 'src/lobpcg_gen_graph_v30.cpp')
+lobpcgo = env.Object('lobpcg/dag_generation/lobpcg_part.o', 'lobpcg/dag_generation/lobpcg_part.cpp')
+#rmlgp = env.Program('exe/rMLGP', ['src/recBisection/rMLGP.cpp', 'src/recBisection/rMLGP.o', 'exe/lobpcg_gen_graph_v30.o'])
+utilo = env.Object('lobpcg/dag_generation/util.o', 'common/util.cpp')
+#rmlgp = env.Program('lobpcg/exe/rMLGP', ['common/partitioner/part_src/rMLGP.cpp', 'common/partitioner/part_src/rMLGP.o', 'lobpcg/dag_generation/util.o'])
+#lobpcgx = env.Program('exe/lobpcg_gen_graph_v30.x', ['src/lobpcg_gen_graph_v30.cpp', 'src/recBisection/rMLGP.o'])
+lobpcgx = env.Program('lobpcg/exe/lobpcg_part.x', ['lobpcg/dag_generation/lobpcg_part.cpp', 'common/partitioner/part_src/rMLGP.o', 'lobpcg/dag_generation/util.o'])
+
+# --- Tools  ------------
+#ginfo = env.Program('../exe/ginfo', '../../common/partitioner/part_src/ginfo.cpp')
+
+#env.Alias('ginfo', ginfo)
+
+#env.Alias('lobpcgx', lobpcgx)
+
+#env.Alias('tools', [ginfo])
+
+
+#env.Alias('rMLGP', rmlgp)
+
+#env.Default(lobpcgx, ginfo)
+
+#env.Alias('all', ['dgraphlib', 'rMLGP', 'tools', 'lobpcgx'])
+
+#env.Clean(BUILD_TARGETS, 'dagP-dist/')
+#env.Clean(BUILD_TARGETS, 'dagP.tar.gz')
+#env.Clean(BUILD_TARGETS, 'dagPschedule-dist/')
+#env.Clean(BUILD_TARGETS, 'dagPschedule.tar.gz')
+
+#env.SConsignFile()

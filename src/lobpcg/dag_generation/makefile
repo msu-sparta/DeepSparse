@@ -1,6 +1,6 @@
-CC=icpc 
-CPPFLAGS= -O3 -w -qopenmp -static -s -Llib -DdagP_METIS
-CFLAGS = -O3 -w -qopenmp -static -s -Llib -DdagP_METIS
+CC=g++
+CPPFLAGS= -DdagP_METIS
+CFLAGS = -O3 -w -fopenmp -m64
 
 
 
@@ -13,71 +13,38 @@ lobpcg_global:
 
 
 
-LIBS=-ldgraph -lm
-LIBSA=-lmetis $(LIBS)
-AR=ar rv
+AR=ar rc
 RANLIB=ranlib
 
 #nersc
-#METISLIBDIR=/usr/common/software/metis/5.1.0/lib
-#METISHDIR=/usr/common/software/metis/5.1.0/include
-
-#hpcc
-METISLIBDIR=/opt/software/METIS/5.1.0-intel-2017.01/lib
-METISHDIR=/opt/software/METIS/5.1.0-intel-2017.01/include
-
+METISLIBDIR=/usr/common/software/metis/5.1.0/lib
+METISHDIR=/usr/common/software/metis/5.1.0/include
 
 INCDIR=../../common/partitioner/part_inc
 SRCDIR=../../common/partitioner/part_src
-EXEDIR=../../common/partitioner/part_exe
 LIBDIR=../../common/partitioner/part_lib
 
-LIBDIRA=-L$(LIBDIR) -L$(METISLIBDIR)
-INCDIRA=-I$(INCDIR) -I$(METISHDIR)
 
-
-BINS=$(EXEDIR)/metis $(EXEDIR)/rMLGP 
 DGRAPHOBJS= $(SRCDIR)/dgraph.o $(SRCDIR)/dgraphTraversal.o $(SRCDIR)/utils.o $(SRCDIR)/info.o $(SRCDIR)/undirPartitioning.o $(SRCDIR)/option.o $(SRCDIR)/debug.o $(SRCDIR)/clustering.o $(SRCDIR)/dgraphReader.o $(SRCDIR)/dgraphDotReader.o $(SRCDIR)/vcycle2way.o $(SRCDIR)/initialBisection.o $(SRCDIR)/rvcycle.o $(SRCDIR)/dgraphBisection.o $(SRCDIR)/refinementBis.o
 
 
-DGRAPHSRCS= $(DGRAPHOBJS:.o=.c)
-
-DGRAPHLIB=$(LIBDIR)/libdgraph.a
-#METISLIB=$(LIBDIR)/libmetis.a
+$(SRCDIR)/%.o: $(SRCDIR)/%.cpp
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@ -I$(METISHDIR) -I$(INCDIR) 
 
 
-#@echo "hello world"
-
-$(SRCDIR)/%.o: $(SRCDIR)/%.cpp $(INCDIR)/dgraph.h
-	$(CC) -c $< -o $@ $(CFLAGS) $(INCDIRA) -I$(METISHDIR) -L$(METISLIBDIR) -lmetis 
+all: $(EXEDIR_DAG)/lobpcg_part.x
 
 
-#$(SRCDIR)/%.o: $(SRCDIR)/%.cpp $(INCDIR)/dgraph.h
-#	$(CXX) -c $< -o $@ $(CPPFLAGS) -std=c++11 -I$(INCDIR)
-
-all: $(LIBDIR)/libdgraph.a $(EXEDIR)/rMLGP #$(EXEDIR)/metis
-
-
-$(LIBDIR)/libdgraph.a: $(DGRAPHOBJS) $(INCDIR)/dgraph.h 
-	@mkdir -p $(@D)
-	$(AR) $@ $(DGRAPHOBJS)
-	$(RANLIB) $@ 
-
-#$(EXEDIR)/metis: $(SRCDIR)/metis.o $(DGRAPHLIB)
-#	@mkdir -p $(@D)
-#	$(CC) -o $@ $^ $(CFLAGS) $(LIBDIRA) $(LIBSA) $(INCDIRA)
-
-$(EXEDIR)/rMLGP: $(SRCDIR)/rMLGP.o $(DGRAPHLIB) 
-	$(CC) $(CFLAGS) -c ../../common/util.cpp  -I$(METISHDIR) -L$(METISLIBDIR)
-	$(CC) $(CFLAGS)  -c lobpcg_part.cpp util.o -I$(METISHDIR) -L$(METISLIBDIR)
-	$(CC) $(CFLAGS)  -o $(EXEDIR_DAG)/lobpcg_part.x lobpcg_part.o $(SRCDIR)/rMLGP.o $(LIBDIR)/libdgraph.a util.o  -L$(LIBDIR) -L$(METISLIBDIR)  -ldgraph -lm  -I$(INCDIR) -I$(METISHDIR)
-	#@mkdir -p $(@D)
-	#$(CC) -o $@ $^ $(CFLAGS) $(LIBDIRA)  $(LIBSA) $(INCDIRA)
+$(LIBDIR)/libdgraph.a: $(DGRAPHOBJS)
+	$(AR) $@ $(SRCDIR)/dgraph.o $(SRCDIR)/dgraphTraversal.o $(SRCDIR)/utils.o $(SRCDIR)/info.o $(SRCDIR)/undirPartitioning.o $(SRCDIR)/option.o $(SRCDIR)/debug.o $(SRCDIR)/clustering.o $(SRCDIR)/dgraphReader.o $(SRCDIR)/dgraphDotReader.o $(SRCDIR)/vcycle2way.o $(SRCDIR)/initialBisection.o $(SRCDIR)/rvcycle.o $(SRCDIR)/dgraphBisection.o $(SRCDIR)/refinementBis.o
+	$(RANLIB) $@
 
 
-
-
+$(EXEDIR_DAG)/lobpcg_part.x: $(SRCDIR)/rMLGP.o $(LIBDIR)/libdgraph.a
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c ../../common/util.cpp
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c lobpcg_part.cpp
+	$(CC) $(CPPFLAGS) $(CFLAGS) -o $(EXEDIR_DAG)/lobpcg_part.x -static lobpcg_part.o $(SRCDIR)/rMLGP.o util.o -L$(METISLIBDIR) -L$(LIBDIR) -lmetis -ldgraph -lm
 
 
 clean: 
-	rm -rf *.o 
+	rm -f *.o ../../common/*.o ../../common/partitioner/part_src/*.o ../../common/partitioner/part_lib/*.a
