@@ -7,6 +7,7 @@
 
 long position = 0 ;
 int *colptrs, *irem;
+double *xrem;
 int nrows, ncols, nnz, numrows, numcols, nnonzero, nthrds = 32;
 int wblk, nrowblks, ncolblks, nthreads;
 int *nnzPerRow;
@@ -3520,9 +3521,10 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
     cout << "wblk = " << wblk << endl;
     cout << "nrowblks = " << nrowblks << endl;
     cout << "ncolblks = " << ncolblks << endl;
-
+    //cout << xrem[1] << endl;
     //matrixBlock = new block<T>[nrowblks * ncolblks];
     matrixBlock = new block[nrowblks * ncolblks];
+
     top = new int*[nrowblks];
     //top = (int **) malloc(nrowblks * sizeof(int *));
     nnzPerRow = (int *) malloc(nrowblks * sizeof(int));
@@ -3555,7 +3557,7 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
         k1 = colptrs[c]+1;
         k2 = colptrs[c + 1] - 1+1;
         blkc = ceil((c + 1) / (double)wblk);
-        //cout<<"K1: "<<k1<<" K2: "<<k2<<" blkc: "<<blkc<<endl;
+       // cout<<"K1: "<<k1<<" K2: "<<k2<<" blkc: "<<blkc<<endl;
 
         for(k = k1 - 1 ; k < k2 ; k++)
         {
@@ -3606,6 +3608,8 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
         //printf("nnzPerRow[%d] : %d\n", blkr, nnzPerRow[blkr]);
     //}
     //cout<<"end for"<<endl;
+    //
+    //printf("wblk = %d\n",wblk);
 
     for(c = 0 ; c < numcols ; c++)
     {
@@ -3614,14 +3618,21 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
         blkc = ceil((c + 1) / (float)wblk);
 
         //:wq
-        //cout<<"K1: "<<k1<<" K2: "<<k2<<" blkc: "<<blkc<<endl;
+       // cout<<"K1: "<<k1<<" K2: "<<k2<<" blkc: "<<blkc<<endl;
 
         for(k = k1 - 1 ; k < k2 ; k++)
         {
             r = irem[k]+1;
             blkr = ceil(r / (float)wblk);
-
-            matrixBlock[(blkr - 1) * ncolblks+blkc - 1].rloc[top[blkr-1][blkc-1]] = r - matrixBlock[(blkr - 1) * ncolblks + blkc - 1].roffset;
+        //    printf("r = %d blkr = %d\n",r , blkr);
+//	    printf("matblk[%d].rloc[%d] = %d - matblk[%d].roffset\n",(blkr - 1) * ncolblks+blkc - 1,top[blkr-1][blkc-1],r,(blkr - 1) * ncolblks + blkc - 1);
+           // printf("%d\n",matrixBlock[(blkr - 1) * ncolblks+blkc - 1].rloc[top[blkr-1][blkc-1]]);
+	   // printf("%d\n",matrixBlock[(blkr - 1) * ncolblks + blkc - 1].roffset);
+	   // printf("%d\n", matrixBlock[(blkr - 1) * ncolblks+blkc - 1].cloc[top[blkr-1][blkc-1]]);
+	   // printf("%d\n",matrixBlock[(blkr - 1) * ncolblks + blkc - 1].coffset);
+	   // printf("%lf\n",matrixBlock[(blkr - 1) * ncolblks+blkc - 1].val[top[blkr-1][blkc-1]]);
+//	    printf("%lf\n",xrem[k]);
+	    matrixBlock[(blkr - 1) * ncolblks+blkc - 1].rloc[top[blkr-1][blkc-1]] = r - matrixBlock[(blkr - 1) * ncolblks + blkc - 1].roffset;
             matrixBlock[(blkr - 1) * ncolblks+blkc - 1].cloc[top[blkr-1][blkc-1]] = (c + 1) -  matrixBlock[(blkr - 1) * ncolblks + blkc - 1].coffset;
             matrixBlock[(blkr - 1) * ncolblks+blkc - 1].val[top[blkr-1][blkc-1]] = xrem[k];
 
@@ -3664,7 +3675,7 @@ void get_new_csb_block(int newWblk, int*** nnzBlock, int* nrowblocks, int* ncolb
     //csc2blkcoord<double>(newMatrixBlock, newXrem);
 
     //read_custom(global_filename, newXrem);
-    csc2blkcoord(newMatrixBlock, newXrem);
+    csc2blkcoord(newMatrixBlock, xrem);
 
     printf("new blks created in get new csb blk\n");
 

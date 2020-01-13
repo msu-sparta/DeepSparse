@@ -59,7 +59,7 @@ int main(int argc, char *argv[]){
 
     /* csb format variables */
 
-    double *xrem;
+    //double *xrem;
 
     char *filename = argv[3];
 
@@ -156,6 +156,10 @@ void  nonloop(int blocksize, int block_width, int argc, char *argv[])
     M = numrows;
     N = numcols;
 
+    wblk = atoi(argv[2]);
+
+    nrowblks = ceil(numrows / (float)(wblk));
+    ncolblks = ceil(numcols / (float)(wblk));
     vertexName.clear();
 
     
@@ -482,7 +486,10 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
 
     vertexName.clear();
 
+    wblk = atoi(argv[2]);
 
+    nrowblks = ceil(numrows / (float)(wblk));
+    ncolblks = ceil(numcols / (float)(wblk));
     ////initialize edgeCount and nodeCount to zero
 
     edgeCount = 0 ; 
@@ -535,7 +542,7 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
         vertexWeight[nodeCount] = blocksize * blocksize * sizeof(double);
         _lambda_id = nodeCount;
         nodeCount++;
-        
+        printf("firstloop iter = %d\n",iterationNumber);
         t2 = omp_get_wtime();
         graphGenTime[12] += (t2 - t1);
 
@@ -549,6 +556,8 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
             vertexName[strdup(ary)] = nodeCount;
             vertexWeight[nodeCount] = block_width * blocksize * sizeof(double);
             nodeCount++;
+
+	    //printf("vertexName[%s] = %d\n",ary,vertexName[strdup(ary)]);
             
             memset(&ary[0], 0, sizeof(ary));
             strcat(ary, "_AX,");
@@ -572,8 +581,8 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
 
 
 
-        /*printf("\n\n\n\n after first XY\n\n\n ");
-        for (std::pair<const char*, int> element : vertexName)
+        printf("\n\n\n\n after first XY\n\n\n ");
+        /*for (std::pair<const char*, int> element : vertexName)
         {
         // std::cout << element.first << " :: " << element.second << std::endl;
           printf("%d = %s \n",element.second,element.first);
@@ -1398,6 +1407,12 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
     int i, j;
 
     double tstart, tend, total_time, t1, t2;
+
+
+
+    wblk = atoi(argv[2]);
+    nrowblks = ceil(numrows / (float)(wblk));
+    ncolblks = ceil(numcols / (float)(wblk));
 
     ////initialize edgeCount and nodeCount to zero
 

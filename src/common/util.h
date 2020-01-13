@@ -23,7 +23,7 @@ using namespace std;
 
 extern long position;
 extern int *colptrs, *irem;
-
+extern double *xrem;
 extern int nrows, ncols, nnz, numrows, numcols, nnonzero, nthrds ;
 
 

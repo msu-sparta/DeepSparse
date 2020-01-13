@@ -76,7 +76,7 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
         
         //non-priority
         //fprintf(vertexName_file,"%s 0\n",rcoarse->coars->graph->vertices[my_partition_topsort[i]-1]);
-
+        //  printf("%s\n",rcoarse->coars->graph->vertices[my_partition_topsort[i]-1]);
         //ptttttt
         //get_task_name(rcoarse->coars->graph->vertices[my_partition_topsort[i]-1],task);
         task = strtok(rcoarse->coars->graph->vertices[my_partition_topsort[i]-1],",");
@@ -424,7 +424,7 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
 
     fclose(task_table);
     //fclose(vertexName_file);
-
+    printf("tasktable done\n");
 
 }
 
@@ -1027,7 +1027,8 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
     fclose(refined_graph_partition);
 
     make_new_table_file(small_rcoarse, my_small_partition_topsort,loopname,matrix_name,starting_block_size,wblk,opt.nbPart);
-
+     
+    printf("make new table file is done\n");
 
 
 
