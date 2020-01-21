@@ -76,7 +76,7 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
         
         //non-priority
         //fprintf(vertexName_file,"%s 0\n",rcoarse->coars->graph->vertices[my_partition_topsort[i]-1]);
-        //  printf("%s\n",rcoarse->coars->graph->vertices[my_partition_topsort[i]-1]);
+          printf("%d = %s\n",i,rcoarse->coars->graph->vertices[my_partition_topsort[i]-1]);
         //ptttttt
         //get_task_name(rcoarse->coars->graph->vertices[my_partition_topsort[i]-1],task);
         task = strtok(rcoarse->coars->graph->vertices[my_partition_topsort[i]-1],",");
@@ -435,8 +435,8 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
     int partcount = -1;
     int i, j;
 
-    ecType* memory_from_out;
-    ecType* memory_from_in;
+ //   ecType* memory_from_out;
+ //   ecType* memory_from_in;
 
     my_generate_graph_fazlay(&G, file_name,opt.use_binary_input, edge_u, edge_v, edge_weight, edgeCount, vertexCount,vertexName,vertexWeight);
 
@@ -709,13 +709,13 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
 
 
     //////memory calculation for each partition/////////////////
-    memory_from_out = (ecType*)calloc(partcount,sizeof(ecType));
-    memory_from_in = (ecType*)calloc(partcount,sizeof(ecType));
+//    memory_from_out = (ecType*)calloc(partcount,sizeof(ecType));
+//    memory_from_in = (ecType*)calloc(partcount,sizeof(ecType));
 
-    for(i=0;i<partcount;++i){
-        memory_from_in[i] = 0;
-        memory_from_out[i] = 0;
-    }
+//    for(i=0;i<partcount;++i){
+//        memory_from_in[i] = 0;
+//        memory_from_out[i] = 0;
+//    }
 
 
 
@@ -764,6 +764,7 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
         }
     }
 
+    fprintf(partInfo, "%d\n", rcoars->coars->graph->nVrtx);
     fclose(partInfo);
 
 
@@ -1030,17 +1031,18 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
      
     printf("make new table file is done\n");
 
-
+  //  free(my_small_partition_topsort);
+  //  free(my_partition_topsort);
 
 
         //////memory calculation for each partition/////////////////
-    ecType* small_memory_from_out = (ecType*)calloc(partcount,sizeof(ecType));
-    ecType* small_memory_from_in = (ecType*)calloc(partcount,sizeof(ecType));
+//    ecType* small_memory_from_out = (ecType*)calloc(partcount,sizeof(ecType));
+//    ecType* small_memory_from_in = (ecType*)calloc(partcount,sizeof(ecType));
 
-    for(i=0;i<partcount;++i){
-        small_memory_from_in[i] = 0;
-        small_memory_from_out[i] = 0;
-    }
+//    for(i=0;i<partcount;++i){
+//        small_memory_from_in[i] = 0;
+//        small_memory_from_out[i] = 0;
+//    }
 
 
     // for(i=1;i<=small_rcoarse->coars->graph->nVrtx;i++){
@@ -1063,8 +1065,8 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
 
 
     //     }
-    FILE* small_mem_out = fopen("small_mem_out.txt","w");
-    FILE* small_mem_in = fopen("small_mem_in.txt","w");
+//    FILE* small_mem_out = fopen("small_mem_out.txt","w");
+//    FILE* small_mem_in = fopen("small_mem_in.txt","w");
 
     // for(i = 0 ; i < partcount ; i++){
     //     fprintf(small_mem_out, "%d %lf\n",i,small_memory_from_out[i] );
@@ -1089,8 +1091,8 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
     //fclose(same_part);
     //fclose(mem_out);
     //fclose(mem_in);
-    fclose(small_mem_out);
-    fclose(small_mem_in);
+//    fclose(small_mem_out);
+//    fclose(small_mem_in);
     //fclose(graph_lookup_100);
     //fclose(graph_lookup_99);
     fclose(small_file);
