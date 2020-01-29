@@ -35,7 +35,7 @@ void read_custom(char* filename, double *&xrem)
     fread(&numcols, sizeof(int), 1, fp);
     cout<<"colum: "<<numcols<<endl;
 
-    fread(&nnonzero, sizeof(float), 1, fp);
+    fread(&nnonzero, sizeof(int), 1, fp);
     cout<<"non zero: "<<nnonzero<<endl;
 
     colptrs = new int[numcols + 1];
@@ -160,10 +160,8 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
             matrixBlock[blkr * ncolblks + blkc].nnz = 0;
         }
     }
-    cout << "here" << endl;
-    cout<<"Finish memory allocation for block.."<<endl;
+    cout<<"finished memory allocation for block.."<<endl;
 
-    cout<<"K1: "<<colptrs[0]<<" K2: "<<colptrs[1]<<endl;
 
     //cout<<"calculatig nnz per block"<<endl;
 
@@ -235,7 +233,7 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
     {
         k1 = colptrs[c]+1;
         k2 = colptrs[c + 1] - 1+1;
-        blkc = ceil((c + 1) / (float)wblk);
+        blkc = ceil((c + 1) / (double)wblk);
         //k1 = colptrs[c];
         //k2 = colptrs[c + 1] - 1;
         //blkc = ceil((c + 1) / (float)wblk);
@@ -248,7 +246,7 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
             //r = irem[k];
 
       //      printf("irem[%d] = %d\n",k , r);
-            blkr = ceil(r / (float)wblk);
+            blkr = ceil(r / (double)wblk);
 
             matrixBlock[(blkr - 1) * ncolblks+blkc - 1].rloc[top[blkr-1][blkc-1]] = r - matrixBlock[(blkr - 1) * ncolblks + blkc - 1].roffset;
             matrixBlock[(blkr - 1) * ncolblks+blkc - 1].cloc[top[blkr-1][blkc-1]] = (c + 1) -  matrixBlock[(blkr - 1) * ncolblks + blkc - 1].coffset;

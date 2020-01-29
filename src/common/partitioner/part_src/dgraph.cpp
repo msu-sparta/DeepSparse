@@ -1431,7 +1431,7 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
 
         printf("before calling filloutfrom\n");
 
-        FILE* entire_small_graph;
+        /*FILE* entire_small_graph;
         entire_small_graph = fopen("entire_small_graph.txt","w");
         for(i = 1 ; i <= my_nVrtx ; i++){
             for (j = G->inStart[i]; j <= G->inEnd[i]; ++j)
@@ -1440,7 +1440,7 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
                 fprintf(entire_small_graph, "%s ---> %s;\n", G->vertices[G->in[j]-1],G->vertices[i-1]);
             }
         }
-        fclose(entire_small_graph);
+        fclose(entire_small_graph);*/
 
 
 

@@ -6,7 +6,7 @@ void spmm_blkcoord_loop(int R, int C, int blocksize, int nthrds, double *X,  dou
 
 	int k, k1, k2;
     int i, j, l, rbase, cbase, r, c;
-    float xcoef;
+    double xcoef;
     int length;
     double tstart;
 

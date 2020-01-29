@@ -30,9 +30,10 @@ int processArgs_rMLGP(int argc, char **argv, MLGP_option* opt)
 
 void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loopname, char* matrix_name, int large_blk, int small_blk, int partCount){
 
+    printf("tasktable started\n");
     int i,j;
 
-
+    
 
 
     char* task = (char*) malloc(150*sizeof(char));
@@ -882,13 +883,13 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
 
 
     /////////outgoing edge count for small graph//////////
-        FILE* out_edge_part_small_graph = fopen("out_edge_part_small_graph.txt","w");
+        //FILE* out_edge_part_small_graph = fopen("out_edge_part_small_graph.txt","w");
         long int tot_out_edge_small = 0 ;
        	for (i = 1;i<=small_G.nVrtx ; i++){
-                fprintf(out_edge_part_small_graph,"(%d)%s --> %d\n",i,small_G.vertices[i-1],small_G.outEnd[i]-small_G.outStart[i]+1);
+                //fprintf(out_edge_part_small_graph,"(%d)%s --> %d\n",i,small_G.vertices[i-1],small_G.outEnd[i]-small_G.outStart[i]+1);
 		tot_out_edge_small += small_G.outEnd[i]-small_G.outStart[i]+1;
         }
-        fclose(out_edge_part_small_graph);
+        //fclose(out_edge_part_small_graph);
 
 	printf("\ntotal outgoing edge refined graph = %ld\n",tot_out_edge_small);
 
@@ -901,7 +902,7 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
     rcoarsen* small_rcoarse;
     small_rcoarse = initializeRCoarsen(small_C);
 
-    FILE *refined_graph_partition = fopen("refined_graph_partition.txt","w");
+    //FILE *refined_graph_partition = fopen("refined_graph_partition.txt","w");
 
     for(i = 1 ; i <= small_rcoarse->coars->graph->nVrtx ; i++){
         small_rcoarse->coars->part[i] = rcoars->coars->part[prev_vertex[i-1]+1];
@@ -914,8 +915,8 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
     }
 
 
-    FILE* small_file = fopen("small_file.txt","w");
-    fprintf(small_file, "%d\n", distinct_part_count);
+    //FILE* small_file = fopen("small_file.txt","w");
+    //fprintf(small_file, "%d\n", distinct_part_count);
 
 
     // TODO: update with appropriate function
@@ -948,7 +949,7 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
     //else if(loopType == 1 )strcpy(loopname,"firstloop");
     //else if(loopType == 2 )strcpy(loopname,"secondloop");
     //refined_new = fopen("refined_new.txt","w");
-    FILE* part_topsort = fopen("part_topsort.txt","w");
+    //FILE* part_topsort = fopen("part_topsort.txt","w");
 
 //////small blk partinfo file///////////////
 
@@ -974,14 +975,14 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
 
             prev_part = small_rcoarse->coars->part[my_small_partition_topsort[i]];
             fprintf(partInfo,"%d\n", i-1);
-            fprintf(part_topsort,"%d\n",prev_part);
+            //fprintf(part_topsort,"%d\n",prev_part);
             //sprintf(new_fname,"refined_new_graphs/refined_new_%d.txt",prev_part);
             //fclose(refined_new);
             //refined_new = fopen(new_fname,"w");
 
         }
-         fprintf(refined_graph_partition,"%s %d %d\n",newVertexName[my_small_partition_topsort[i]-1],small_rcoarse->coars->part[my_small_partition_topsort[i]], j);
-        // //fprintf(refined_new,"%s %d %d\n",newVertexName[my_small_partition_topsort[i]-1],small_rcoarse->coars->part[my_small_partition_topsort[i]], j);
+        //fprintf(refined_graph_partition,"%s %d %d\n",newVertexName[my_small_partition_topsort[i]-1],small_rcoarse->coars->part[my_small_partition_topsort[i]], j);
+        //fprintf(refined_new,"%s %d %d\n",newVertexName[my_small_partition_topsort[i]-1],small_rcoarse->coars->part[my_small_partition_topsort[i]], j);
 
 
 
@@ -1018,13 +1019,13 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
 
     fprintf(partInfo, "%d\n", small_rcoarse->coars->graph->nVrtx);
     //fclose(refined_new);
-    fclose(part_topsort);
+    //fclose(part_topsort);
     fclose(partInfo);
 
 
 
 
-    fclose(refined_graph_partition);
+    //fclose(refined_graph_partition);
 
     make_new_table_file(small_rcoarse, my_small_partition_topsort,loopname,matrix_name,starting_block_size,wblk,opt.nbPart);
      
@@ -1063,8 +1064,8 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
 
 
     //     }
-    FILE* small_mem_out = fopen("small_mem_out.txt","w");
-    FILE* small_mem_in = fopen("small_mem_in.txt","w");
+    //FILE* small_mem_out = fopen("small_mem_out.txt","w");
+    //FILE* small_mem_in = fopen("small_mem_in.txt","w");
 
     // for(i = 0 ; i < partcount ; i++){
     //     fprintf(small_mem_out, "%d %lf\n",i,small_memory_from_out[i] );
@@ -1089,11 +1090,11 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
     //fclose(same_part);
     //fclose(mem_out);
     //fclose(mem_in);
-    fclose(small_mem_out);
-    fclose(small_mem_in);
+    //fclose(small_mem_out);
+    //fclose(small_mem_in);
     //fclose(graph_lookup_100);
     //fclose(graph_lookup_99);
-    fclose(small_file);
+    //fclose(small_file);
 
     free(save_ub);
     free(edgecut);

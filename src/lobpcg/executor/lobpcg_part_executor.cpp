@@ -245,14 +245,16 @@ int main(int argc, char *argv[])
 
     taskCount_nonLoop = buildTaskInfoStruct(taskInfo_nonLoop, argv[4]);
     partCount_nonLoop = readPartBoundary(partBoundary_nonLoop, argv[7]);
-    //cout << "taskCount_nonLoop: " << taskCount_nonLoop << endl;
+    cout << "taskCount_nonLoop: " << taskCount_nonLoop << endl;
     taskCount_firstLoop = buildTaskInfoStruct(taskInfo_firstLoop, argv[5]);
     partCount_firstLoop = readPartBoundary(partBoundary_firstLoop, argv[8]);
-    //cout << "taskCount_firstLoop: " << taskCount_firstLoop << endl;
+    cout << "taskCount_firstLoop: " << taskCount_firstLoop << endl;
     taskCount_secondLoop = buildTaskInfoStruct(taskInfo_secondLoop, argv[6]);
     partCount_secondLoop = readPartBoundary(partBoundary_secondLoop, argv[9]);
-    //cout << "taskCount_secondLoop: " << taskCount_secondLoop << endl;
-   
+    cout << "taskCount_secondLoop: " << taskCount_secondLoop << endl;
+    partBoundary_nonLoop[partCount_nonLoop] = taskCount_nonLoop;
+    partBoundary_firstLoop[partCount_firstLoop] = taskCount_firstLoop;
+    partBoundary_secondLoop[partCount_secondLoop] = taskCount_secondLoop;
 
 
     //opening partition file
@@ -278,7 +280,6 @@ int main(int argc, char *argv[])
     {
         for(partIterator = 0 ; partIterator < partCount_nonLoop ; partIterator++)
         {
-
     for(structIterator = partBoundary_nonLoop[partIterator] ; structIterator < partBoundary_nonLoop[partIterator + 1]; structIterator++) 
     {
         //printf("%s\n", taskName);
@@ -2193,7 +2194,7 @@ int main(int argc, char *argv[])
                         }
                         //#pragma omp taskwait
                     }
-                    else if(taskInfo_secondLoop[structIterator].opCode == 8) //UPDATE
+                    else if(taskInfo_secondLoop[structIterator].opCode == 8 && 0) //UPDATE
                     {
                         // block_id = atoi(splitParams[1]);
                         // task_id = atoi(splitParams[2]);

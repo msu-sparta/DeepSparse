@@ -3615,7 +3615,7 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
     {
         k1 = colptrs[c]+1;
         k2 = colptrs[c + 1] - 1+1; 
-        blkc = ceil((c + 1) / (float)wblk);
+        blkc = ceil((c + 1) / (double)wblk);
 
         //:wq
        // cout<<"K1: "<<k1<<" K2: "<<k2<<" blkc: "<<blkc<<endl;
@@ -3623,7 +3623,7 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
         for(k = k1 - 1 ; k < k2 ; k++)
         {
             r = irem[k]+1;
-            blkr = ceil(r / (float)wblk);
+            blkr = ceil(r / (double)wblk);
         //    printf("r = %d blkr = %d\n",r , blkr);
 //	    printf("matblk[%d].rloc[%d] = %d - matblk[%d].roffset\n",(blkr - 1) * ncolblks+blkc - 1,top[blkr-1][blkc-1],r,(blkr - 1) * ncolblks + blkc - 1);
            // printf("%d\n",matrixBlock[(blkr - 1) * ncolblks+blkc - 1].rloc[top[blkr-1][blkc-1]]);
@@ -3663,8 +3663,8 @@ void get_new_csb_block(int newWblk, int*** nnzBlock, int* nrowblocks, int* ncolb
 
     int i,j;
 
-    int nrowblks = ceil(numrows / (float)(wblk));
-    int ncolblks = ceil(numcols / (float)(wblk));
+    int nrowblks = ceil(numrows / (double)(wblk));
+    int ncolblks = ceil(numcols / (double)(wblk));
 
     //char *filename = "550k.cus";
     //char* filename = "Z5.N5.Nm7.Mj1.p45/matrix.cus";
@@ -3892,9 +3892,9 @@ void buildTaskInfoStruct_main(int nodeCount, char **graph , const char *loopType
     string numStr;
 
     char taskinfo_file_name[500];
-    strcpy(taskinfo_file_name , "../dag_files/");
-    strcat(taskinfo_file_name , matrixName);
-    strcat(taskinfo_file_name , "_");
+    //strcpy(taskinfo_file_name , "../dag_files/");
+    strcpy(taskinfo_file_name , matrixName);
+    strcat(taskinfo_file_name , "_global_");
     strcat(taskinfo_file_name , loopType);
     strcat(taskinfo_file_name , "_");
     strcat(taskinfo_file_name , "taskinfo.txt");

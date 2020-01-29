@@ -18,13 +18,9 @@ int main(int argc, char *argv[])
     s >> blocksize;
     stringstream s1(argv[2]);
     s1 >> block_width;
-    if(argc == 8)
-    {
-        stringstream sIter(argv[7]);
-        sIter >> maxIterations;
-    }
+    stringstream sIter(argv[7]);
+    sIter >> maxIterations;
     
-
     int currentBlockSize = blocksize, prevCurrentBlockSize = blocksize;
 
     const char jobvl = 'N';
@@ -580,10 +576,12 @@ int main(int argc, char *argv[])
 
     free(taskInfo_nonLoop);
     printf("After nonloop part \n");
-     for(i = 0 ; i < blocksize ; i++)
+    for(i = 0 ; i < blocksize ; i++)
     {
-        cout << lambda[i * blocksize + i] << endl;
+        //cout << lambda[i * blocksize + i] << endl;
+        printf("%.4lf ", lambda[i * blocksize + i]);
     }
+    printf("\n");
 
 
     free(gramXAX); 
@@ -1592,11 +1590,13 @@ int main(int argc, char *argv[])
 
     //printf("\nargv[6]: %s\n", argv[4]);
 
-     printf("After firstloop part \n");
-     for(i = 0 ; i < blocksize ; i++)
+    printf("After firstloop part \n");
+    for(i = 0 ; i < blocksize ; i++)
     {
-        cout << lambda[i * blocksize + i] << endl;
+        //cout << lambda[i * blocksize + i] << endl;
+        printf("%.4lf ", lambda[i * blocksize + i]);
     }
+    printf("\n");
 
    
     
@@ -2183,7 +2183,7 @@ int main(int argc, char *argv[])
                         }
                         //#pragma omp taskwait
                     }
-                    else if(taskInfo_secondLoop[structIterator].opCode == 8) //UPDATE
+                    else if(taskInfo_secondLoop[structIterator].opCode == 8 && 0) //UPDATE
                     {
                         // block_id = atoi(splitParams[1]);
                         // task_id = atoi(splitParams[2]);
@@ -2436,7 +2436,7 @@ int main(int argc, char *argv[])
                                 dpotrf_( &uplo, &currentBlockSize, trans_gramRBR, &currentBlockSize, &info );
                                 if(info != 0)
                                 {
-                                    cout<<"dportf_ error 2!!"<<endl;
+                                    cout<<"dpotrf_ error: "<< info << endl;
                                 }
 
                                 //taskTiming[tid][6] += (omp_get_wtime() - tstart);
@@ -2802,12 +2802,14 @@ int main(int argc, char *argv[])
             } //end while file read
 
             #pragma omp taskwait
-
+            //cout << "iteration #" << iterationNumber << ":" << endl;
             loopTime[iterationNumber - 1] = omp_get_wtime() - loop_start_time;
             for(i = 0 ; i < blocksize ; i++)
             {
                 saveLamda[i][iterationNumber - 1] = lambda[i * blocksize + i];
+                //printf("%.4lf ", saveLamda[i][iterationNumber-1]);
             }
+            //cout << endl;
             //print_summary(timingStat, iterationNumber);
             iterationNumber++;
             //inputFile.close();

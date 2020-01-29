@@ -158,8 +158,8 @@ void  nonloop(int blocksize, int block_width, int argc, char *argv[])
 
     wblk = atoi(argv[2]);
 
-    nrowblks = ceil(numrows / (float)(wblk));
-    ncolblks = ceil(numcols / (float)(wblk));
+    nrowblks = ceil(numrows / (double)(wblk));
+    ncolblks = ceil(numcols / (double)(wblk));
     vertexName.clear();
 
     
@@ -488,8 +488,8 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
 
     wblk = atoi(argv[2]);
 
-    nrowblks = ceil(numrows / (float)(wblk));
-    ncolblks = ceil(numcols / (float)(wblk));
+    nrowblks = ceil(numrows / (double)(wblk));
+    ncolblks = ceil(numcols / (double)(wblk));
     ////initialize edgeCount and nodeCount to zero
 
     edgeCount = 0 ; 
@@ -1411,8 +1411,8 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
 
 
     wblk = atoi(argv[2]);
-    nrowblks = ceil(numrows / (float)(wblk));
-    ncolblks = ceil(numcols / (float)(wblk));
+    nrowblks = ceil(numrows / (double)(wblk));
+    ncolblks = ceil(numcols / (double)(wblk));
 
     ////initialize edgeCount and nodeCount to zero
 
