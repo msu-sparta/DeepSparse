@@ -127,7 +127,7 @@ int main(int argc, char *argv[]){
     globalGraph = (char **) malloc(guessNodeCount * sizeof(char *));
     for (i = 0 ; i < guessNodeCount ; i++)
     {
-        globalGraph[i] = (char*) malloc(100 * sizeof(char));
+        globalGraph[i] = (char*) malloc(20 * sizeof(char));
     }
 
     nonloop(blocksize, block_width, argc, argv);
@@ -136,6 +136,10 @@ int main(int argc, char *argv[]){
 
 
 
+//    free(edgeU);
+//    free()
+
+    
 
 }
 
@@ -450,6 +454,12 @@ void  nonloop(int blocksize, int block_width, int argc, char *argv[])
 
     printf("run_rMLGP Finshed\n");
     //run_rMLGP(opt.file_name, opt);
+
+    for(i = 0 ; i <= nrowblks ; i++)
+    {
+	//free(pseudo_tid_map[i]);
+    }
+
 
     free(pseudo_tid_map);
     
@@ -1373,6 +1383,11 @@ void firstloop(int blocksize , int block_width, int argc, char *argv[])
 
     printf("run_rMLGP Finshed\n");
     //run_rMLGP(opt.file_name, opt);
+    for(i = 0 ; i <= nrowblks ; i++)
+    {
+	//free(pseudo_tid_map[i]);
+    }
+
 
     free(pseudo_tid_map);
     
@@ -2549,8 +2564,14 @@ void secondloop(int blocksize, int block_width, int argc, char *argv[])
     printf("run_rMLGP Finshed\n");
     //run_rMLGP(opt.file_name, opt);
 
+    for(i = 0 ; i <= nrowblks ; i++)
+    {
+       // free(pseudo_tid_map[i]);
+    }
+
+
     free(pseudo_tid_map);
-    
+   
     free_opt(&opt);
 
 //    return 0;
