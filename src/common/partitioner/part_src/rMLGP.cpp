@@ -58,12 +58,6 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
     //vertexName_file = fopen(vertex_filename,"w");
 
 
-
-    printf("checkpoint #1\n");
-
-
-
-
     char taskinfo_file_name[200];
 
     sprintf(taskinfo_file_name,"%s_%dk_%dk_part%d_%s_taskinfo.txt",matrix_name,large_blk/1024,small_blk/1024,partCount,loopname);
@@ -71,33 +65,27 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
     FILE* task_table = fopen(taskinfo_file_name,"w");
 
 
-    printf("checkpoint #2\n");
-
-
     fprintf(task_table,"%d\n",rcoarse->coars->graph->nVrtx);
+
     for(i = 1, j = rcoarse->coars->graph->nVrtx ; i <= rcoarse->coars->graph->nVrtx ; i++, j--)
     {
         
 
         //non-priority
         //fprintf(vertexName_file,"%s 0\n",rcoarse->coars->graph->vertices[my_partition_topsort[i]-1]);
-      //    printf("%d = %s\n",i,rcoarse->coars->graph->vertices[my_partition_topsort[i]-1]);
-        //ptttttt
+        //printf("%d = %s\n",i,rcoarse->coars->graph->vertices[my_partition_topsort[i]-1]);
         //get_task_name(rcoarse->coars->graph->vertices[my_partition_topsort[i]-1],task);
+        
         task = strtok(rcoarse->coars->graph->vertices[my_partition_topsort[i]-1],",");
     
         if(task == NULL)
         {
-            printf("i = %d\ttask ID = %d\tvertex = %s\t",i,my_partition_topsort[i]-1,rcoarse->coars->graph->vertices[my_partition_topsort[i]-1]);
-            printf("task: %s\n",task);
-            fflush(stdout);
-            continue;
+            fprintf(stderr, "One of the tasks is NULLL, cannot proceed...\n");
+            exit(-1);
         }
         
-        if(!strcmp(task,"RESET")){
+        else if(!strcmp(task,"RESET")){
             opcode = 1;
-            ////printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 0 ; 
             strparamsCount = 1;
             task_id = -1;
@@ -106,14 +94,9 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
             strparam = strtok(NULL,",");
 
             fprintf(task_table,"%d,%d,%d,%s,%d,%d,%d\n",opcode,numparamsCount,strparamsCount,strparam,task_id,partition_no,priority);
-            ////printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
         }
         else if(!strcmp(task,"SPMM")){
             opcode = 2;
-            ////printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 3 ;
             strparam = strtok(NULL,"/");//ttttsav the whole row,col,buf of SPMM in this string and just print that 
             strparamsCount = 0;
@@ -121,16 +104,10 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
             partition_no = rcoarse->coars->part[my_partition_topsort[i]];
             priority = j;
             
-
             fprintf(task_table,"%d,%d,%s,%d,%d,%d,%d\n",opcode,numparamsCount,strparam,strparamsCount,task_id,partition_no,priority);
-            /////printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
         }
         else if(!strcmp(task,"XTY")){
             opcode = 3;
-            ////printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 2 ;
             int rowblk = atoi(strtok(NULL,","));
             int buffid = atoi(strtok(NULL,","));
@@ -140,154 +117,96 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
             partition_no = rcoarse->coars->part[my_partition_topsort[i]];
             priority = j;
             
-
             fprintf(task_table,"%d,%d,%d,%d,%d,%d,%d,%d\n",opcode,numparamsCount,rowblk,buffid, strparamsCount,task_id,partition_no,priority);
-            ////printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
         }
 
         else if(!strcmp(task,"RED")){
             opcode = 4;
-            ////printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 1 ;
             strparam = strtok(NULL,",");
             int rowblk = atoi(strtok(NULL,","));
-
 
             strparamsCount = 1;
             task_id = -1;
             partition_no = rcoarse->coars->part[my_partition_topsort[i]];
             priority = j;
             
-
             fprintf(task_table,"%d,%d,%d,%d,%s,%d,%d,%d\n",opcode,numparamsCount,rowblk, strparamsCount,strparam, task_id,partition_no,priority);
-            ////printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
         }
         else if(!strcmp(task,"XY")){
             opcode = 5;
-            ////printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 1 ;
             int rowblk = atoi(strtok(NULL,","));
             
-
             strparamsCount = 0;
             task_id = atoi(strtok(NULL,","));
             partition_no = rcoarse->coars->part[my_partition_topsort[i]];
             priority = j;
             
-
             fprintf(task_table,"%d,%d,%d,%d,%d,%d,%d\n",opcode,numparamsCount,rowblk, strparamsCount,task_id,partition_no,priority);
-
-            ////printf("opcode %d ended\n", opcode);
-            fflush(stdout);
         }
         else if(!strcmp(task,"ADD")){
             opcode = 6;
-            ////printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 1 ;
             int rowblk = atoi(strtok(NULL,","));
             
-
             strparamsCount = 0;
             task_id = atoi(strtok(NULL,","));
             partition_no = rcoarse->coars->part[my_partition_topsort[i]];
             priority = j;
             
-
             fprintf(task_table,"%d,%d,%d,%d,%d,%d,%d\n",opcode,numparamsCount,rowblk, strparamsCount,task_id,partition_no,priority);
-            ////printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
         }
         else if(!strcmp(task,"DLACPY")){
             opcode = 7;
-            ////printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 1 ;
             int rowblk = atoi(strtok(NULL,","));
             
-
             strparamsCount = 0;
             task_id = atoi(strtok(NULL,","));
             partition_no = rcoarse->coars->part[my_partition_topsort[i]];
             priority = j;
             
-
             fprintf(task_table,"%d,%d,%d,%d,%d,%d,%d\n",opcode,numparamsCount,rowblk, strparamsCount,task_id,partition_no,priority);
-            ////printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
         }
-
         else if(!strcmp(task,"UPDATE")){
             opcode = 8;
-            //printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 1 ;
             int rowblk = atoi(strtok(NULL,","));
-            
 
             strparamsCount = 0;
             task_id = atoi(strtok(NULL,","));
             partition_no = rcoarse->coars->part[my_partition_topsort[i]];
             priority = j;
             
-
             fprintf(task_table,"%d,%d,%d,%d,%d,%d,%d\n",opcode,numparamsCount,rowblk, strparamsCount,task_id,partition_no,priority);
-            //printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
         }
         else if(!strcmp(task,"SUB")){
             opcode = 9;
-            //printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 1 ;
             int rowblk = atoi(strtok(NULL,","));
-            
 
             strparamsCount = 0;
             task_id = atoi(strtok(NULL,","));
             partition_no = rcoarse->coars->part[my_partition_topsort[i]];
             priority = j;
             
-
             fprintf(task_table,"%d,%d,%d,%d,%d,%d,%d\n",opcode,numparamsCount,rowblk, strparamsCount,task_id,partition_no,priority);
-            //printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
         }
-
         else if(!strcmp(task,"MULT")){
             opcode = 10;
-            //printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 1 ;
             int rowblk = atoi(strtok(NULL,","));
             
-
             strparamsCount = 0;
             task_id = -1;
             partition_no = rcoarse->coars->part[my_partition_topsort[i]];
             priority = j;
             
-
             fprintf(task_table,"%d,%d,%d,%d,%d,%d,%d\n",opcode,numparamsCount,rowblk, strparamsCount,task_id,partition_no,priority);
-            //printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
         }
-
         else if(!strcmp(task,"COL")){
             opcode = 11;
-            //printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 2 ;
             int rowblk = atoi(strtok(NULL,","));
             int buffid = atoi(strtok(NULL,","));
@@ -296,19 +215,12 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
             task_id = -1;
             partition_no = rcoarse->coars->part[my_partition_topsort[i]];
             priority = j;
-            
 
             fprintf(task_table,"%d,%d,%d,%d,%d,%d,%d,%d\n",opcode,numparamsCount,rowblk,buffid, strparamsCount,task_id,partition_no,priority);
-            //printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
         }
-
         else if(!strcmp(task,"RNRED")){
             opcode = 12;
-            //printf("opcode %d started\n", opcode);
-            fflush(stdout);
-            numparamsCount = 0 ; 
+            numparamsCount = 0; 
             strparamsCount = 1;
             task_id = -1;
             partition_no = rcoarse->coars->part[my_partition_topsort[i]];
@@ -316,15 +228,9 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
             strparam = strtok(NULL,",");
 
             fprintf(task_table,"%d,%d,%d,%s,%d,%d,%d\n",opcode,numparamsCount,strparamsCount,strparam,task_id,partition_no,priority);
-            //printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
         }
-
         else if(!strcmp(task,"SQRT")){
             opcode = 13;
-            //printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 0 ; 
             strparamsCount = 1;
             task_id = -1;
@@ -333,37 +239,22 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
             strparam = strtok(NULL,",");
 
             fprintf(task_table,"%d,%d,%d,%s,%d,%d,%d\n",opcode,numparamsCount,strparamsCount,strparam,task_id,partition_no,priority);
-            //printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
         }
-
-        //no 14
-
         else if(!strcmp(task,"GET")){
             opcode = 14;
-            //printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 1 ;
             int rowblk = atoi(strtok(NULL,","));
-            
 
             strparamsCount = 0;
             task_id = atoi(strtok(NULL,","));
             partition_no = rcoarse->coars->part[my_partition_topsort[i]];
             priority = j;
-            
 
             fprintf(task_table,"%d,%d,%d,%d,%d,%d,%d\n",opcode,numparamsCount,rowblk, strparamsCount,task_id,partition_no,priority);
-            //printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
         }
 
         else if(!strcmp(task,"TRANS")){
             opcode = 15;
-            //printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 0 ; 
             strparamsCount = 1;
             task_id = -1;
@@ -372,15 +263,9 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
             strparam = strtok(NULL,",");
 
             fprintf(task_table,"%d,%d,%d,%s,%d,%d,%d\n",opcode,numparamsCount,strparamsCount,strparam,task_id,partition_no,priority);
-            //printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
         }
-
         else if(!strcmp(task,"SPEUPDATE")){
             opcode = 16;
-            //printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 0 ; 
             strparamsCount = 1;
             task_id = -1;
@@ -389,15 +274,9 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
             strparam = strtok(NULL,",");
 
             fprintf(task_table,"%d,%d,%d,%s,%d,%d,%d\n",opcode,numparamsCount,strparamsCount,strparam,task_id,partition_no,priority);
-            //printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
         }
-
         else if(!strcmp(task,"CHOL")){
             opcode = 17;
-            //printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 0 ; 
             strparamsCount = 1;
             task_id = -1;
@@ -406,15 +285,9 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
             strparam = strtok(NULL,",");
 
             fprintf(task_table,"%d,%d,%d,%s,%d,%d,%d\n",opcode,numparamsCount,strparamsCount,strparam,task_id,partition_no,priority);
-            //printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
         }
-
         else if(!strcmp(task,"INV")){
             opcode = 18;
-            //printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 0 ; 
             strparamsCount = 1;
             task_id = -1;
@@ -423,39 +296,21 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
             strparam = strtok(NULL,",");
 
             fprintf(task_table,"%d,%d,%d,%s,%d,%d,%d\n",opcode,numparamsCount,strparamsCount,strparam,task_id,partition_no,priority);
-
-            //printf("opcode %d ended\n", opcode);
-            fflush(stdout);
         }
-
-        // no 19
-
         else if(!strcmp(task,"SETZERO")){
             opcode = 19;
-            //printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 1 ;
             int rowblk = atoi(strtok(NULL,","));
             
-
             strparamsCount = 0;
             task_id = atoi(strtok(NULL,","));
             partition_no = rcoarse->coars->part[my_partition_topsort[i]];
             priority = j;
             
-
             fprintf(task_table,"%d,%d,%d,%d,%d,%d,%d\n",opcode,numparamsCount,rowblk, strparamsCount,task_id,partition_no,priority);
-            //printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
         }
-
-
-
         else if(!strcmp(task,"CONV")){
             opcode = 20;
-            //printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 0 ; 
             strparamsCount = 1;
             task_id = -1;
@@ -464,14 +319,9 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
             strparam = strtok(NULL,",");
 
             fprintf(task_table,"%d,%d,%d,%s,%d,%d,%d\n",opcode,numparamsCount,strparamsCount,strparam,task_id,partition_no,priority);
-            //printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
         }
         else if(task[0] == '_'){
             opcode = 22;
-            //printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 0 ; 
             strparamsCount = 1;
             task_id = -1;
@@ -480,18 +330,9 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
             strparam = task;
 
             fprintf(task_table,"%d,%d,%d,%s,%d,%d,%d\n",opcode,numparamsCount,strparamsCount,strparam,task_id,partition_no,priority);
-            //printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
-
         }
-
-
-
         else if(strtok(NULL,",")==NULL){
             opcode = 21;
-            //printf("opcode %d started\n", opcode);
-            fflush(stdout);
             numparamsCount = 0 ; 
             strparamsCount = 1;
             task_id = -1;
@@ -500,10 +341,6 @@ void make_new_table_file(rcoarsen* rcoarse, int *my_partition_topsort, char* loo
             strparam = task;
 
             fprintf(task_table,"%d,%d,%d,%s,%d,%d,%d\n",opcode,numparamsCount,strparamsCount,strparam,task_id,partition_no,priority);
-            //printf("opcode %d ended\n", opcode);
-            fflush(stdout);
-
-
         }
     }
 
