@@ -130,9 +130,9 @@ int main(int argc, char *argv[]){
         globalGraph[i] = (char*) malloc(20 * sizeof(char));
     }
 
-    nonloop(blocksize, block_width, argc, argv);
+    //nonloop(blocksize, block_width, argc, argv);
     firstloop(blocksize, block_width, argc, argv);
-    secondloop(blocksize, block_width, argc, argv);
+    //secondloop(blocksize, block_width, argc, argv);
 
 
 

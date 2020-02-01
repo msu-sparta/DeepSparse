@@ -1134,18 +1134,13 @@ int get_spmm_col_num(const char* node){
 }
 
 void task_name(const char *node_name, char** task){
-    //char *task = (char*) malloc(100*sizeof(char));
-    //char task[100];
     int i = 0 ; 
-
-    while(node_name[i]!= ','){
+    int len = strlen(node_name);
+    while(node_name[i]!= ',' && i < len){
         (*task)[i] = node_name[i];
         i++;
     }
-    if(i<=strlen(node_name))
-        (*task)[i] = '\0';
-  //  printf("task name %s\n",*task);
-    //return task;
+    (*task)[i] = '\0';
     return;
 }
 
