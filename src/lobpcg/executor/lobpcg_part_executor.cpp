@@ -2194,7 +2194,7 @@ int main(int argc, char *argv[])
                         }
                         //#pragma omp taskwait
                     }
-                    else if(taskInfo_secondLoop[structIterator].opCode == 8 && 0) //UPDATE
+                    else if(taskInfo_secondLoop[structIterator].opCode == 8 && 0) //UPDATE //TODO: investigate why not skipping update leads to failure
                     {
                         // block_id = atoi(splitParams[1]);
                         // task_id = atoi(splitParams[2]);

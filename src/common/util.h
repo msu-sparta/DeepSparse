@@ -34,8 +34,8 @@ struct block
 {   
     int nnz;
     int roffset, coffset;
-    int *rloc, *cloc;
-    //short int *rloc , *cloc;
+    unsigned short int *rloc, *cloc;
+    //int *rloc, *cloc;
     double *val;
 };
 
