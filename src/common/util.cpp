@@ -3581,8 +3581,8 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
         for(blkr = 0 ; blkr < nrowblks ; blkr++)
         {
             //cout<<"br: "<<blkr<<" bc: "<<blkc<<" roffset: "<<blkr*wblk<<" coffset: "<<blkc*wblk<<endl;
-            matrixBlock[blkr * ncolblks + blkc].roffset = blkr * wblk;
-            matrixBlock[blkr * ncolblks + blkc].coffset = blkc * wblk;
+            matrixBlock[blkr * ncolblks + blkc].roffset = blkr * wblk + 1;
+            matrixBlock[blkr * ncolblks + blkc].coffset = blkc * wblk + 1;
             //cout<<"here 1"<<endl;
 
             if(matrixBlock[blkr * ncolblks + blkc].nnz > 0)
