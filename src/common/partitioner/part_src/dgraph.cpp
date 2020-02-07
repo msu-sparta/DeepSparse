@@ -930,8 +930,9 @@ void topSortOnParts(dgraph *G, idxType *part, idxType *toporder, idxType nbpart)
 
 
 
+    printf("topSortOnParts before main kernel\n");
     // for (i = 1 ; i <= G->nVrtx ; i++){
-         printf("%s %d\n",G->vertices[i-1],part[i]);
+    //     printf("%s %d\n",G->vertices[i-1],part[i]);
     // }
     for (i=1; i<=G->nVrtx; i++){
         for (j=G->outStart[i]; j<=G->outEnd[i]; j++){
@@ -966,6 +967,7 @@ void topSortOnParts(dgraph *G, idxType *part, idxType *toporder, idxType nbpart)
             }
         }
     }
+    printf("topSortOnParts right after main kernel\n");
     idxType* ready = (idxType*) malloc(sizeof(idxType)*(nbpart));
     idxType* nbinleft = (idxType*) malloc(sizeof(idxType)*(nbpart));
     int nbready = 0;
@@ -976,7 +978,7 @@ void topSortOnParts(dgraph *G, idxType *part, idxType *toporder, idxType nbpart)
     }
     
     int to = 0;
-        printf("In topsortpart, nbready = %d\n", nbready);
+    printf("In topsortpart, nbready = %d\n", nbready);
     while (nbready > 0) {
         idxType part = ready[nbready-1];
         nbready--;
