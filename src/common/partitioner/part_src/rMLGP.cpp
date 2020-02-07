@@ -766,14 +766,15 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
     int updatedVertexCount, updatedEdgeCount;
 
 
-// getting the vmap from dgraph
+    // getting the vmap from dgraph
     int **v_map;
     v_map = (int**)calloc((vertexCount+1),sizeof(int*));
-
     
     for(i = 0;i< (vertexCount);++i){
             v_map[i] = (int*)calloc((block_divisor*block_divisor+1),sizeof(int));
     }
+    printf("vmap all allocation done with vertex count = %d and block divisor %d\n", vertexCount, block_divisor);
+    fflush(stdout);
 
 /////////////////////////////
 ////////////CHECK////////////
@@ -786,12 +787,11 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
     printf("returned %s\n",newVertexName[0]);
     printf("rmlgp te asche abar\n");
     printf("updatedVertexCount = %d updatedEdgeCount = %d\n",updatedVertexCount,updatedEdgeCount);
+    fflush(stdout);
 
-    for(i = 0 ; i < updatedVertexCount ; i++){
+    //for(i = 0 ; i < updatedVertexCount ; i++){
         //printf("prev[%s] = %s\n",newVertexName[i], G.vertices[prev_vertex[i]]);
-    }
-
-
+    //}
 
 
     dgraph small_G;
@@ -802,16 +802,14 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
 /////////////////////////////
 
 
-
-
     /////////outgoing edge count for small graph//////////
-        //FILE* out_edge_part_small_graph = fopen("out_edge_part_small_graph.txt","w");
-        long int tot_out_edge_small = 0 ;
-       	for (i = 1;i<=small_G.nVrtx ; i++){
-                //fprintf(out_edge_part_small_graph,"(%d)%s --> %d\n",i,small_G.vertices[i-1],small_G.outEnd[i]-small_G.outStart[i]+1);
+    //FILE* out_edge_part_small_graph = fopen("out_edge_part_small_graph.txt","w");
+    long int tot_out_edge_small = 0 ;
+    for (i = 1;i<=small_G.nVrtx ; i++){
+        //fprintf(out_edge_part_small_graph,"(%d)%s --> %d\n",i,small_G.vertices[i-1],small_G.outEnd[i]-small_G.outStart[i]+1);
 		tot_out_edge_small += small_G.outEnd[i]-small_G.outStart[i]+1;
-        }
-        //fclose(out_edge_part_small_graph);
+    }
+    //fclose(out_edge_part_small_graph);
 
 	printf("\ntotal outgoing edge refined graph = %ld\n",tot_out_edge_small);
 
@@ -845,18 +843,12 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
     // print_info_part(small_rcoarse->coars->graph, small_rcoarse->coars->part, opt);
 
 
-
-
-
-
     idxType* my_small_partition_topsort = (idxType*)malloc((small_rcoarse->coars->graph->nVrtx+1)*sizeof(idxType));
     //DFStopsort_with_part(&G,rcoars->coars->part,opt.nbPart,my_partition_topsort);
 
-    for (i = 1 ; i <= small_G.nVrtx ; i++){
+    //for (i = 1 ; i <= small_G.nVrtx ; i++){
         //printf("%s %d\n",small_G.vertices[i-1],small_rcoarse->coars->part[i]);
-    }
-
-
+    //}
 
 
     ///////// calling dfstop sort with part using refined graph////////////
@@ -877,8 +869,6 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
 
 
     sprintf(partinfo_file_name,"%s_%dk_%dk_part%d_%s_partinfo.txt",matrix_name,starting_block_size/1024,wblk/1024,opt.nbPart,loopname);
-
-
 
 
     partInfo = fopen(partinfo_file_name,"w");
@@ -905,46 +895,30 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
         }
         //fprintf(refined_graph_partition,"%s %d %d\n",newVertexName[my_small_partition_topsort[i]-1],small_rcoarse->coars->part[my_small_partition_topsort[i]], j);
         //fprintf(refined_new,"%s %d %d\n",newVertexName[my_small_partition_topsort[i]-1],small_rcoarse->coars->part[my_small_partition_topsort[i]], j);
-
-
-
-
-
-
-        
     }
 
 
 	/////////////////processed node check /////////////////
-	    int* processed_coarsened_small = (int*) calloc(small_rcoarse->coars->graph->nVrtx+1 , sizeof(int));
+	int* processed_coarsened_small = (int*) calloc(small_rcoarse->coars->graph->nVrtx+1 , sizeof(int));
 
-    for(int i = 1 ; i <= small_rcoarse->coars->graph->nVrtx ; i++){
-                processed_coarsened_small[my_small_partition_topsort[i]] = 1;
-
-                for(j = small_rcoarse->coars->graph->outStart[my_small_partition_topsort[i]] ; j <= small_rcoarse->coars->graph->outEnd[my_small_partition_topsort[i]] ; j++){
-
-                if(processed_coarsened_small[small_rcoarse->coars->graph->out[j]] == 1){
-                        printf("refined graph %s --> %s , %s already processed\n",newVertexName[my_partition_topsort[i]-1],small_rcoarse->coars->graph->vertices[rcoars->coars->graph->out[j]-1],small_rcoarse->coars->graph->vertices[small_rcoarse->coars->graph->out[j]-1]);
-
-                        }
-                }
-
+    for(int i = 1 ; i <= small_rcoarse->coars->graph->nVrtx ; i++)
+    {
+        processed_coarsened_small[my_small_partition_topsort[i]] = 1;
+        for(j = small_rcoarse->coars->graph->outStart[my_small_partition_topsort[i]] ; j <= small_rcoarse->coars->graph->outEnd[my_small_partition_topsort[i]] ; j++)
+        {
+            if(processed_coarsened_small[small_rcoarse->coars->graph->out[j]] == 1)
+            {
+                printf("refined graph %s --> %s , %s already processed\n",newVertexName[my_partition_topsort[i]-1],small_rcoarse->coars->graph->vertices[rcoars->coars->graph->out[j]-1],small_rcoarse->coars->graph->vertices[small_rcoarse->coars->graph->out[j]-1]);
+            }
+        }
     }
 
 	printf("\n\nrefined graph checking is done\n\n\n");
-
-
-
-
-
-
 
     fprintf(partInfo, "%d\n", small_rcoarse->coars->graph->nVrtx);
     //fclose(refined_new);
     //fclose(part_topsort);
     fclose(partInfo);
-
-
 
 
     //fclose(refined_graph_partition);

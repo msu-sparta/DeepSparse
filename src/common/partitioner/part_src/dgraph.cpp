@@ -1143,19 +1143,28 @@ void task_name(const char *node_name, char** task){
         i++;
     }
     (*task)[i] = '\0';
+    if(i > 30)
+    {
+        printf("ERROR, task_name hit %d with %s\n", i, node_name);
+        fflush(stdout);
+    }
     return;
 }
 
 
 int node_type(const char* node){
-   // printf("inside type function %s\n",node);
+    // printf("inside type function %s\n",node);
 
+    //printf("entering node_type function\n");
+    //fflush(stdout);
     //char* tsk_name = task_name(node);
     char* task = (char*)malloc(50*sizeof(char));
     //strcpy(temp_node_name,node);
     task_name(node,&task);
+    //printf("task %s started in node_type\n", task);
+    //fflush(stdout);
 
-  //  printf("inside type taskname = %s node = %s\n", task,node);
+    //printf("inside type taskname = %s node = %s\n", task,node);
 
     //if(!strcmp(task_name(node),"SPMM"))return 3;
     //if(node[0] == 'S' && node[0] == 'P' && node[0] == 'M' && node[0] == 'M' && node[0] == ',')return 3;
@@ -1200,9 +1209,6 @@ int node_type(const char* node){
     else if(!strcmp(node,"DLACPY,0,20")) {free(task);return 0;}
 
 
-
-
-
     else if(!strcmp(task,"_X")){free(task);return 1;}
     else if(!strcmp(task,"_AX")){free(task);return 1;}
     else if(!strcmp(task,"_P")){free(task);return 1;}
@@ -1211,7 +1217,6 @@ int node_type(const char* node){
     else if(!strcmp(task,"SPMMRED")){free(task);return 1;}
     else if(!strcmp(task,"NORM")){free(task);return 1;}
     else if(!strcmp(task,"_Y")){free(task);return 1;}
-
 
 
     else if(!strcmp(task,"XTY")){free(task);return 2;}
@@ -1229,7 +1234,11 @@ int node_type(const char* node){
 
     //else if(node[0]=='A' && node[1] == 'D')return 2;
 
+    //printf("task %s ended in node_type\n",task);
+    //fflush(stdout);
     free(task);
+    //printf("task is freed\n");
+    //fflush(stdout);
 
     
     return 0;
@@ -1238,6 +1247,7 @@ int node_type(const char* node){
 
 void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, int *edge_u, int *edge_v, double *edge_weight, int edgeCount, int vertexCount, const char** vertexName,double* vertexWeight, int block_divisor){
         printf("\n\n\n\ngenerate small Dgraph called\n\n\n\n");
+        fflush(stdout);
 
         //printf("\n\n%s\n\n",vertexName[0]);
 
@@ -1259,6 +1269,8 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
             }
             // printf("No bin file found for input!\n");
         }
+        printf("Checkpoint #1\n");
+        fflush(stdout);
 
         char line[1000];
         char token[100];
@@ -1267,6 +1279,9 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
         idxType* nbneighbors; //how many neighbours of each vertex
         idxType** inneighbors; //adjacency list (in-neighbours) , parent tracking
 
+        printf("vertexCount = %d\n",vertexCount);
+        printf("Checkpoint #1.1\n");
+        fflush(stdout);
 
         //idxType my_nVrtx = 45*block_divisor+block_divisor*block_divisor+27 , my_nEdge = 0 ;
         idxType my_nVrtx = vertexCount, my_nEdge = 0;
@@ -1277,17 +1292,25 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
        // ecType my_inedgeweights[12000][10]; //ecType double incoming edge weights
         ecType** my_inedgeweights;
 
+        printf("Checkpoint #1.2\n");
+        fflush(stdout);
         my_nbneighbors = (idxType*) calloc((vertexCount+1), sizeof(idxType));
-//        my_nbneighbors = (idxType*) malloc((vertexCount+1) * sizeof(idxType));
+        printf("Checkpoint #1.3\n");
+        fflush(stdout);
+        //my_nbneighbors = (idxType*) malloc((vertexCount+1) * sizeof(idxType));
         my_inneighbors = (idxType**) malloc((vertexCount+1) * sizeof(idxType*));
+        printf("Checkpoint #1.4\n");
+        fflush(stdout);
         my_inedgeweights = (ecType**) malloc((my_nVrtx+1) * sizeof(ecType*));
-        
+        printf("Checkpoint #2\n");
+        fflush(stdout);
         for (i = 0; i <= my_nVrtx; i++)
         {
             my_inneighbors[i] = (idxType*) malloc(100 * sizeof(idxType)); //say ever vertex has max 100 parents
             my_inedgeweights[i] = (ecType*) malloc(100 * sizeof(ecType));
         }
-
+        printf("Checkpoint #3\n");
+        fflush(stdout);
         while(k < edgeCount)
         {
       
@@ -1327,7 +1350,8 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
         G->inStart  = (idxType * ) calloc(my_nVrtx + 2, sizeof(idxType));
         G->inEnd= (idxType * ) malloc(sizeof(idxType) * (my_nVrtx + 2));
         G->in = (idxType * ) malloc(sizeof(idxType) * my_nEdge);
-
+        printf("Checkpoint #4\n");
+        fflush(stdout);
 
         // TODO: Update these two accordingly.
         G->maxVW = 1;
@@ -1342,7 +1366,8 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
         G->ecOut = (ecType *) malloc(sizeof(ecType) * my_nEdge);
 
         idxType idx = 0, degree;
-
+        printf("Checkpoint #5\n");
+        fflush(stdout);
         for (i=1; i<=my_nVrtx; i++){
             G->inStart[i] = idx;
             G->inEnd[i-1] = idx-1;
@@ -1359,6 +1384,8 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
             }
 
         }
+        printf("Checkpoint #6\n");
+        fflush(stdout);
         G->inStart[0] = 0;
         G->inEnd[0] = -1;
         G->inEnd[my_nVrtx] = idx-1;
@@ -1377,7 +1404,8 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
         G->out = (idxType * ) malloc(sizeof(idxType) * my_nEdge);
 
         // TODO: Verify vw values for the partitioner
-
+        printf("Checkpoint #7\n");
+        fflush(stdout);
         G->vw = (vwType *) malloc(sizeof(vwType) * (my_nVrtx+1));
         G->vWeight = (ecType*)malloc(sizeof(ecType)*(my_nVrtx+1));
     //    G->totvw = 0;
@@ -1388,17 +1416,12 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
     //      printf("G.vw[%d] = %lf totvw = %lf\n",i,G->vw[i],G->totvw);
         }
 
-        for (i=0; i< my_nEdge; i++){
-    //      G->ecIn[i] = 1;
-    //      G->ecOut[i] = 1;
-    //      G->ecIn[i] = edge_weights[i];
-    //      G->ecOut[i] = edge_weights[i];
-        }
-
-     //   for(i=1;i<=my_nVrtx;++i){
-     //     for(j=G->ecIn[])
-    //    }
-
+        //for (i=0; i< my_nEdge; i++){
+            //G->ecIn[i] = 1;
+            //G->ecOut[i] = 1;
+            //G->ecIn[i] = edge_weights[i];
+            //G->ecOut[i] = edge_weights[i];
+        //}
 
         for(i=0;i<my_nVrtx;++i){
      
@@ -1427,6 +1450,7 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
         // fclose(indegree_file);
 
         printf("before calling filloutfrom\n");
+        fflush(stdout);
 
         /*FILE* entire_small_graph;
         entire_small_graph = fopen("entire_small_graph.txt","w");
@@ -1542,15 +1566,14 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
     char task_id[10];
     int vmap_index = 0;
 
-
-
     int **vertex_map;
     vertex_map = (int**)calloc((vertexCount+1),sizeof(int*));
 
     
-    for(i = 0;i< (vertexCount);++i){
-            vertex_map[i] = (int*)calloc((block_divisor*block_divisor+1),sizeof(int));
-        }
+    for(i = 0;i< (vertexCount);++i)
+    {
+        vertex_map[i] = (int*)calloc((block_divisor*block_divisor+1),sizeof(int));
+    }
 
     printf("new_vertexcount = %d\n",new_vertexcount);
     int buff = 0;
@@ -1599,40 +1622,38 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
 
                     if(local_row < newRblock && local_col < newCblock && nnzblock_matrix[local_row][local_col]) 
                     {
-                    sprintf(loc_col,"%d",local_col);
-                    char total_node[1000];
+                        sprintf(loc_col,"%d",local_col);
+                        char total_node[1000];
 
-                    strcpy(total_node,task);
-                    strcat(total_node,",");
-                    strcat(total_node,loc_row);
-                    strcat(total_node,",");
-                    strcat(total_node,loc_col);
-                    strcat(total_node,",");
+                        strcpy(total_node,task);
+                        strcat(total_node,",");
+                        strcat(total_node,loc_row);
+                        strcat(total_node,",");
+                        strcat(total_node,loc_col);
+                        strcat(total_node,",");
 
 
-                    char buff_c[2];
-                    //sprintf(buff_c,"%d",local_row%16);
-                    buff++;
-                    strcat(total_node,"0");
-                    //printf("totalnode made\n");
-                    strcpy((*newVertexName)[global_vertex_index],total_node);
-                    //printf("%s %d\n", (*newVertexName)[global_vertex_index],global_vertex_index);
-                    //(*newVertexName)[global_vertex_index] = strdup(total_node);
-                    (*prev_vertex)[global_vertex_index] = k;
-                    //printf("prev_vertex[%s] = %s\n",(*newVertexName)[global_vertex_index],vertexName[k]);
-                    vertex_map[k][i*block_divisor+j] = global_vertex_index;
-                    //printf("vertex_map[%d][%d] = %d(%s)\n",k,i*block_divisor+j , global_vertex_index,(*newVertexName)[global_vertex_index]);
-                    (*newVertex_weight)[global_vertex_index] = vertexWeight[k]/block_divisor;
-                    vmap_index++;
-                    global_vertex_index++;
-                    //printf("added %s prev %d\n",(*newVertexName)[global_vertex_index-1],(*prev_vertex)[global_vertex_index-1]);
-                }
+                        char buff_c[2];
+                        //sprintf(buff_c,"%d",local_row%16);
+                        buff++;
+                        strcat(total_node,"0");
+                        //printf("totalnode made\n");
+                        strcpy((*newVertexName)[global_vertex_index],total_node);
+                        //printf("%s %d\n", (*newVertexName)[global_vertex_index],global_vertex_index);
+                        //(*newVertexName)[global_vertex_index] = strdup(total_node);
+                        (*prev_vertex)[global_vertex_index] = k;
+                        //printf("prev_vertex[%s] = %s\n",(*newVertexName)[global_vertex_index],vertexName[k]);
+                        vertex_map[k][i*block_divisor+j] = global_vertex_index;
+                        //printf("vertex_map[%d][%d] = %d(%s)\n",k,i*block_divisor+j , global_vertex_index,(*newVertexName)[global_vertex_index]);
+                        (*newVertex_weight)[global_vertex_index] = vertexWeight[k]/block_divisor;
+                        vmap_index++;
+                        global_vertex_index++;
+                        //printf("added %s prev %d\n",(*newVertexName)[global_vertex_index-1],(*prev_vertex)[global_vertex_index-1]);
+                    }
                 }
             }
 
         }
-
-
 
         else if(type == 0) {
             //printf("global_vertex_index %d vertex %s\n",global_vertex_index,vertexName[k]);
@@ -1690,111 +1711,108 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
                 //printf("added %s prev %d\n",(*newVertexName)[global_vertex_index-1],(*prev_vertex)[global_vertex_index-1]);
 
             }
-            
-           
          
         }
+        
         else if(type == 2){
-
-
 
             //special case col node
             if(!strcmp(task,"COL")){
 
-            vmap_index = 0;
+                vmap_index = 0;
 
-            int row_num = 0;
-            buff =0;
-            int s = strlen(task)+1;
-            //printf("type 1 task %s s value %d char %c\n",task,s,vertexName[k][s]);
-            while(vertexName[k][s]!= ','){
-                row_num = row_num*10+vertexName[k][s]-48;
-                s++;
-            }
-            //printf("row num = %d\n",row_num);
-            for(i=0;i<block_divisor;i++){
-                int loc;
-                loc= row_num*block_divisor+i;
-                if(loc >= newRblock) break;
-                //char* loc_row = (char*)malloc(10*sizeof(char));
-                
-                sprintf(loc_row_str_type1,"%d",loc);
-                //printf("loc row str %s\n", loc_row_str_type1);
-                char total_node[1000];
-                strcpy(total_node,task);
-                strcat(total_node,",");
-                strcat(total_node,loc_row_str_type1);
-                strcat(total_node,",");
+                int row_num = 0;
+                buff =0;
+                int s = strlen(task)+1;
+                //printf("type 1 task %s s value %d char %c\n",task,s,vertexName[k][s]);
+                while(vertexName[k][s]!= ','){
+                    row_num = row_num*10+vertexName[k][s]-48;
+                    s++;
+                }
+                //printf("row num = %d\n",row_num);
+                for(i=0;i<block_divisor;i++){
+                    int loc;
+                    loc= row_num*block_divisor+i;
+                    if(loc >= newRblock) break;
+                    //char* loc_row = (char*)malloc(10*sizeof(char));
+                    
+                    sprintf(loc_row_str_type1,"%d",loc);
+                    //printf("loc row str %s\n", loc_row_str_type1);
+                    char total_node[1000];
+                    strcpy(total_node,task);
+                    strcat(total_node,",");
+                    strcat(total_node,loc_row_str_type1);
+                    strcat(total_node,",");
 
 
-                char buff_c[2];
-                    sprintf(buff_c,"%d",loc%16);
-                    buff++;
-                    strcat(total_node,buff_c);
-                //printf("type 1 total node %s\n",total_node);
+                    char buff_c[2];
+                        sprintf(buff_c,"%d",loc%16);
+                        buff++;
+                        strcat(total_node,buff_c);
+                    //printf("type 1 total node %s\n",total_node);
 
-                vertex_map[k][i] = global_vertex_index;
-                    vmap_index++;
-                (*prev_vertex)[global_vertex_index] = k;
+                    vertex_map[k][i] = global_vertex_index;
+                        vmap_index++;
+                    (*prev_vertex)[global_vertex_index] = k;
 
-                strcpy((*newVertexName)[global_vertex_index],total_node);
-                //printf("prev_vertex[%s] = %s\n",(*newVertexName)[global_vertex_index],vertexName[k]);
-                (*newVertex_weight)[global_vertex_index] = vertexWeight[k]/block_divisor;
-                //printf("strdup e problem????\n");
-                global_vertex_index++;
-                //printf("added %s prev %d\n",(*newVertexName)[global_vertex_index-1],(*prev_vertex)[global_vertex_index-1]);
+                    strcpy((*newVertexName)[global_vertex_index],total_node);
+                    //printf("prev_vertex[%s] = %s\n",(*newVertexName)[global_vertex_index],vertexName[k]);
+                    (*newVertex_weight)[global_vertex_index] = vertexWeight[k]/block_divisor;
+                    //printf("strdup e problem????\n");
+                    global_vertex_index++;
+                    //printf("added %s prev %d\n",(*newVertexName)[global_vertex_index-1],(*prev_vertex)[global_vertex_index-1]);
 
-            }
+                }
 
             }
 
             //special case col node
             else if(!strcmp(task,"DOT")){
 
-            vmap_index = 0;
+                vmap_index = 0;
 
-            int row_num = 0;
-            buff =0;
-            int s = strlen(task)+1;
-            //printf("type 1 task %s s value %d char %c\n",task,s,vertexName[k][s]);
-            while(vertexName[k][s]!= ','){
-                row_num = row_num*10+vertexName[k][s]-48;
-                s++;
-            }
-            //printf("row num = %d\n",row_num);
-            for(i=0;i<block_divisor;i++){
-                int loc;
-                loc= row_num*block_divisor+i;
-                if(loc >= newRblock) break;
-                //char* loc_row = (char*)malloc(10*sizeof(char));
-                
-                sprintf(loc_row_str_type1,"%d",loc);
-                //printf("loc row str %s\n", loc_row_str_type1);
-                char total_node[1000];
-                strcpy(total_node,task);
-                strcat(total_node,",");
-                strcat(total_node,loc_row_str_type1);
-                strcat(total_node,",");
+                int row_num = 0;
+                buff =0;
+                int s = strlen(task)+1;
+                //printf("type 1 task %s s value %d char %c\n",task,s,vertexName[k][s]);
+                while(vertexName[k][s]!= ','){
+                    row_num = row_num*10+vertexName[k][s]-48;
+                    s++;
+                }
+                //printf("row num = %d\n",row_num);
+                for(i=0;i<block_divisor;i++){
+                    int loc;
+                    loc= row_num*block_divisor+i;
+                    if(loc >= newRblock) break;
+                    //char* loc_row = (char*)malloc(10*sizeof(char));
+                    
+                    sprintf(loc_row_str_type1,"%d",loc);
+                    //printf("loc row str %s\n", loc_row_str_type1);
+                    char total_node[1000];
+                    strcpy(total_node,task);
+                    strcat(total_node,",");
+                    strcat(total_node,loc_row_str_type1);
+                    strcat(total_node,",");
 
 
-                char buff_c[2];
-                    sprintf(buff_c,"%d",loc%16);
-                    buff++;
-                    strcat(total_node,buff_c);
-                //printf("type 1 total node %s\n",total_node);
+                    char buff_c[2];
+                        sprintf(buff_c,"%d",loc%16);
+                        buff++;
+                        strcat(total_node,buff_c);
+                    //printf("type 1 total node %s\n",total_node);
 
-                vertex_map[k][i] = global_vertex_index;
-                    vmap_index++;
-                (*prev_vertex)[global_vertex_index] = k;
+                    vertex_map[k][i] = global_vertex_index;
+                        vmap_index++;
+                    (*prev_vertex)[global_vertex_index] = k;
 
-                strcpy((*newVertexName)[global_vertex_index],total_node);
-                //printf("prev_vertex[%s] = %s\n",(*newVertexName)[global_vertex_index],vertexName[k]);
-                (*newVertex_weight)[global_vertex_index] = vertexWeight[k]/block_divisor;
-                //printf("strdup e problem????\n");
-                global_vertex_index++;
-                //printf("added %s prev %d\n",(*newVertexName)[global_vertex_index-1],(*prev_vertex)[global_vertex_index-1]);
+                    strcpy((*newVertexName)[global_vertex_index],total_node);
+                    //printf("prev_vertex[%s] = %s\n",(*newVertexName)[global_vertex_index],vertexName[k]);
+                    (*newVertex_weight)[global_vertex_index] = vertexWeight[k]/block_divisor;
+                    //printf("strdup e problem????\n");
+                    global_vertex_index++;
+                    //printf("added %s prev %d\n",(*newVertexName)[global_vertex_index-1],(*prev_vertex)[global_vertex_index-1]);
 
-            }
+                }
 
             }
 
@@ -1806,121 +1824,128 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
                     task_id_index--;
                 task_id_index++;
                 int t = 0;
-                while(vertexName[k][t]!= '\0')
+                while(vertexName[k][task_id_index]!= '\0')
                     task_id[t++] = vertexName[k][task_id_index++];
                 task_id[t] = '\0';
 
+                if(t >= 10)
+                {
+                    printf("ERROR #2 task_name hit %d with %s\n", t, task_id);
+                    fflush(stdout);
+                }
+
                 int row_num = 0;
-            buff =0;
-            int s = strlen(task)+1;
-            //printf("type 1 task %s s value %d char %c\n",task,s,vertexName[k][s]);
-            while(vertexName[k][s]!= ','){
-                row_num = row_num*10+vertexName[k][s]-48;
-                s++;
-            }
-            //printf("row num = %d\n",row_num);
-            for(i=0;i<block_divisor;i++){
-                int loc;
-                loc= row_num*block_divisor+i;
-                if(loc >= newRblock) break;
-                //char* loc_row = (char*)malloc(10*sizeof(char));
-                
-                sprintf(loc_row_str_type1,"%d",loc);
-                //printf("loc row str %s\n", loc_row_str_type1);
-                char total_node[1000];
-                strcpy(total_node,task);
-                strcat(total_node,",");
-                strcat(total_node,loc_row_str_type1);
-                strcat(total_node,",");
+                buff =0;
+                int s = strlen(task)+1;
+                //printf("type 1 task %s s value %d char %c\n",task,s,vertexName[k][s]);
+                while(vertexName[k][s]!= ','){
+                    row_num = row_num*10+vertexName[k][s]-48;
+                    s++;
+                }
+                //printf("row num = %d\n",row_num);
+                for(i=0;i<block_divisor;i++){
+                    int loc;
+                    loc= row_num*block_divisor+i;
+                    if(loc >= newRblock) break;
+                    //char* loc_row = (char*)malloc(10*sizeof(char));
+                    
+                    sprintf(loc_row_str_type1,"%d",loc);
+                    //printf("loc row str %s\n", loc_row_str_type1);
+                    char total_node[1000];
+                    strcpy(total_node,task);
+                    strcat(total_node,",");
+                    strcat(total_node,loc_row_str_type1);
+                    strcat(total_node,",");
 
 
-                char buff_c[2];
-                sprintf(buff_c,"%d",loc%16);
-                buff++;
-                strcat(total_node,buff_c);
-                strcat(total_node,",");
-                strcat(total_node,task_id);
+                    char buff_c[2];
+                    sprintf(buff_c,"%d",loc%16);
+                    buff++;
+                    strcat(total_node,buff_c);
+                    strcat(total_node,",");
+                    strcat(total_node,task_id);
 
-                vertex_map[k][i] = global_vertex_index;
-                    vmap_index++;
-                //printf("type 1 total node %s\n",total_node);
-                (*prev_vertex)[global_vertex_index] = k;
+                    vertex_map[k][i] = global_vertex_index;
+                        vmap_index++;
+                    //printf("type 1 total node %s\n",total_node);
+                    (*prev_vertex)[global_vertex_index] = k;
 
-                strcpy((*newVertexName)[global_vertex_index],total_node);
-                (*newVertex_weight)[global_vertex_index] = vertexWeight[k]/block_divisor;
-                //printf("prev_vertex[%s] = %s\n",(*newVertexName)[global_vertex_index],vertexName[k]);
-                //printf("strdup e problem????\n");
-                global_vertex_index++;
-                //printf("added %s prev %d\n",(*newVertexName)[global_vertex_index-1],(*prev_vertex)[global_vertex_index-1]);
+                    strcpy((*newVertexName)[global_vertex_index],total_node);
+                    (*newVertex_weight)[global_vertex_index] = vertexWeight[k]/block_divisor;
+                    //printf("prev_vertex[%s] = %s\n",(*newVertexName)[global_vertex_index],vertexName[k]);
+                    //printf("strdup e problem????\n");
+                    global_vertex_index++;
+                    //printf("added %s prev %d\n",(*newVertexName)[global_vertex_index-1],(*prev_vertex)[global_vertex_index-1]);
 
-            }
-
-
-
-
+                }
             }
 
+            else{
+                vmap_index = 0;
 
-
-        else{
-            vmap_index = 0;
-
-            int task_id_index=strlen(vertexName[k])-1;
+                int task_id_index=strlen(vertexName[k])-1;
                 while(vertexName[k][task_id_index]!= ',')
                     task_id_index--;
                 task_id_index++;
                 int t = 0;
-                while(vertexName[k][t]!= '\0')
+                while(vertexName[k][task_id_index]!= '\0')
                     task_id[t++] = vertexName[k][task_id_index++];
                 task_id[t] = '\0';
+                if(t >= 10)
+                {
+                    printf("ERROR #3 task_name hit %d with %s\n", t, task_id);
+                    fflush(stdout);
+                }
 
                 int row_num = 0;
-            buff =0;
-            int s = strlen(task)+1;
-            //printf("type 1 task %s s value %d char %c\n",task,s,vertexName[k][s]);
-            while(vertexName[k][s]!= ','){
-                row_num = row_num*10+vertexName[k][s]-48;
-                s++;
+                buff =0;
+                int s = strlen(task)+1;
+                //printf("type 1 task %s s value %d char %c\n",task,s,vertexName[k][s]);
+                while(vertexName[k][s]!= ','){
+                    row_num = row_num*10+vertexName[k][s]-48;
+                    s++;
+                }
+                //printf("row num = %d\n",row_num);
+                for(i=0;i<block_divisor;i++){
+                    int loc;
+                    loc= row_num*block_divisor+i;
+                    if(loc >= newRblock) break;
+                    //char* loc_row = (char*)malloc(10*sizeof(char));
+                    
+                    sprintf(loc_row_str_type1,"%d",loc);
+                    //printf("loc row str %s\n", loc_row_str_type1);
+                    char total_node[1000];
+                    strcpy(total_node,task);
+                    strcat(total_node,",");
+                    strcat(total_node,loc_row_str_type1);
+                    strcat(total_node,",");
+
+
+                    
+                    strcat(total_node,task_id);
+                    //printf("type 1 total node %s\n",total_node);
+
+
+                    vertex_map[k][i] = global_vertex_index;
+                        vmap_index++;
+                    (*prev_vertex)[global_vertex_index] = k;
+
+                    strcpy((*newVertexName)[global_vertex_index],total_node);
+                    //printf("prev_vertex[%s] = %s\n",(*newVertexName)[global_vertex_index],vertexName[k]);
+                    (*newVertex_weight)[global_vertex_index] = vertexWeight[k]/block_divisor;
+                    //printf("strdup e problem????\n");
+                    global_vertex_index++;
+                    //printf("added %s prev %d\n",(*newVertexName)[global_vertex_index-1],(*prev_vertex)[global_vertex_index-1]);
+
+                }
+
             }
-            //printf("row num = %d\n",row_num);
-            for(i=0;i<block_divisor;i++){
-                int loc;
-                loc= row_num*block_divisor+i;
-                if(loc >= newRblock) break;
-                //char* loc_row = (char*)malloc(10*sizeof(char));
-                
-                sprintf(loc_row_str_type1,"%d",loc);
-                //printf("loc row str %s\n", loc_row_str_type1);
-                char total_node[1000];
-                strcpy(total_node,task);
-                strcat(total_node,",");
-                strcat(total_node,loc_row_str_type1);
-                strcat(total_node,",");
-
-
-                
-                strcat(total_node,task_id);
-                //printf("type 1 total node %s\n",total_node);
-
-
-                vertex_map[k][i] = global_vertex_index;
-                    vmap_index++;
-                (*prev_vertex)[global_vertex_index] = k;
-
-                strcpy((*newVertexName)[global_vertex_index],total_node);
-                //printf("prev_vertex[%s] = %s\n",(*newVertexName)[global_vertex_index],vertexName[k]);
-                (*newVertex_weight)[global_vertex_index] = vertexWeight[k]/block_divisor;
-                //printf("strdup e problem????\n");
-                global_vertex_index++;
-                //printf("added %s prev %d\n",(*newVertexName)[global_vertex_index-1],(*prev_vertex)[global_vertex_index-1]);
-
-            }
-
-
         }
 
+        if(k==0)
+        {
+            printf("vertex_map[0][0] edited within first iteration with %d\n",vertex_map[0][0]);
         }
-
 
         k++;
         free(task); 
@@ -1928,11 +1953,12 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
     }
 
     printf("updated vertex count = %d\n",global_vertex_index);
+    fflush(stdout);
     *updatedVertexCount = global_vertex_index;
 
-    for(i = 0; i < global_vertex_index ; i++){
-     //   printf("new node %d = %s %d\n",i,(*newVertexName)[i],(*prev_vertex)[i]);
-    }
+    //for(i = 0; i < global_vertex_index ; i++){
+        //printf("new node %d = %s %d\n",i,(*newVertexName)[i],(*prev_vertex)[i]);
+    //}
 
     k = 0;
     int global_edge_index = 0;
@@ -1973,60 +1999,54 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
             global_edge_index++;
         }
         else if(nd_type1 == 3 || nd_type2 == 3){
-            
-            
 
-                if(nd_type1 == 3){
+            if(nd_type1 == 3){
 
-
-                    
-                    
-
-                    for(i = 0 ; i < block_divisor ; i++){
-                        sp_row = get_row_num(vertexName[v1])*block_divisor+i;
+                for(i = 0 ; i < block_divisor ; i++){
+                    sp_row = get_row_num(vertexName[v1])*block_divisor+i;
 
 
-                        for(j = 0 ; j < block_divisor ; j++){
-                            sp_col = get_spmm_col_num(vertexName[v1])*block_divisor+j;
-                            if(sp_row < newRblock && sp_col < newCblock && vertex_map[v1][i*block_divisor+j])
-                            {
+                    for(j = 0 ; j < block_divisor ; j++){
+                        sp_col = get_spmm_col_num(vertexName[v1])*block_divisor+j;
+                        if(sp_row < newRblock && sp_col < newCblock && vertex_map[v1][i*block_divisor+j])
+                        {
                             (*newEdge_u)[global_edge_index] = vertex_map[v1][i*block_divisor+j];
                             (*newEdge_v)[global_edge_index] = vertex_map[v2][i];
                             (*newEdge_weight)[global_edge_index] = edge_weight[k]/block_divisor;
                             //printf("added %s --> %s\n",(*newVertexName)[(*newEdge_u)[global_edge_index]],(*newVertexName)[(*newEdge_v)[global_edge_index]]);
                             global_edge_index++;
                         }
-                        }
                     }
                 }
-                else if(vertexName[v1][0] == 'S'){
-                //printf("%s --> %s\n",vertexName[v1],vertexName[v2]);
-                 for(i = 0 ; i < block_divisor ; i++){
+            }
+            else if(vertexName[v1][0] == 'S'){
+            //printf("%s --> %s\n",vertexName[v1],vertexName[v2]);
+                for(i = 0 ; i < block_divisor ; i++){
                     sp_row = get_row_num(vertexName[v2])*block_divisor+i;
-                        for(j = 0 ; j < block_divisor ; j++){
-                            sp_col = get_spmm_col_num(vertexName[v2])*block_divisor+j;
-                            if(sp_row < newRblock && sp_col < newCblock && vertex_map[v2][i*block_divisor+j])
-                            {
+                    for(j = 0 ; j < block_divisor ; j++){
+                        sp_col = get_spmm_col_num(vertexName[v2])*block_divisor+j;
+                        if(sp_row < newRblock && sp_col < newCblock && vertex_map[v2][i*block_divisor+j])
+                        {
                             (*newEdge_u)[global_edge_index] = vertex_map[v1][i];
                             (*newEdge_v)[global_edge_index] = vertex_map[v2][i*block_divisor+j];
                             (*newEdge_weight)[global_edge_index] = edge_weight[k]/block_divisor;
                             //printf("added %s --> %s\n",(*newVertexName)[(*newEdge_u)[global_edge_index]],(*newVertexName)[(*newEdge_v)[global_edge_index]]);
                             global_edge_index++;
                         }
-                        }
-                    }   
-                }
-                else if(vertexName[v1][0] == 'D'){
-                //printf("%s --> %s\n",vertexName[v1],vertexName[v2]);
-                  for(j = 0 ; j < block_divisor ; j++){
-                        sp_col = get_spmm_col_num(vertexName[v2])*block_divisor+j;
-                        for(i = 0 ; i < block_divisor ; i++){
-                            sp_row = get_row_num(vertexName[v2])*block_divisor+i;
-                            //if(!strcmp((*newVertexName)[vertex_map[v1][j]],"DLACPY,28,1"))
-                            //printf("%s\n",vertexName[])
-                            //printf("sp_row = %d sp_col = %d vmap[%d][%d] = %d\n", sp_row,sp_col,v2,i*block_divisor+j,vertex_map[v2][i*block_divisor+j]);
-                            if(sp_row < newRblock && sp_col < newCblock && vertex_map[v2][i*block_divisor+j] > 0 )//&& vertex_map[v2][i*block_divisor+j] <= global_vertex_index)
-                            {
+                    }
+                }   
+            }
+            else if(vertexName[v1][0] == 'D'){
+            //printf("%s --> %s\n",vertexName[v1],vertexName[v2]);
+              for(j = 0 ; j < block_divisor ; j++){
+                    sp_col = get_spmm_col_num(vertexName[v2])*block_divisor+j;
+                    for(i = 0 ; i < block_divisor ; i++){
+                        sp_row = get_row_num(vertexName[v2])*block_divisor+i;
+                        //if(!strcmp((*newVertexName)[vertex_map[v1][j]],"DLACPY,28,1"))
+                        //printf("%s\n",vertexName[])
+                        //printf("sp_row = %d sp_col = %d vmap[%d][%d] = %d\n", sp_row,sp_col,v2,i*block_divisor+j,vertex_map[v2][i*block_divisor+j]);
+                        if(sp_row < newRblock && sp_col < newCblock && vertex_map[v2][i*block_divisor+j] > 0 )//&& vertex_map[v2][i*block_divisor+j] <= global_vertex_index)
+                        {
                             (*newEdge_u)[global_edge_index] = vertex_map[v1][j];
                             (*newEdge_v)[global_edge_index] = vertex_map[v2][i*block_divisor+j];
                             (*newEdge_weight)[global_edge_index] = edge_weight[k]/block_divisor;
@@ -2034,32 +2054,26 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
                             //printf("added %s --> %s\n",(*newVertexName)[(*newEdge_u)[global_edge_index]],(*newVertexName)[(*newEdge_v)[global_edge_index]]);
                             global_edge_index++;
                         }
-                        }
-                    }  
-                }
-
+                    }
+                }  
+            }
 
         }
 
         //else if(node_type(vertexName[v1]) == 1 && node_type(vertexName[v2]) == 2){
 
         //}
+        
         else {
-            //if(nd_type1 == )
-
-
 
             for(i = 0 ; i < block_divisor ; i++){
-               // if(!strcmp(task1,"SETZERO") && !strcmp(task2,"SPMMRED")){
-                if(nd_type1 == 0){
-                    
-                        sp_row = get_row_num(vertexName[v2])*block_divisor+i;
-                    
-            }
-            else 
-                sp_row = get_row_num(vertexName[v1])*block_divisor+i;
-            //printf("%s --> %s  %d\n",vertexName[v1],vertexName[v2], sp_row);
-
+                // if(!strcmp(task1,"SETZERO") && !strcmp(task2,"SPMMRED")){
+                if(nd_type1 == 0)
+                    sp_row = get_row_num(vertexName[v2])*block_divisor+i;
+                else 
+                    sp_row = get_row_num(vertexName[v1])*block_divisor+i;
+            
+                //printf("%s --> %s  %d\n",vertexName[v1],vertexName[v2], sp_row);
 
                 if(vertexName[v1][0] == 'S' && vertexName[v1][1] == 'E' && vertexName[v1][2] == 'T' && vertexName[v2][3] == 'M' &&
                         vertexName[v2][4] == 'R' && vertexName[v2][5] == 'E' && vertexName[v2][6] == 'D' ){
@@ -2071,54 +2085,73 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
                         //printf("spmm node = %s col no = %d cal col no = %d\n",vertexName[edge_u[k-1]],get_spmm_col_num(vertexName[edge_u[k-1]]),sp_col);
                         if(sp_row < newRblock && sp_col < newCblock && vertex_map[edge_u[k-1]][i*block_divisor+j])
                         {
-                        (*newEdge_u)[global_edge_index] = vertex_map[v1][i];
-                        (*newEdge_v)[global_edge_index] = vertex_map[v2][i];
-                        (*newEdge_weight)[global_edge_index] = edge_weight[k]/block_divisor;
-                        //printf("added %s --> %s\n",(*newVertexName)[(*newEdge_u)[global_edge_index]],(*newVertexName)[(*newEdge_v)[global_edge_index]]);
-                        global_edge_index++;
-                    }
+                            (*newEdge_u)[global_edge_index] = vertex_map[v1][i];
+                            (*newEdge_v)[global_edge_index] = vertex_map[v2][i];
+                            (*newEdge_weight)[global_edge_index] = edge_weight[k]/block_divisor;
+                            //printf("added %s --> %s\n",(*newVertexName)[(*newEdge_u)[global_edge_index]],(*newVertexName)[(*newEdge_v)[global_edge_index]]);
+                            global_edge_index++;
+                        }
 
                     }
                 }
                 else{
-                if(sp_row < newRblock){
-                (*newEdge_u)[global_edge_index] = vertex_map[v1][i];
-                (*newEdge_v)[global_edge_index] = vertex_map[v2][i];
-                (*newEdge_weight)[global_edge_index] = edge_weight[k]/block_divisor;
-                //printf("%s --> %s new added %s --> %s\n",vertexName[v1],vertexName[v2],(*newVertexName)[(*newEdge_u)[global_edge_index]],(*newVertexName)[(*newEdge_v)[global_edge_index]]);
-                global_edge_index++;
-            }
-            }
-                
-             
+                    if(sp_row < newRblock){
+                        (*newEdge_u)[global_edge_index] = vertex_map[v1][i];
+                        (*newEdge_v)[global_edge_index] = vertex_map[v2][i];
+                        (*newEdge_weight)[global_edge_index] = edge_weight[k]/block_divisor;
+                        //printf("%s --> %s new added %s --> %s\n",vertexName[v1],vertexName[v2],(*newVertexName)[(*newEdge_u)[global_edge_index]],(*newVertexName)[(*newEdge_v)[global_edge_index]]);
+                        global_edge_index++;
+                    }
+                }
             }
         }
-
 
         k++;
     }
 
     printf("updated edge count = %d\n", global_edge_index);
+    fflush(stdout);
     *updatedEdgeCount = global_edge_index;
 
-    for(i = 0 ; i < vertexCount ; i++){
-        for(j = 0 ; j < block_divisor*block_divisor ; j++){
+    printf("block divisor: %d\nvertex count: %d\n", block_divisor, vertexCount);
+    if(*vmap == NULL)
+    {
+        printf("ERROR, vmap is NULL\n");
+        fflush(stdout);
+        return;
+    }
+    for(i = 0 ; i < vertexCount ; i++)
+    {
+        if((*vmap)[i] == NULL)
+        {
+            printf("iteration %d: ERROR, vmap is null\n", i);
+            fflush(stdout);
+            return;
+        }
+        for(j = 0 ; j < block_divisor*block_divisor ; j++)
+        {
+            if((*vmap)[i][j])
+            {
+                printf("iteration %d %d: ERROR, vmap is null\n", i, j);
+                fflush(stdout);
+                return;
+            }
             (*vmap)[i][j] = vertex_map[i][j];
         }
         if(node_type(vertexName[i])==0)
+        {
             (*vmap)[i][1] = -1;
+        }
         else if((node_type(vertexName[i]) == 1) || (node_type(vertexName[i]) == 2)) 
+        {
             (*vmap)[i][block_divisor] = -1;
-
+        }
     }
 
     printf("loop sesh\n");
+    fflush(stdout);
 
 }
-
-
-
-
 
 void my_generate_graph_fazlay(dgraph *G, char* file_name, int use_binary_input, int *edge_u, int *edge_v, double *edge_weight, int edgeCount, int vertexCount,const char** vertexName,double* vertexWeight)
 {
@@ -2248,24 +2281,24 @@ void my_generate_graph_fazlay(dgraph *G, char* file_name, int use_binary_input, 
 
         G->vw = (vwType *) malloc(sizeof(vwType) * (my_nVrtx+1));
         G->vWeight = (ecType*)malloc(sizeof(ecType)*(my_nVrtx+1));
-    //    G->totvw = 0;
+        //G->totvw = 0;
         for (i=1; i<=my_nVrtx; i++){
-      //      G->vw[i] = vweights[i-1];
+            //G->vw[i] = vweights[i-1];
             G->vw[i] = 1.0;
-     //       G->totvw += G->vw[i];
-    //      printf("G.vw[%d] = %lf totvw = %lf\n",i,G->vw[i],G->totvw);
+            //G->totvw += G->vw[i];
+            //printf("G.vw[%d] = %lf totvw = %lf\n",i,G->vw[i],G->totvw);
         }
 
 
         ////// incoming edge weight needed for partitioning
         G->incoming_edge_weight = (ecType*)calloc((my_nVrtx+1),sizeof(ecType));
 
-        for (i=0; i< my_nEdge; i++){
-    //      G->ecIn[i] = 1;
-    //      G->ecOut[i] = 1;
-    //      G->ecIn[i] = edge_weights[i];
-    //      G->ecOut[i] = edge_weights[i];
-        }
+        //for (i=0; i< my_nEdge; i++){
+            //G->ecIn[i] = 1;
+            //G->ecOut[i] = 1;
+            //G->ecIn[i] = edge_weights[i];
+            //G->ecOut[i] = edge_weights[i];
+        //}
 
 
 
