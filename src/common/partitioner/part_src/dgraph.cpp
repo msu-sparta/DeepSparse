@@ -1097,56 +1097,57 @@ void DFStopsort_with_part(dgraph* G, idxType *part, int nbpart, idxType *toporde
 }
 
 int get_row_num(const char* node){
-    int i = 0;
-    int row_num = 0;
-    //printf("node1 = %s\n",node);
-    while(node[i] != ','){
+    
+    int i = 0, row_num = 0, len = strlen(node);
+    
+    while(i < len && node[i] != ',')
+    {
         i++;
     }
     i++;
-    while(node[i] != ',' && i < strlen(node)){
-      //  printf("node[%d] = %c\n",i,node[i]);
+    while(i < len && node[i] != ',')
+    {
         row_num = row_num*10 + node[i] - 48;
         i++;
     }
-    //printf("row num = %d\n");
+    
     return row_num;
 }
 
 int get_spmm_col_num(const char* node){
-    int i = 0 ; 
-    int col_num = 0;
-    while(node[i] != ','){
+    
+    int i = 0, col_num = 0, len = strlen(node);
+    while(i < len && node[i] != ',')
+    {
         i++;
     }
     i++;
-    while(node[i] != ','){
+    while(i < len && node[i] != ',')
+    {
         i++;
     }
     i++;
-
-    while(node[i] != ',' && strlen(node)){
+    while(i < len && node[i] != ',')
+    {
         col_num = col_num*10 + node[i] - 48;
         i++;
 
     }
+
     return col_num;
-
-
 }
 
 void task_name(const char *node_name, char** task){
-    int i = 0 ; 
-    int len = strlen(node_name);
-    while(node_name[i]!= ',' && i < len){
+    int i = 0, len = strlen(node_name);
+    while(i < len && node_name[i]!= ',')
+    {
         (*task)[i] = node_name[i];
         i++;
     }
     (*task)[i] = '\0';
     if(i > 30)
     {
-        printf("ERROR, task_name hit %d with %s\n", i, node_name);
-        fflush(stdout);
+        u_errexit("ERROR, task_name hit %d with %s\n", i, node_name);
     }
     return;
 }
@@ -1163,7 +1164,8 @@ int node_type(const char* node){
     task_name(node,&task);
     //printf("task %s started in node_type\n", task);
     //fflush(stdout);
-
+    if(node==NULL || task==NULL)
+        u_errexit("node_type not gonna work\n");
     //printf("inside type taskname = %s node = %s\n", task,node);
 
     //if(!strcmp(task_name(node),"SPMM"))return 3;
@@ -1269,8 +1271,6 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
             }
             // printf("No bin file found for input!\n");
         }
-        printf("Checkpoint #1\n");
-        fflush(stdout);
 
         char line[1000];
         char token[100];
@@ -1280,8 +1280,6 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
         idxType** inneighbors; //adjacency list (in-neighbours) , parent tracking
 
         printf("vertexCount = %d\n",vertexCount);
-        printf("Checkpoint #1.1\n");
-        fflush(stdout);
 
         //idxType my_nVrtx = 45*block_divisor+block_divisor*block_divisor+27 , my_nEdge = 0 ;
         idxType my_nVrtx = vertexCount, my_nEdge = 0;
@@ -1292,25 +1290,15 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
        // ecType my_inedgeweights[12000][10]; //ecType double incoming edge weights
         ecType** my_inedgeweights;
 
-        printf("Checkpoint #1.2\n");
-        fflush(stdout);
         my_nbneighbors = (idxType*) calloc((vertexCount+1), sizeof(idxType));
-        printf("Checkpoint #1.3\n");
-        fflush(stdout);
         //my_nbneighbors = (idxType*) malloc((vertexCount+1) * sizeof(idxType));
         my_inneighbors = (idxType**) malloc((vertexCount+1) * sizeof(idxType*));
-        printf("Checkpoint #1.4\n");
-        fflush(stdout);
         my_inedgeweights = (ecType**) malloc((my_nVrtx+1) * sizeof(ecType*));
-        printf("Checkpoint #2\n");
-        fflush(stdout);
         for (i = 0; i <= my_nVrtx; i++)
         {
             my_inneighbors[i] = (idxType*) malloc(100 * sizeof(idxType)); //say ever vertex has max 100 parents
             my_inedgeweights[i] = (ecType*) malloc(100 * sizeof(ecType));
         }
-        printf("Checkpoint #3\n");
-        fflush(stdout);
         while(k < edgeCount)
         {
       
@@ -1350,8 +1338,6 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
         G->inStart  = (idxType * ) calloc(my_nVrtx + 2, sizeof(idxType));
         G->inEnd= (idxType * ) malloc(sizeof(idxType) * (my_nVrtx + 2));
         G->in = (idxType * ) malloc(sizeof(idxType) * my_nEdge);
-        printf("Checkpoint #4\n");
-        fflush(stdout);
 
         // TODO: Update these two accordingly.
         G->maxVW = 1;
@@ -1366,8 +1352,6 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
         G->ecOut = (ecType *) malloc(sizeof(ecType) * my_nEdge);
 
         idxType idx = 0, degree;
-        printf("Checkpoint #5\n");
-        fflush(stdout);
         for (i=1; i<=my_nVrtx; i++){
             G->inStart[i] = idx;
             G->inEnd[i-1] = idx-1;
@@ -1384,8 +1368,6 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
             }
 
         }
-        printf("Checkpoint #6\n");
-        fflush(stdout);
         G->inStart[0] = 0;
         G->inEnd[0] = -1;
         G->inEnd[my_nVrtx] = idx-1;
@@ -1404,8 +1386,6 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
         G->out = (idxType * ) malloc(sizeof(idxType) * my_nEdge);
 
         // TODO: Verify vw values for the partitioner
-        printf("Checkpoint #7\n");
-        fflush(stdout);
         G->vw = (vwType *) malloc(sizeof(vwType) * (my_nVrtx+1));
         G->vWeight = (ecType*)malloc(sizeof(ecType)*(my_nVrtx+1));
     //    G->totvw = 0;
@@ -1450,7 +1430,6 @@ void my_generate_smallgraph(dgraph *G, char* file_name, int use_binary_input, in
         // fclose(indegree_file);
 
         printf("before calling filloutfrom\n");
-        fflush(stdout);
 
         /*FILE* entire_small_graph;
         entire_small_graph = fopen("entire_small_graph.txt","w");
@@ -1574,6 +1553,7 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
     {
         vertex_map[i] = (int*)calloc((block_divisor*block_divisor+1),sizeof(int));
     }
+
 
     printf("new_vertexcount = %d\n",new_vertexcount);
     int buff = 0;
@@ -1828,12 +1808,6 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
                     task_id[t++] = vertexName[k][task_id_index++];
                 task_id[t] = '\0';
 
-                if(t >= 10)
-                {
-                    printf("ERROR #2 task_name hit %d with %s\n", t, task_id);
-                    fflush(stdout);
-                }
-
                 int row_num = 0;
                 buff =0;
                 int s = strlen(task)+1;
@@ -1891,11 +1865,6 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
                 while(vertexName[k][task_id_index]!= '\0')
                     task_id[t++] = vertexName[k][task_id_index++];
                 task_id[t] = '\0';
-                if(t >= 10)
-                {
-                    printf("ERROR #3 task_name hit %d with %s\n", t, task_id);
-                    fflush(stdout);
-                }
 
                 int row_num = 0;
                 buff =0;
@@ -1942,18 +1911,13 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
             }
         }
 
-        if(k==0)
-        {
-            printf("vertex_map[0][0] edited within first iteration with %d\n",vertex_map[0][0]);
-        }
-
         k++;
         free(task); 
         //free(vertex_map);
     }
+                
 
     printf("updated vertex count = %d\n",global_vertex_index);
-    fflush(stdout);
     *updatedVertexCount = global_vertex_index;
 
     //for(i = 0; i < global_vertex_index ; i++){
@@ -2108,34 +2072,14 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
 
         k++;
     }
-
+                
     printf("updated edge count = %d\n", global_edge_index);
-    fflush(stdout);
     *updatedEdgeCount = global_edge_index;
 
-    printf("block divisor: %d\nvertex count: %d\n", block_divisor, vertexCount);
-    if(*vmap == NULL)
-    {
-        printf("ERROR, vmap is NULL\n");
-        fflush(stdout);
-        return;
-    }
     for(i = 0 ; i < vertexCount ; i++)
     {
-        if((*vmap)[i] == NULL)
-        {
-            printf("iteration %d: ERROR, vmap is null\n", i);
-            fflush(stdout);
-            return;
-        }
         for(j = 0 ; j < block_divisor*block_divisor ; j++)
         {
-            if((*vmap)[i][j])
-            {
-                printf("iteration %d %d: ERROR, vmap is null\n", i, j);
-                fflush(stdout);
-                return;
-            }
             (*vmap)[i][j] = vertex_map[i][j];
         }
         if(node_type(vertexName[i])==0)
@@ -2147,9 +2091,6 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
             (*vmap)[i][block_divisor] = -1;
         }
     }
-
-    printf("loop sesh\n");
-    fflush(stdout);
 
 }
 

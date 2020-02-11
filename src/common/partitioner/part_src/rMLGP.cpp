@@ -742,7 +742,8 @@ void run_rMLGP(char* file_name, MLGP_option opt, int *edge_u, int *edge_v, doubl
     printf("new_blocksize = %d\n", new_blocksize);
 
     int newVertexCount = new_blocksize*45+new_blocksize*new_blocksize+27;
-    int newEdgeCount = 90*new_blocksize+25+new_blocksize*new_blocksize*4; /// replace 90 with 84 if needed
+    //int newEdgeCount = 90*new_blocksize+25+new_blocksize*new_blocksize*4; /// replace 90 with 84 if needed
+    int newEdgeCount = edgeCount * block_divisor * block_divisor;
     char **newVertexName;
     printf("new vertexcount = %d newEdgeCount = %d\n",newVertexCount,newEdgeCount);
 
