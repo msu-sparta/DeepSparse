@@ -135,12 +135,8 @@ int main(int argc, char *argv[]){
     secondloop(blocksize, block_width, argc, argv);
 
 
-
 //    free(edgeU);
 //    free()
-
-    
-
 }
 
 

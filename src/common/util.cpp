@@ -3557,7 +3557,7 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
         k1 = colptrs[c]+1;
         k2 = colptrs[c + 1] - 1+1;
         blkc = ceil((c + 1) / (double)wblk);
-       // cout<<"K1: "<<k1<<" K2: "<<k2<<" blkc: "<<blkc<<endl;
+        //cout<<"K1: "<<k1<<" K2: "<<k2<<" blkc: "<<blkc<<endl;
 
         for(k = k1 - 1 ; k < k2 ; k++)
         {
@@ -3609,9 +3609,6 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
     //{
         //printf("nnzPerRow[%d] : %d\n", blkr, nnzPerRow[blkr]);
     //}
-    //cout<<"end for"<<endl;
-    //
-    //printf("wblk = %d\n",wblk);
 
     for(c = 0 ; c < numcols ; c++)
     {
@@ -3619,21 +3616,13 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
         k2 = colptrs[c + 1] - 1+1; 
         blkc = ceil((c + 1) / (double)wblk);
 
-        //:wq
-       // cout<<"K1: "<<k1<<" K2: "<<k2<<" blkc: "<<blkc<<endl;
+        //cout<<"K1: "<<k1<<" K2: "<<k2<<" blkc: "<<blkc<<endl;
 
         for(k = k1 - 1 ; k < k2 ; k++)
         {
             r = irem[k]+1;
             blkr = ceil(r / (double)wblk);
-        //    printf("r = %d blkr = %d\n",r , blkr);
-//	    printf("matblk[%d].rloc[%d] = %d - matblk[%d].roffset\n",(blkr - 1) * ncolblks+blkc - 1,top[blkr-1][blkc-1],r,(blkr - 1) * ncolblks + blkc - 1);
-           // printf("%d\n",matrixBlock[(blkr - 1) * ncolblks+blkc - 1].rloc[top[blkr-1][blkc-1]]);
-	   // printf("%d\n",matrixBlock[(blkr - 1) * ncolblks + blkc - 1].roffset);
-	   // printf("%d\n", matrixBlock[(blkr - 1) * ncolblks+blkc - 1].cloc[top[blkr-1][blkc-1]]);
-	   // printf("%d\n",matrixBlock[(blkr - 1) * ncolblks + blkc - 1].coffset);
-	   // printf("%lf\n",matrixBlock[(blkr - 1) * ncolblks+blkc - 1].val[top[blkr-1][blkc-1]]);
-//	    printf("%lf\n",xrem[k]);
+            //printf("matblk[%d].rloc[%d] = %d - matblk[%d].roffset\n",(blkr - 1) * ncolblks+blkc - 1,top[blkr-1][blkc-1],r,(blkr - 1) * ncolblks + blkc - 1);
 	        matrixBlock[(blkr - 1) * ncolblks+blkc - 1].rloc[top[blkr-1][blkc-1]] = r - matrixBlock[(blkr - 1) * ncolblks + blkc - 1].roffset;
             matrixBlock[(blkr - 1) * ncolblks+blkc - 1].cloc[top[blkr-1][blkc-1]] = (c + 1) -  matrixBlock[(blkr - 1) * ncolblks + blkc - 1].coffset;
             matrixBlock[(blkr - 1) * ncolblks+blkc - 1].val[top[blkr-1][blkc-1]] = xrem[k];

@@ -1154,19 +1154,10 @@ void task_name(const char *node_name, char** task){
 
 
 int node_type(const char* node){
-    // printf("inside type function %s\n",node);
-
-    //printf("entering node_type function\n");
-    //fflush(stdout);
-    //char* tsk_name = task_name(node);
+    
     char* task = (char*)malloc(50*sizeof(char));
     //strcpy(temp_node_name,node);
     task_name(node,&task);
-    //printf("task %s started in node_type\n", task);
-    //fflush(stdout);
-    if(node==NULL || task==NULL)
-        u_errexit("node_type not gonna work\n");
-    //printf("inside type taskname = %s node = %s\n", task,node);
 
     //if(!strcmp(task_name(node),"SPMM"))return 3;
     //if(node[0] == 'S' && node[0] == 'P' && node[0] == 'M' && node[0] == 'M' && node[0] == ',')return 3;
@@ -1554,7 +1545,6 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
         vertex_map[i] = (int*)calloc((block_divisor*block_divisor+1),sizeof(int));
     }
 
-
     printf("new_vertexcount = %d\n",new_vertexcount);
     int buff = 0;
     while (k < vertexCount){
@@ -1913,10 +1903,8 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
 
         k++;
         free(task); 
-        //free(vertex_map);
     }
                 
-
     printf("updated vertex count = %d\n",global_vertex_index);
     *updatedVertexCount = global_vertex_index;
 
@@ -1936,8 +1924,6 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
 
         //printf("k = %d %d %d\n",k,edge_u[k],edge_v[k]);
 
-
-        
         //task_name(vertexName[v1],&task1);
         //task_name(vertexName[v2],&task2);
 

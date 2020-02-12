@@ -564,22 +564,19 @@ rcoarsen* rVCycle(dgraph *G, MLGP_option opt, rMLGP_info* info, int *resultingNb
 
     total_memory = incoming_edge_weight_in_part+task_memory;
 
-    //total_memory = 1510977560;
-
-//    printf("vertex count = %d total memory = %lf \n",G->nVrtx,total_memory );
+    //printf("vertex count = %d total memory = %lf \n",G->nVrtx,total_memory );
     coarsen* C;
 
 
 
-
-     if(total_memory < total_memory_limit) //32 MB for haswell L3 data cache
-//      if(total_memory < 134217728) //128 MB 
-//    if(total_memory < 536870912) // 512 MB
+     
+    if(total_memory < total_memory_limit) //32 MB for haswell L3 data cache
+    //if(total_memory < 134217728) //128 MB 
+    //if(total_memory < 536870912) // 512 MB
     {
 
-
         C = initializeCoarsen(G);
-//        printf("coarse vertex count = %d\n",C->graph->nVrtx);
+        //printf("coarse vertex count = %d\n",C->graph->nVrtx);
         for(i = 1 ; i<= C->graph->nVrtx ; ++i){
             //C->new_index[i] = i;
             C->part[i] = 0;
@@ -594,7 +591,7 @@ rcoarsen* rVCycle(dgraph *G, MLGP_option opt, rMLGP_info* info, int *resultingNb
         info->timing_inipart = 0;
         info->timing_uncoars = 0;
         rcoarsen* rcoarse = initializeRCoarsen(C);
-    //    fclose(fp);
+        //fclose(fp);
         return rcoarse;
     }
 
