@@ -1,16 +1,18 @@
 #include "matrix_ops.h"
 #include "exec_util.h"
 
+//TODO: edited for 8RHS optimizations
 void spmm_blkcoord_loop(int R, int C, int blocksize, int nthrds, double *X,  double *Y, block *H){
 
 
 	int k, k1, k2;
     int i, j, l, rbase, cbase, r, c;
+    int index;
     double xcoef;
     int length;
     double tstart;
 
-    #pragma omp parallel for default(shared) private(tstart, rbase, cbase, j, k, l, r, c, xcoef)
+    #pragma omp parallel for default(shared) private(tstart, rbase, cbase, j, k, l, r, c, xcoef, index)
     for(i = 0; i < nrowblks ; i++)
     {
         //tstart = omp_get_wtime();
@@ -18,18 +20,27 @@ void spmm_blkcoord_loop(int R, int C, int blocksize, int nthrds, double *X,  dou
         
         for(j = 0 ; j < ncolblks ; j++)
         {
-            cbase = H[i * ncolblks + j].coffset;
-            if(H[i * ncolblks + j].nnz > 0)
+            index = i * ncolblks + j;
+            //cbase = H[i * ncolblks + j].coffset;
+            cbase = H[index].coffset;
+            //if(H[i * ncolblks + j].nnz > 0)
+            if(H[index].nnz > 0)
             {
-                for(k = 0 ; k < H[i * ncolblks + j].nnz ; k++)
+                //for(k = 0 ; k < H[i * ncolblks + j].nnz ; k++)
+                for(k = 0 ; k < H[index].nnz ; k++)
                 {
-                    r = rbase + H[i * ncolblks + j].rloc[k] - 1;
-                    c = cbase + H[i * ncolblks + j].cloc[k] - 1;
-                    xcoef = H[i * ncolblks + j].val[k];
-                    //#pragma omp simd 
-                    for(l = 0 ;l < blocksize ; l++)
+                    //r = rbase + H[i * ncolblks + j].rloc[k] - 1;
+                    r = ( rbase + H[index].rloc[k] - 1 ) << 3;
+                    //c = cbase + H[i * ncolblks + j].cloc[k] - 1;
+                    c = ( cbase + H[index].cloc[k] - 1 ) << 3;
+                    //xcoef = H[i * ncolblks + j].val[k];
+                    xcoef = H[index].val[k];
+                    #pragma omp simd 
+                    //for(l = 0; l < blocksize ; l++)
+                    for(l = 0; l < 8 ; l++)
                     {
-                        Y[r * blocksize + l] = Y[r * blocksize + l] + xcoef * X[c * blocksize + l];
+                        //Y[r * blocksize + l] = Y[r * blocksize + l] + xcoef * X[c * blocksize + l];
+                        Y[r + l] = Y[r + l] + xcoef * X[c + l];
                     }
                 }
             }
@@ -80,7 +91,7 @@ void mat_mult(double *src1, double *src2, double *dst, const int row, const int 
 
 
 
-
+//TODO: edited for 8RHS optimizations
 void spmm_blkcoord_finegrained_exe_fixed_buf(int R, int C, int M, int nbuf, double *X,  double *Y, block *H, int row_id, int col_id, int buf_id, int block_width)
 {
     //code: 15
@@ -88,6 +99,7 @@ void spmm_blkcoord_finegrained_exe_fixed_buf(int R, int C, int M, int nbuf, doub
     int k, k1, k2, tid, blksz, offset;
     int spmm_offset, spmm_blksz;
     int i, j, l, rbase, cbase, r, c, nthreads;
+    int index;
     double tstart, tend;
 
     i = row_id;
@@ -107,9 +119,12 @@ void spmm_blkcoord_finegrained_exe_fixed_buf(int R, int C, int M, int nbuf, doub
     
     double xcoef, sum;
 
-    if(H[i * ncolblks + j].nnz > 0)
+    index = i * ncolblks + j;
+
+    //if(H[i * ncolblks + j].nnz > 0)
+    if(H[index].nnz > 0)
     {
-        #pragma omp task firstprivate(i, j, buf_id, X, Y, H, R, C, M, nbuf, block_width, offset, blksz, spmm_blksz, spmm_offset)\
+        #pragma omp task firstprivate(i, j, index, buf_id, X, Y, H, R, C, M, nbuf, block_width, offset, blksz, spmm_blksz, spmm_offset)\
         private(k, l, r, c, xcoef, rbase, cbase, tid, tstart, tend)\
         depend(inout: Y[spmm_offset * M : spmm_blksz * M])\
         depend(in: X[offset * M : blksz * M])
@@ -119,18 +134,24 @@ void spmm_blkcoord_finegrained_exe_fixed_buf(int R, int C, int M, int nbuf, doub
             tstart = omp_get_wtime();
 
             rbase = H[i * ncolblks + 0].roffset;
-            cbase = H[i * ncolblks + j].coffset;
+            //cbase = H[i * ncolblks + j].coffset;
+            cbase = H[index].coffset;
             
-            for(k = 0 ; k < H[i * ncolblks + j].nnz ; k++)
+            //for(k = 0 ; k < H[i * ncolblks + j].nnz ; k++)
+            for(k = 0 ; k < H[index].nnz ; k++)
             {
-                r = rbase + H[i * ncolblks + j].rloc[k] - 1;
-                c = cbase + H[i * ncolblks + j].cloc[k] - 1;
-                xcoef = H[i * ncolblks + j].val[k];
+                //r = rbase + H[i * ncolblks + j].rloc[k] - 1;
+                r = ( rbase + H[index].rloc[k] - 1 ) << 3;
+                //c = cbase + H[i * ncolblks + j].cloc[k] - 1;
+                c = ( cbase + H[index].cloc[k] - 1 ) << 3;
+                //xcoef = H[i * ncolblks + j].val[k];
+                xcoef = H[index].val[k];
                 
                 #pragma omp simd    
-                for(l = 0 ; l < M ; l++)
+                for(l = 0 ; l < 8 ; l++)
                 {
-                    Y[r * M + l] = Y[r * M + l] + xcoef * X[c * M + l];
+                    //Y[r * M + l] = Y[r * M + l] + xcoef * X[c * M + l];
+                    Y[r + l] = Y[r + l] + xcoef * X[c + l];
                 }
             }
             tend = omp_get_wtime();
@@ -191,6 +212,7 @@ void spmm_blkcoord_exec(int R, int C, int M, int nthrds, double *X,  double *Y, 
 {
     int k, k1, k2;
     int i, j, l, rbase, cbase, r, c;
+    int index;
     double xcoef;
 
     #pragma omp parallel num_threads(nthrds)
@@ -204,18 +226,27 @@ void spmm_blkcoord_exec(int R, int C, int M, int nthrds, double *X,  double *Y, 
                     rbase = H[i * ncolblks + 0].roffset;
                     for(j = 0 ; j < ncolblks ; j++)
                     {
-                        cbase = H[i * ncolblks + j].coffset;
-                        if(H[i * ncolblks + j].nnz > 0)
+                        //cbase = H[i * ncolblks + j].coffset;
+                        index = i * ncolblks + j;
+                        cbase = H[index].coffset;
+                        //if(H[i * ncolblks + j].nnz > 0)
+                        if(H[index].nnz > 0)
                         {
-                            for(k = 0 ; k < H[i * ncolblks + j].nnz ; k++)
+                            //for(k = 0 ; k < H[i * ncolblks + j].nnz ; k++)
+                            for(k = 0 ; k < H[index].nnz ; k++)
                             {
-                                r = rbase + H[i * ncolblks + j].rloc[k] - 1;
-                                c = cbase + H[i * ncolblks + j].cloc[k] - 1;
-                                xcoef = H[i * ncolblks + j].val[k];
+                                //r = rbase + H[i * ncolblks + j].rloc[k] - 1;
+                                r = ( rbase + H[index].rloc[k] - 1 ) << 3;
+                                //c = cbase + H[i * ncolblks + j].cloc[k] - 1;
+                                c = ( cbase + H[index].cloc[k] - 1 ) << 3;
+                                //xcoef = H[i * ncolblks + j].val[k];
+                                xcoef = H[index].val[k];
                                 #pragma omp simd 
-                                for(l = 0 ; l < M ; l++)
+                                //for(l = 0 ; l < M ; l++)
+                                for(l = 0 ; l < 8 ; l++)
                                 {
-                                    Y[r * M + l] = Y[r * M + l] + xcoef * X[c * M +l];
+                                    //Y[r * M + l] = Y[r * M + l] + xcoef * X[c * M +l];
+                                    Y[r + l] = Y[r + l] + xcoef * X[c + l];
                                 }
                             }
                         }

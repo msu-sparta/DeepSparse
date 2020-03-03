@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
     ja = (int *) malloc(nnonzero * sizeof(int)); //new int[nnonzero](); //irem
     ia = (int *) malloc((numrows + 1) * sizeof(int)); //new int[numrows + 1](); //colsptr
 
-    tstart = omp_get_wtime();
+    //tstart = omp_get_wtime();
     
     mkl_dcsrcsc(job_dcsrcsc, &numrows, acsr, ja, ia, xrem, irem, colptrs, &dcsrcsc_info);
     
@@ -262,6 +262,10 @@ int main(int argc, char *argv[])
     // if 17 
     // blockVectorAX = operatorA*blockVectorX;
     //std::memset(blockVectorAX, 0.0, sizeof(blockVectorAX));
+    
+    for(i = 0 ; i < numTaks ; i++)
+        taskTiming[i] = 0;
+
     tstart = omp_get_wtime();
     #pragma omp parallel for private(j) default(shared)
     for(i = 0; i < M ; i++)
@@ -369,31 +373,31 @@ int main(int argc, char *argv[])
         //if 12 nested if
         //blockVectorR = blockVectorAX - blockVectorX*spdiags(lambda,0,blockSize,blockSize);
     
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
         cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, blocksize, blocksize, 1.0, blockVectorX, blocksize, lambda,blocksize, 0.0, blockVectorR, blocksize); //XY code 1
-        //taskTiming[1] += (omp_get_wtime() - tstart);
+        taskTiming[1] += (omp_get_wtime() - tstart);
 
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
         mat_sub(blockVectorAX, blockVectorR, blockVectorR , M, blocksize); //SUB : 4
-        //taskTiming[4] += (omp_get_wtime() - tstart); 
+        taskTiming[4] += (omp_get_wtime() - tstart); 
 
         //residualNorms=full(sqrt(sum(conj(blockVectorR).*blockVectorR)')); 
         #pragma omp parallel for default(shared)
         for(i = 0 ; i < blocksize ; i++)
             residualNorms[i] = 0.0;
 
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
         mat_mult(blockVectorR, blockVectorR, newX, M, blocksize); //MULT : 5
-        //taskTiming[5] += (omp_get_wtime() - tstart);
+        taskTiming[5] += (omp_get_wtime() - tstart);
         
         sum_sqrt(newX, residualNorms, M, blocksize);
         
         //residualNormsHistory(1:blockSize,iterationNumber)=residualNorms;
         //activeMask = full(residualNorms > residualTolerance) & activeMask;
 
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
         update_activeMask(activeMask, residualNorms, residualTolerance, blocksize);
-        //taskTiming[8] += (omp_get_wtime() - tstart); //UPDATE : 8
+        taskTiming[8] += (omp_get_wtime() - tstart); //UPDATE : 8
     
         //currentBlockSize = sum(activeMask);
         currentBlockSize=0;
@@ -410,28 +414,28 @@ int main(int argc, char *argv[])
         //blockVectorR(:,activeMask) = blockVectorR(:,activeMask) - ...
         //        blockVectorX*(blockVectorX'*blockVectorR(:,activeMask));
 
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
         getActiveBlockVector(activeBlockVectorR, activeMask, blockVectorR, M, blocksize, currentBlockSize); //GET: 7
-        //taskTiming[7] += (omp_get_wtime() - tstart);
+        taskTiming[7] += (omp_get_wtime() - tstart);
     
         //blockVectorX'*blockVectorR(:,activeMask)  -> temp2 is the result
         std::memset(temp2, 0.0, sizeof(temp2));
         
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
         cblas_dgemm(CblasRowMajor,CblasTrans,CblasNoTrans, blocksize, currentBlockSize, M, 1.0, blockVectorX, blocksize, activeBlockVectorR, currentBlockSize,0.0, temp2, currentBlockSize); //XTY : 2
         //_XTY(blockVectorX, activeBlockVectorR, temp2, M, blocksize, currentBlockSize, block_width);
-        //taskTiming[2] += (omp_get_wtime() - tstart);
+        taskTiming[2] += (omp_get_wtime() - tstart);
     
         //temp3 = blockVectorX * temp2
         
 
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
         cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, currentBlockSize, blocksize, 1.0, blockVectorX, blocksize, temp2, currentBlockSize, 0.0, temp3, currentBlockSize);
-        //taskTiming[1] += (omp_get_wtime() - tstart);
+        taskTiming[1] += (omp_get_wtime() - tstart);
 
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
         mat_sub(activeBlockVectorR, temp3, activeBlockVectorR, M, currentBlockSize);
-        //taskTiming[4] += (omp_get_wtime() - tstart);
+        taskTiming[4] += (omp_get_wtime() - tstart);
 
         // tstart = omp_get_wtime();
         // updateBlockVector(activeBlockVectorR, activeMask, blockVectorR, M, blocksize, currentBlockSize); //UPDATE: 8
@@ -442,10 +446,10 @@ int main(int argc, char *argv[])
 
         
 
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
         cblas_dgemm(CblasRowMajor,CblasTrans,CblasNoTrans, currentBlockSize, currentBlockSize, M, 1.0, activeBlockVectorR, currentBlockSize, activeBlockVectorR, currentBlockSize, 0.0,gramRBR, currentBlockSize);
         //_XTY(activeBlockVectorR, activeBlockVectorR, gramRBR, M, currentBlockSize, currentBlockSize, block_width);
-        //taskTiming[2] += (omp_get_wtime() - tstart);
+        taskTiming[2] += (omp_get_wtime() - tstart);
 
         //[gramRBR,cholFlag]=chol(gramRBR);
         transpose(gramRBR, trans_gramRBR, currentBlockSize, currentBlockSize);
@@ -471,22 +475,22 @@ int main(int argc, char *argv[])
         {
             inverse(gramRBR, currentBlockSize, currentBlockSize);
 
-            //tstart = omp_get_wtime();
+            tstart = omp_get_wtime();
             cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, currentBlockSize, currentBlockSize, 1.0, activeBlockVectorR, currentBlockSize, gramRBR, currentBlockSize, 0.0, temp3, currentBlockSize);
-            //taskTiming[1] += (omp_get_wtime() - tstart);
+            taskTiming[1] += (omp_get_wtime() - tstart);
 
-            //tstart = omp_get_wtime();
+            tstart = omp_get_wtime();
             custom_dlacpy(temp3, activeBlockVectorR, M, currentBlockSize); //DLACPY: 11
-            //taskTiming[10] += (omp_get_wtime() - tstart);
+            taskTiming[10] += (omp_get_wtime() - tstart);
             
-            //tstart = omp_get_wtime();
+            tstart = omp_get_wtime();
             updateBlockVector(activeBlockVectorR, activeMask, blockVectorR, M, blocksize, currentBlockSize);
-            //taskTiming[8] += (omp_get_wtime() - tstart);
+            taskTiming[8] += (omp_get_wtime() - tstart);
         } //end if
 
         
 
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
         #pragma omp parallel for private(j) default(shared)
         for(i = 0; i < M ; i++)
         {
@@ -495,13 +499,13 @@ int main(int argc, char *argv[])
                 activeBlockVectorAR[i * currentBlockSize + j] = 0.0;
             }
         }
-        //taskTiming[0] += (omp_get_wtime() - tstart); //SETZERO : 0
+        taskTiming[0] += (omp_get_wtime() - tstart); //SETZERO : 0
      
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
         //mkl_dcscmm(&transA, &M, &currentBlockSize, &M, &alpha, matdescra, xrem, irem, colptrs, colptrs+1, activeBlockVectorR, &currentBlockSize,  &beta, activeBlockVectorAR, &currentBlockSize);
         mkl_dcsrmm(&transA, &M, &currentBlockSize, &M, &alpha, matdescra, acsr, ja, ia, ia+1, activeBlockVectorR, &currentBlockSize, &beta, activeBlockVectorAR, &currentBlockSize);
         //spmm_blkcoord(numrows, numcols, currentBlockSize, nthrds, activeBlockVectorR, activeBlockVectorAR, matrixBlock);
-        //taskTiming[6] += (omp_get_wtime() - tstart); //SPMM 6
+        taskTiming[6] += (omp_get_wtime() - tstart); //SPMM 6
 
         // tstart = omp_get_wtime();
         // updateBlockVector(activeBlockVectorAR, activeMask, blockVectorAR, M, blocksize, currentBlockSize);
@@ -514,14 +518,14 @@ int main(int argc, char *argv[])
 
            
 
-            //tstart = omp_get_wtime();
+            tstart = omp_get_wtime();
             getActiveBlockVector(activeBlockVectorP, activeMask, blockVectorP, M, blocksize, currentBlockSize);
-            //taskTiming[7] += (omp_get_wtime() - tstart);
+            taskTiming[7] += (omp_get_wtime() - tstart);
 
-            //tstart = omp_get_wtime();
+            tstart = omp_get_wtime();
             cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, currentBlockSize, currentBlockSize, M, 1.0, activeBlockVectorP, currentBlockSize, activeBlockVectorP, currentBlockSize, 0.0, gramPBP, currentBlockSize);
             //_XTY(activeBlockVectorP, activeBlockVectorP, gramPBP, M, currentBlockSize, currentBlockSize, block_width);
-            //taskTiming[2] += (omp_get_wtime() - tstart);
+            taskTiming[2] += (omp_get_wtime() - tstart);
             
             transpose(gramPBP, trans_gramPBP, currentBlockSize, currentBlockSize);
             dpotrf_( &uplo, &currentBlockSize, trans_gramPBP, &currentBlockSize, &info );
@@ -557,35 +561,36 @@ int main(int argc, char *argv[])
                    activeBlockVectorAP= new double[M*currentBlockSize]();
                 }*/
 
-                //tstart = omp_get_wtime();
+                tstart = omp_get_wtime();
                 cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, currentBlockSize, currentBlockSize, 1.0, activeBlockVectorP, currentBlockSize, gramPBP, currentBlockSize, 0.0, temp3, currentBlockSize);
-                //taskTiming[1] += (omp_get_wtime() - tstart);
+                taskTiming[1] += (omp_get_wtime() - tstart);
                 
-                //tstart = omp_get_wtime();
+                tstart = omp_get_wtime();
                 custom_dlacpy(temp3, activeBlockVectorP, M, currentBlockSize);
-                //taskTiming[10] += (omp_get_wtime() - tstart);
+                taskTiming[10] += (omp_get_wtime() - tstart);
              
-                //tstart = omp_get_wtime();
+                tstart = omp_get_wtime();
                 updateBlockVector(activeBlockVectorP, activeMask, blockVectorP, M, blocksize, currentBlockSize);
-                //taskTiming[8] += (omp_get_wtime() - tstart);
+                taskTiming[8] += (omp_get_wtime() - tstart);
 
              
+                tstart = omp_get_wtime();
                 //blockVectorAP(:,activeMask) = blockVectorAP(:,activeMask)/gramPBP;
                 //temp1Time=omp_get_wtime();
                 getActiveBlockVector(activeBlockVectorAP, activeMask, blockVectorAP, M, blocksize, currentBlockSize);
-                //taskTiming[10] += (omp_get_wtime() - tstart);
+                taskTiming[10] += (omp_get_wtime() - tstart);
                 
-                //tstart = omp_get_wtime();
+                tstart = omp_get_wtime();
                 cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, currentBlockSize, currentBlockSize, 1.0, activeBlockVectorAP, currentBlockSize, gramPBP, currentBlockSize, 0.0, temp3, currentBlockSize);
-                //taskTiming[1] += (omp_get_wtime() - tstart);
+                taskTiming[1] += (omp_get_wtime() - tstart);
                 
-                //tstart = omp_get_wtime();
+                tstart = omp_get_wtime();
                 custom_dlacpy(temp3, activeBlockVectorAP, M, currentBlockSize);
-                //taskTiming[10] += (omp_get_wtime() - tstart);
+                taskTiming[10] += (omp_get_wtime() - tstart);
                 
-                //tstart = omp_get_wtime();
+                tstart = omp_get_wtime();
                 updateBlockVector(activeBlockVectorAP, activeMask, blockVectorAP, M, blocksize, currentBlockSize);
-                //taskTiming[8] += (omp_get_wtime() - tstart);
+                taskTiming[8] += (omp_get_wtime() - tstart);
             } //end if info
             else
             {
@@ -632,21 +637,21 @@ int main(int argc, char *argv[])
         //gramRAR=full(blockVectorAR(:,activeMask)'*blockVectorR(:,activeMask));
         //gramRAR=(gramRAR'+gramRAR)*0.5;
  
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
         cblas_dgemm(CblasRowMajor,CblasTrans, CblasNoTrans, blocksize, currentBlockSize, M, 1.0, blockVectorAX, blocksize, activeBlockVectorR, currentBlockSize, 0.0, gramXAR, currentBlockSize);
         //_XTY(blockVectorAX, activeBlockVectorR, gramXAR, M, blocksize, currentBlockSize, block_width);
-        //taskTiming[2] += (omp_get_wtime() - tstart);
+        taskTiming[2] += (omp_get_wtime() - tstart);
      
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
         cblas_dgemm(CblasRowMajor,CblasTrans, CblasNoTrans, currentBlockSize, currentBlockSize, M, 1.0, activeBlockVectorAR, currentBlockSize, activeBlockVectorR, currentBlockSize, 0.0, gramRAR, currentBlockSize);
         //_XTY(activeBlockVectorAR, activeBlockVectorR, gramRAR, M, currentBlockSize, currentBlockSize, block_width);
-        //taskTiming[2] += (omp_get_wtime() - tstart);
+        taskTiming[2] += (omp_get_wtime() - tstart);
      
         transpose(gramRAR, transGramRAR, currentBlockSize, currentBlockSize);
         
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
         cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, currentBlockSize, currentBlockSize, currentBlockSize, 0.5, transGramRAR, currentBlockSize, identity_PAP, currentBlockSize, 0.5, gramRAR, currentBlockSize);
-        //taskTiming[1] += (omp_get_wtime() - tstart);
+        taskTiming[1] += (omp_get_wtime() - tstart);
 
      
         //--- cond_try for loop -----
@@ -662,26 +667,26 @@ int main(int argc, char *argv[])
                     //activeBlockVectorP= new double[M*currentBlockSize]();
                     //getActiveBlockVector(activeBlockVectorP, activeMask, blockVectorP, M, blocksize, currentBlockSize);
                     
-                    //tstart = omp_get_wtime();
+                    tstart = omp_get_wtime();
                     cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, blocksize, currentBlockSize, M, 1.0, blockVectorAX, blocksize, activeBlockVectorP, currentBlockSize, 0.0, gramXAP, currentBlockSize);
                     //_XTY(blockVectorAX, activeBlockVectorP, gramXAP, M, blocksize, currentBlockSize, block_width);
-                    //taskTiming[2] += (omp_get_wtime() - tstart);
+                    taskTiming[2] += (omp_get_wtime() - tstart);
                  
-                    //tstart = omp_get_wtime();
+                    tstart = omp_get_wtime();
                     cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, currentBlockSize, currentBlockSize, M, 1.0, activeBlockVectorAR, currentBlockSize, activeBlockVectorP, currentBlockSize, 0.0, gramRAP, currentBlockSize);
                     //_XTY(activeBlockVectorAR, activeBlockVectorP, gramRAP, M, currentBlockSize, currentBlockSize, block_width);
-                    //taskTiming[2] += (omp_get_wtime() - tstart);
+                    taskTiming[2] += (omp_get_wtime() - tstart);
                     
-                    //tstart = omp_get_wtime();
+                    tstart = omp_get_wtime();
                     cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, currentBlockSize, currentBlockSize, M, 1.0, activeBlockVectorAP, currentBlockSize, activeBlockVectorP, currentBlockSize, 0.0, gramPAP, currentBlockSize);
                     //_XTY(activeBlockVectorAP, activeBlockVectorP, gramPAP, M, currentBlockSize, currentBlockSize, block_width);
-                    //taskTiming[2] += (omp_get_wtime() - tstart);
+                    taskTiming[2] += (omp_get_wtime() - tstart);
                  
                     //gramPAP=(gramPAP'+gramPAP)*0.5;
 
-                    //tstart = omp_get_wtime();
+                    tstart = omp_get_wtime();
                     cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, currentBlockSize, currentBlockSize, currentBlockSize, 0.5, gramPAP, currentBlockSize, identity_PAP, currentBlockSize, 0.5, gramPAP, currentBlockSize);
-                    //taskTiming[1] += (omp_get_wtime() - tstart);
+                    taskTiming[1] += (omp_get_wtime() - tstart);
                  
                     if(explicitGramFlag==1)
                     {
@@ -715,15 +720,15 @@ int main(int argc, char *argv[])
                         mat_copy(gramPAP, currentBlockSize, currentBlockSize, gramA, blocksize+currentBlockSize, blocksize+currentBlockSize, gramASize);
                     } //end else
                     //double *gramXBP = new double[blocksize*currentBlockSize]();
-                    //tstart = omp_get_wtime();
+                    tstart = omp_get_wtime();
                     cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, blocksize, currentBlockSize, M, 1.0, blockVectorX, blocksize, activeBlockVectorP, currentBlockSize, 0.0, gramXBP, currentBlockSize);
                     //_XTY(blockVectorX, activeBlockVectorP, gramXBP, M, blocksize, currentBlockSize, block_width);
-                    //taskTiming[2] += (omp_get_wtime() - tstart);
+                    taskTiming[2] += (omp_get_wtime() - tstart);
 
-                    //tstart = omp_get_wtime();
+                    tstart = omp_get_wtime();
                     cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, currentBlockSize, currentBlockSize, M, 1.0, activeBlockVectorR, currentBlockSize, activeBlockVectorP, currentBlockSize, 0.0, gramRBP, currentBlockSize);
                     //_XTY(activeBlockVectorR, activeBlockVectorP, gramRBP, M, currentBlockSize, currentBlockSize, block_width);
-                    //taskTiming[2] += (omp_get_wtime() - tstart);
+                    taskTiming[2] += (omp_get_wtime() - tstart);
                  
                     if(explicitGramFlag==1)
                     {
@@ -797,7 +802,7 @@ int main(int argc, char *argv[])
         }//inner loop finish here
 
 
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
 
         eigen_value = new double[gramASize]();
         double *trans_gramA = new double[gramASize*gramASize]();
@@ -845,29 +850,29 @@ int main(int argc, char *argv[])
             }
             column++;
         }
-        //taskTiming[9] += (omp_get_wtime() - tstart);
+        taskTiming[9] += (omp_get_wtime() - tstart);
 
         if(restart == 0)
         {
             // partil result- part1:- blockVectorP =  blockVectorR(:,activeMask)*coordX(blockSize+1:blockSize+activeRSize,:)
-            //tstart = omp_get_wtime();
+            tstart = omp_get_wtime();
             cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, blocksize, currentBlockSize, 1.0, activeBlockVectorR, currentBlockSize, coordX+(blocksize*blocksize), blocksize, 0.0, blockVectorP, blocksize);
-            //taskTiming[1] += (omp_get_wtime() - tstart);
+            taskTiming[1] += (omp_get_wtime() - tstart);
             
             /*blockVectorP =  blockVectorR(:,activeMask)*coordX(blockSize+1:blockSize+activeRSize,:) + blockVectorP(:,activeMask)*coordX(blockSize+activeRSize+1:blockSize+activeRSize+activePSize,:); */
-            //tstart = omp_get_wtime();
+            tstart = omp_get_wtime();
             cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, blocksize, currentBlockSize, 1.0, activeBlockVectorP, currentBlockSize, coordX+((blocksize+currentBlockSize)*blocksize), blocksize, 1.0, blockVectorP, blocksize);
-            //taskTiming[1] += (omp_get_wtime() - tstart);
+            taskTiming[1] += (omp_get_wtime() - tstart);
          
             /*blockVectorAP = blockVectorAR(:,activeMask)*coordX(blockSize+1:blockSize+activeRSize,:) + blockVectorAP(:,activeMask)*coordX(blockSize+activeRSize+1:blockSize + activeRSize+activePSize,:);*/
 
-            //tstart = omp_get_wtime();
+            tstart = omp_get_wtime();
             cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, blocksize, currentBlockSize, 1.0, activeBlockVectorAR, currentBlockSize, coordX+(blocksize*blocksize), blocksize, 0.0, blockVectorAP, blocksize);
-            //taskTiming[1] += (omp_get_wtime() - tstart);
+            taskTiming[1] += (omp_get_wtime() - tstart);
             
-            //tstart = omp_get_wtime();
+            tstart = omp_get_wtime();
             cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, blocksize, currentBlockSize, 1.0, activeBlockVectorAP, currentBlockSize, coordX+((blocksize+currentBlockSize)*blocksize), blocksize, 1.0, blockVectorAP, blocksize);
-            //taskTiming[1] += (omp_get_wtime() - tstart);
+            taskTiming[1] += (omp_get_wtime() - tstart);
         }
         else
         {
@@ -875,32 +880,32 @@ int main(int argc, char *argv[])
             // blockVectorP =   blockVectorR(:,activeMask)*...
             //    coordX(blockSize+1:blockSize+activeRSize,:);
 
-            //tstart = omp_get_wtime();
+            tstart = omp_get_wtime();
             cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans, M, blocksize, activeRSize, 1.0, activeBlockVectorR, currentBlockSize, coordX+(blocksize*blocksize), blocksize, 0.0, blockVectorP, blocksize);
-            //taskTiming[1] += (omp_get_wtime() - tstart);
+            taskTiming[1] += (omp_get_wtime() - tstart);
          
             //blockVectorAP = blockVectorAR(:,activeMask)*coordX(blockSize+1:blockSize+activeRSize,:);
         
-            //tstart = omp_get_wtime();
+            tstart = omp_get_wtime();
             cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans, M, blocksize, activeRSize, 1.0, activeBlockVectorAR, currentBlockSize, coordX+(blocksize*blocksize), blocksize, 0.0, blockVectorAP, blocksize);
-            //taskTiming[1] += (omp_get_wtime() - tstart);
+            taskTiming[1] += (omp_get_wtime() - tstart);
         }
 
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
         cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, blocksize, blocksize, 1.0, blockVectorX, blocksize, coordX, blocksize, 0.0, newX, blocksize);
-        //taskTiming[1] += (omp_get_wtime() - tstart);
+        taskTiming[1] += (omp_get_wtime() - tstart);
 
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
         mat_addition(newX, blockVectorP, blockVectorX, M, blocksize);
-        //taskTiming[3] += (omp_get_wtime() - tstart);
+        taskTiming[3] += (omp_get_wtime() - tstart);
         
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
         cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, blocksize, blocksize, 1.0, blockVectorAX, blocksize, coordX, blocksize, 0.0, newX, blocksize);
-        //taskTiming[1] += (omp_get_wtime() - tstart);
+        taskTiming[1] += (omp_get_wtime() - tstart);
 
-        //tstart = omp_get_wtime();
+        tstart = omp_get_wtime();
         mat_addition(newX, blockVectorAP, blockVectorAX, M, blocksize);
-        //taskTiming[3] += (omp_get_wtime() - tstart);
+        taskTiming[3] += (omp_get_wtime() - tstart);
         
         //temp1Time=omp_get_wtime();
         delete []eigen_value;
@@ -959,6 +964,18 @@ int main(int argc, char *argv[])
         }
         printf("\n");
     }
+
+    printf("%10s %.6lf sec.\n", "SETZERO", taskTiming[0]);
+    printf("%10s %.6lf sec.\n", "XY", taskTiming[1]);
+    printf("%10s %.6lf sec.\n", "XTY", taskTiming[2]);
+    printf("%10s %.6lf sec.\n", "ADD", taskTiming[3]);
+    printf("%10s %.6lf sec.\n", "SUB", taskTiming[4]);
+    printf("%10s %.6lf sec.\n", "MULT", taskTiming[5]);
+    printf("%10s %.6lf sec.\n", "SPMM", taskTiming[6]);
+    printf("%10s %.6lf sec.\n", "GET", taskTiming[7]);
+    printf("%10s %.6lf sec.\n", "UPDATE", taskTiming[8]);
+    printf("%10s %.6lf sec.\n", "EIGEN", taskTiming[9]);
+    printf("%10s %.6lf sec.\n", "DLACPY", taskTiming[10]);
 
     return 0;
 }

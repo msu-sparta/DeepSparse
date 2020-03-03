@@ -1,6 +1,10 @@
 CC=g++
+#CC=icpc
 #CFLAGS=-std=c++11 -Wall -Wextra -Wconversion -O3  -qopenmp
-CFLAGS= -fopenmp -O3 -std=c++11 -m64 -I${MKL_ROOT}/include
+#CFLAGS= -fopenmp -O3 -std=c++11 -m64 -I${MKL_ROOT}/include
+CFLAGS= -march=knl -fopenmp -O3 -std=c++11 -m64 -I${MKL_ROOT}/include
+#CFLAGS= -xMIC-AVX512 -qopenmp -O3 -std=c++11 -m64 -I${MKL_ROOT}/include
+#CFLAGS= -qopenmp -O3 -std=c++11 -m64 -I${MKL_ROOT}/include
 LINKER_INT32=-L${MKL_ROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_gnu_thread -lmkl_core -lgomp -lpthread -lm -ldl
 
 
