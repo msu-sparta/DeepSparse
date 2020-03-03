@@ -8,7 +8,7 @@
 long position = 0 ;
 int *colptrs, *irem;
 double *xrem;
-int nrows, ncols, nnz, numrows, numcols, nnonzero, nthrds = 32;
+int nrows, ncols, nnz, numrows, numcols, nnonzero;
 int wblk, nrowblks, ncolblks, nthreads;
 int *nnzPerRow;
 //block<double> *matrixBlock;
@@ -332,7 +332,7 @@ void _XY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func[
     /**********************************************
     Input: X[M*N], Y[N*P]
     Output: result[M*P]
-    nthrds : global variable, total # of threads
+    nthreads : global variable, total # of threads
     ***********************************************/
     
     /* funciton code: 1 */
@@ -533,7 +533,7 @@ void _XY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
     /**********************************************
     Input: X[M*N], Y[N*P]
     Output: result[M*P]
-    nthrds : global variable, total # of threads
+    nthreads : global variable, total # of threads
     ***********************************************/
    
 
@@ -710,7 +710,7 @@ void _XY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
     /**********************************************
     Input: X[M*N], Y[N*P]
     Output: result[M*P]
-    nthrds : global variable, total # of threads
+    nthreads : global variable, total # of threads
     ***********************************************/
 
     /* funciton code: 1 */
@@ -861,7 +861,7 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
     _XTY_v1: adding partial sums block by block, not row by row
     Input: X[row*col], Y[row*p]
     Output: result[col*P]
-    nthrds : global variable, total # of threads
+    nthreads : global variable, total # of threads
     buf : how to free/deallocate corresponding memory location
     blocksize: each chunk
     **********************************************************/
@@ -872,7 +872,7 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
     tstart = omp_get_wtime(); 
 
     int i, j, k, l;
-    int nbuf = 16;
+    int nbuf = nthreads;
     int pseudo_tid, max_pesudo_tid = -1;
 
     char i_string[8], j_string[8], l_string[8], k_string[4], task_id1_char[4], task_id2_char[4], xty_id_char[4];
@@ -1051,9 +1051,9 @@ void _XTY(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_func
             
             edgeU[edgeCount] = nodeCount - 1;
             edgeV[edgeCount] = vertexName[ary];
-            edgeW[edgeCount] = nthrds * col * p * sizeof(double); //=> changed //sizeof(double); 
+            edgeW[edgeCount] = nthreads * col * p * sizeof(double); //=> changed //sizeof(double); 
 
-            //printf("%s --> %s %lf nthrds = %d col = %d p = %d \n", main_task, ary, edgeW[edgeCount],nthrds,col,p);
+            //printf("%s --> %s %lf nthreads = %d col = %d p = %d \n", main_task, ary, edgeW[edgeCount],nthreads,col,p);
             edgeCount++;
 
             // #### Hier #####
@@ -1101,7 +1101,7 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
     _XTY_v1: adding partial sums block by block, not row by row
     Input: X[row*col], Y[col*p]
     Output: result[col*P]
-    nthrds : global variable, total # of threads
+    nthreads : global variable, total # of threads
     buf : how to free/deallocate corresponding memory location
     blocksize: each chunk
     **********************************************************/
@@ -1110,7 +1110,7 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
     tstart = omp_get_wtime();
     
     int i, j, k, l;
-    int nbuf = 16;
+    int nbuf = nthreads;
     int pseudo_tid, max_pesudo_tid = -1;
 
     char i_string[8], j_string[8], l_string[8], k_string[4], task_id1_char[4], task_id2_char[4], xty_id_char[4];
@@ -1294,7 +1294,7 @@ void _XTY_v1(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
             
             edgeU[edgeCount] = nodeCount - 1;
             edgeV[edgeCount] = vertexName[ary];
-            edgeW[edgeCount] = nthrds * col * p * sizeof(double); //sizeof(double);
+            edgeW[edgeCount] = nthreads * col * p * sizeof(double); //sizeof(double);
             edgeCount++;
 
             // #### Hier #####
@@ -1342,7 +1342,7 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
     tstart = omp_get_wtime();
     
     int i, j, k, l;
-    int nbuf = 16;
+    int nbuf = nthreads;
     int pseudo_tid, max_pesudo_tid = -1;
 
     char i_string[8], j_string[8], l_string[8], k_string[4], task_id1_char[4], task_id2_char[4], xty_id_char[4];
@@ -1522,7 +1522,7 @@ void _XTY_v2(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
          
             edgeU[edgeCount] = nodeCount - 1;
             edgeV[edgeCount] = vertexName[ary];
-            edgeW[edgeCount] = nthrds * col * p * sizeof(double); //sizeof(double);
+            edgeW[edgeCount] = nthreads * col * p * sizeof(double); //sizeof(double);
             edgeCount++;
 
             // #### Hier #####
@@ -1570,7 +1570,7 @@ void  _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_
     tstart = omp_get_wtime();
     
     int i, j, k, l;
-    int nbuf = 16;
+    int nbuf = nthreads   ;
     int pseudo_tid, max_pesudo_tid = -1;
 
     char i_string[8], j_string[8], l_string[8], k_string[4], task_id2_char[4], xty_id_char[4];
@@ -1775,7 +1775,7 @@ void  _XTY_v3(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_
 
             edgeU[edgeCount] = nodeCount - 1;
             edgeV[edgeCount] = vertexName[ary];
-            edgeW[edgeCount] = nthrds * col * p * sizeof(double); //sizeof(double);
+            edgeW[edgeCount] = nthreads * col * p * sizeof(double); //sizeof(double);
             edgeCount++;
 
             // #### Hier #####
@@ -2481,7 +2481,7 @@ void mat_sub(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_f
     /**********************************************
     Input: X[M*N], Y[N*P]
     Output: result[M*P]
-    nthrds : global variable, total # of threads
+    nthreads : global variable, total # of threads
     ***********************************************/
 
     /* funciton code: 4 */
@@ -2797,7 +2797,7 @@ void dot_mm(int edge1Format, char edge1_var[], char edge1_part1[], char edge1_fu
             char input1[], char input2[], char output[], int row, int col, int block_width)
 {
     /* funciton code: 5 */
-    int nbuf = 16, k, pseudo_tid, max_pesudo_tid = -1;
+    int nbuf = nthreads, k, pseudo_tid, max_pesudo_tid = -1;
 
     string dummyString = "";
     double tstart, tend;
@@ -3009,7 +3009,7 @@ void sum_sqrt(char edge1_part1[], char edge1_func[], char edge1_part2[], char ed
     tstart = omp_get_wtime();
 
     int i, k;
-    int nbuf = 16;
+    int nbuf = nthreads;
     int pseudo_tid, max_pesudo_tid = -1;
 
     char i_string[8], k_string[4], task_id2_char[4];
@@ -3205,7 +3205,7 @@ void sum_sqrt_dot(char edge1_part1[], char edge1_func[], char edge1_part2[], cha
     tstart = omp_get_wtime();
 
     int i, k;
-    int nbuf = 16;
+    int nbuf = nthreads;
     int pseudo_tid, max_pesudo_tid = -1;
 
     char i_string[8], k_string[4], task_id2_char[4];
