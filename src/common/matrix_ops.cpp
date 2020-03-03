@@ -30,14 +30,14 @@ void spmm_blkcoord_loop(int R, int C, int blocksize, int nthrds, double *X,  dou
                 for(k = 0 ; k < H[index].nnz ; k++)
                 {
                     //r = rbase + H[i * ncolblks + j].rloc[k] - 1;
-                    r = ( rbase + H[index].rloc[k] - 1 ) << 3;
+                    r = ( rbase + H[index].rloc[k] - 1 ) << 6;
                     //c = cbase + H[i * ncolblks + j].cloc[k] - 1;
-                    c = ( cbase + H[index].cloc[k] - 1 ) << 3;
+                    c = ( cbase + H[index].cloc[k] - 1 ) << 6;
                     //xcoef = H[i * ncolblks + j].val[k];
                     xcoef = H[index].val[k];
                     #pragma omp simd 
                     //for(l = 0; l < blocksize ; l++)
-                    for(l = 0; l < 8 ; l++)
+                    for(l = 0; l < 64 ; l++)
                     {
                         //Y[r * blocksize + l] = Y[r * blocksize + l] + xcoef * X[c * blocksize + l];
                         Y[r + l] = Y[r + l] + xcoef * X[c + l];
@@ -141,14 +141,14 @@ void spmm_blkcoord_finegrained_exe_fixed_buf(int R, int C, int M, int nbuf, doub
             for(k = 0 ; k < H[index].nnz ; k++)
             {
                 //r = rbase + H[i * ncolblks + j].rloc[k] - 1;
-                r = ( rbase + H[index].rloc[k] - 1 ) << 3;
+                r = ( rbase + H[index].rloc[k] - 1 ) << 6;
                 //c = cbase + H[i * ncolblks + j].cloc[k] - 1;
-                c = ( cbase + H[index].cloc[k] - 1 ) << 3;
+                c = ( cbase + H[index].cloc[k] - 1 ) << 6;
                 //xcoef = H[i * ncolblks + j].val[k];
                 xcoef = H[index].val[k];
                 
                 #pragma omp simd    
-                for(l = 0 ; l < 8 ; l++)
+                for(l = 0 ; l < 64 ; l++)
                 {
                     //Y[r * M + l] = Y[r * M + l] + xcoef * X[c * M + l];
                     Y[r + l] = Y[r + l] + xcoef * X[c + l];
@@ -388,12 +388,25 @@ void _XTY_v1_RED(double *buf, double *result, int N, int P, int block_width)
         if(i + blksz > N)
             blksz = N - i;
 
+        //depend(in: buf[0*N*P:N*P], buf[1*N*P:N*P], buf[2*N*P:N*P], buf[3*N*P:nthrds*N*P], buf[4*N*P:N*P], buf[5*N*P:N*P], buf[6*N*P:N*P],\
+        buf[7*N*P:N*P], buf[8*N*P:N*P], buf[9*N*P:N*P], buf[10*N*P:nthrds*N*P], buf[11*N*P:N*P], buf[12*N*P:N*P], buf[13*N*P:N*P],\
+        buf[14*N*P:N*P], buf[15*N*P:N*P])
+        //TODO:buf in dependency 0 through 63
         #pragma omp task private(sum, k, l, tid, tstart, tend)\
         firstprivate(i, nthrds, blksz, buf, N, P, result, block_width)\
         depend(in: N, P) depend(out: result[i * P : blksz * P])\
         depend(in: buf[0*N*P:N*P], buf[1*N*P:N*P], buf[2*N*P:N*P], buf[3*N*P:nthrds*N*P], buf[4*N*P:N*P], buf[5*N*P:N*P], buf[6*N*P:N*P],\
         buf[7*N*P:N*P], buf[8*N*P:N*P], buf[9*N*P:N*P], buf[10*N*P:nthrds*N*P], buf[11*N*P:N*P], buf[12*N*P:N*P], buf[13*N*P:N*P],\
-        buf[14*N*P:N*P], buf[15*N*P:N*P])
+        buf[14*N*P:N*P], buf[15*N*P:N*P],\
+        buf[16*N*P:N*P], buf[17*N*P:N*P], buf[18*N*P:N*P], buf[19*N*P:nthrds*N*P], buf[20*N*P:N*P], buf[21*N*P:N*P], buf[22*N*P:N*P],\
+        buf[23*N*P:N*P], buf[24*N*P:N*P], buf[25*N*P:N*P], buf[26*N*P:nthrds*N*P], buf[27*N*P:N*P], buf[28*N*P:N*P], buf[29*N*P:N*P],\
+        buf[30*N*P:N*P], buf[31*N*P:N*P],\
+        buf[32*N*P:N*P], buf[33*N*P:N*P], buf[34*N*P:N*P], buf[35*N*P:nthrds*N*P], buf[36*N*P:N*P], buf[37*N*P:N*P], buf[38*N*P:N*P],\
+        buf[39*N*P:N*P], buf[40*N*P:N*P], buf[41*N*P:N*P], buf[42*N*P:nthrds*N*P], buf[43*N*P:N*P], buf[44*N*P:N*P], buf[45*N*P:N*P],\
+        buf[46*N*P:N*P], buf[47*N*P:N*P],\
+        buf[48*N*P:N*P], buf[49*N*P:N*P], buf[50*N*P:N*P], buf[51*N*P:nthrds*N*P], buf[52*N*P:N*P], buf[53*N*P:N*P], buf[54*N*P:N*P],\
+        buf[55*N*P:N*P], buf[56*N*P:N*P], buf[57*N*P:N*P], buf[58*N*P:nthrds*N*P], buf[59*N*P:N*P], buf[60*N*P:N*P], buf[61*N*P:N*P],\
+        buf[62*N*P:N*P], buf[63*N*P:N*P])
         {
             tid = omp_get_thread_num();
             tstart = omp_get_wtime();
