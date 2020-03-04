@@ -1536,6 +1536,9 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
     char task_id[10];
     int vmap_index = 0;
 
+
+    int nbuff = nthreads ; 
+    printf("smallgraph d structure = %d\n",nbuff);
     int **vertex_map;
     vertex_map = (int**)calloc((vertexCount+1),sizeof(int*));
 
@@ -1604,7 +1607,7 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
 
 
                         char buff_c[2];
-                        //sprintf(buff_c,"%d",local_row%16);
+                        //sprintf(buff_c,"%d",local_row%nbuff);
                         buff++;
                         strcat(total_node,"0");
                         //printf("totalnode made\n");
@@ -1716,7 +1719,7 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
 
 
                     char buff_c[2];
-                        sprintf(buff_c,"%d",loc%16);
+                        sprintf(buff_c,"%d",loc%nbuff);
                         buff++;
                         strcat(total_node,buff_c);
                     //printf("type 1 total node %s\n",total_node);
@@ -1766,7 +1769,7 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
 
 
                     char buff_c[2];
-                        sprintf(buff_c,"%d",loc%16);
+                        sprintf(buff_c,"%d",loc%nbuff);
                         buff++;
                         strcat(total_node,buff_c);
                     //printf("type 1 total node %s\n",total_node);
@@ -1823,7 +1826,7 @@ void create_smallgraph_datastructure_sparse(int *edge_u, int *edge_v, double *ed
 
 
                     char buff_c[2];
-                    sprintf(buff_c,"%d",loc%16);
+                    sprintf(buff_c,"%d",loc%nbuff);
                     buff++;
                     strcat(total_node,buff_c);
                     strcat(total_node,",");

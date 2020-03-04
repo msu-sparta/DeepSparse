@@ -13,6 +13,8 @@
 #include <unistd.h>
 #include <getopt.h>
 
+#include "../../util.h"
+
 typedef int idxType; /* indices */
 //typedef long long ecType;  /* edge costs */
 typedef double ecType;
