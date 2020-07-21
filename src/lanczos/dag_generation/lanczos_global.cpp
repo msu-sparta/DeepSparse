@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     char *filename = argv[3];
 
     wblk = block_width; 
-    
+
     //read_custom<double>(filename, xrem);
     read_custom(filename, xrem);
 
@@ -51,22 +51,22 @@ int main(int argc, char *argv[])
 
     //csc2blkcoord<double>(matrixBlock, xrem);
     csc2blkcoord(matrixBlock, xrem);
-    
+
     printf("Finsihed Converting CUS TO CSB\n");
 
 
-    #pragma omp parallel
-    #pragma omp master
+#pragma omp parallel
+#pragma omp master
     {
         nthreads = omp_get_num_threads();
     }
 
     /* initializing nrowblksString */
-    
+
     tstart = omp_get_wtime();
     int intTOstringCount = (nrowblks > nthreads) ? nrowblks : nthreads;
     nrowblksString = (char**) malloc(intTOstringCount * sizeof(char *)); // Allocate row pointers
-    
+
     for(i = 0 ; i < intTOstringCount ; i++)
     {
         nrowblksString[i] = (char *) malloc(7 * sizeof(char));
@@ -76,11 +76,11 @@ int main(int argc, char *argv[])
 
     tend = omp_get_wtime();
     printf("nrowblksString time: %lf sec. \n", tend - tstart);
-    
+
 
     /* graphn Gen timing breakdown*/
     graphGenTime = (double *) malloc(total_func * sizeof(double));
-    
+
     for(i = 0 ; i < total_func; i++)
     {
         graphGenTime[i] = 0.0;
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     edgeV = (int *) malloc(guessEdgeCount * sizeof(int));
     edgeW = (double *) malloc(guessEdgeCount * sizeof(double));
     vertexWeight = (double *) malloc(guessEdgeCount * sizeof(double));
-    
+
     vertexName.reserve(guessEdgeCount);
     vertexName.max_load_factor(0.25);
 
@@ -163,7 +163,7 @@ void mainloop(int blocksize , int block_width){
     int *QQ_vertexNo = (int *) malloc(ncolblks * sizeof(int));
 
     int **SPMV_vertexNo = (int **) malloc(nrowblks * sizeof(int *));
-    
+
     for(i = 0 ; i < ncolblks ; i++)
     {
         SPMV_vertexNo[i] = (int *) malloc(ncolblks * sizeof(int));
@@ -178,23 +178,23 @@ void mainloop(int blocksize , int block_width){
 
 
     for(i = 0 ; i < ncolblks ; i++)
-        {
-            //Y
-            memset(&ary[0], 0, sizeof(ary));
-            strcat(ary, "_QQ,");
-            strcat(ary, nrowblksString[i]);
-            vertexName[strdup(ary)] = nodeCount;
-            vertexWeight[nodeCount] = block_width * sizeof(double);
-            nodeCount++;
-            QQ_vertexNo[i] = nodeCount - 1;
-            
-            //Global Graph
-            strcpy(globalGraph[globalNodeCount], ary);
-            globalNodeCount++;
-            //printf("node: %s id: %d\n", ary, Y_vertexNo[i]);
-        }
-    
-    
+    {
+        //Y
+        memset(&ary[0], 0, sizeof(ary));
+        strcat(ary, "_QQ,");
+        strcat(ary, nrowblksString[i]);
+        vertexName[strdup(ary)] = nodeCount;
+        vertexWeight[nodeCount] = block_width * sizeof(double);
+        nodeCount++;
+        QQ_vertexNo[i] = nodeCount - 1;
+
+        //Global Graph
+        strcpy(globalGraph[globalNodeCount], ary);
+        globalNodeCount++;
+        //printf("node: %s id: %d\n", ary, Y_vertexNo[i]);
+    }
+
+
     int SETZERO_id = -1, Y_id = -1;
     for(i = 0 ; i < nrowblks ; i++)
     {   
@@ -228,7 +228,7 @@ void mainloop(int blocksize , int block_width){
         strcpy(globalGraph[globalNodeCount], ary);
         globalNodeCount++;
 
-            
+
         for(j = 0 ; j < ncolblks ; j++)
         {
             //SPMV
@@ -236,15 +236,15 @@ void mainloop(int blocksize , int block_width){
             {
                 //A 
                 /*memset(&ary[0], 0, sizeof(ary));
-                strcat(ary, "_A,");
-                strcat(ary, nrowblksString[i]);
-                strcat(ary, ",");
-                strcat(ary, nrowblksString[j]);
-                vertexName[strdup(ary)] = nodeCount;
-                vertexWeight[nodeCount] = matrixBlock[i * ncolblks + j].nnz * sizeof(double); 
-                nodeCount++;*/
+                  strcat(ary, "_A,");
+                  strcat(ary, nrowblksString[i]);
+                  strcat(ary, ",");
+                  strcat(ary, nrowblksString[j]);
+                  vertexName[strdup(ary)] = nodeCount;
+                  vertexWeight[nodeCount] = matrixBlock[i * ncolblks + j].nnz * sizeof(double); 
+                  nodeCount++;*/
                 //printf("nodeName: %s nodeId: %d\n", ary, nodeCount);
-                
+
                 pseudo_tid = ((pseudo_tid % nthreads) > (nthreads - 1) ? 0 : (pseudo_tid % nthreads) ); //pseudo_tid changes itself from 0 to 15 in a cyclic fashion
 
                 memset(&ary[0], 0, sizeof(ary));
@@ -288,7 +288,7 @@ void mainloop(int blocksize , int block_width){
                 memset(&QQ_task[0], 0, sizeof(QQ_task));
                 strcat(QQ_task, "_QQ,");
                 strcat(QQ_task, nrowblksString[j]);
-                
+
                 // edge Y to SPMV
                 strcpy(tmp_input1,QQ_task);
                 strcpy(temp_chunk.memory_name,tmp_input1);
@@ -297,7 +297,7 @@ void mainloop(int blocksize , int block_width){
                 ////inp_map[strdup(spmv_task)][strdup(QQ_task)] = temp_chunk;
                 //out_map[strdup(QQ_task)][strdup(spmv_task)] = temp_chunk;
 
-//                printf("input_map[%s][%s] = %s %lf\n", spmv_task,QQ_task,tmp_input1,edgeW[edgeCount-1]);  
+                //                printf("input_map[%s][%s] = %s %lf\n", spmv_task,QQ_task,tmp_input1,edgeW[edgeCount-1]);  
 
                 edgeU[edgeCount] = SETZERO_id; //from SETZERO
                 edgeV[edgeCount] = nodeCount - 1;
@@ -316,7 +316,7 @@ void mainloop(int blocksize , int block_width){
                 ////inp_map[strdup(spmv_task)][strdup(setzero_task)] = temp_chunk;
                 //out_map[strdup(setzero_task)][strdup(spmv_task)] = temp_chunk;
 
-//                 printf("input_map[%s][%s] = %s %lf\n", spmv_task,setzero_task,tmp_input1,edgeW[edgeCount-1]);      
+                //                 printf("input_map[%s][%s] = %s %lf\n", spmv_task,setzero_task,tmp_input1,edgeW[edgeCount-1]);      
             }
         }
     }
@@ -324,7 +324,7 @@ void mainloop(int blocksize , int block_width){
     //SUBMAX
 
 
-    
+
     //printf("spmv nodes done\n");
 
 
@@ -368,8 +368,8 @@ void mainloop(int blocksize , int block_width){
         memset(&QQ_task[0], 0, sizeof(QQ_task));
         strcat(QQ_task, "_QQ,");
         strcat(QQ_task, nrowblksString[i]);
-        
-        
+
+
 
         //NORM --> DLACPY
         edgeU[edgeCount] = QQ_vertexNo[i]; 
@@ -388,7 +388,7 @@ void mainloop(int blocksize , int block_width){
         ////inp_map[strdup(ary)][strdup(QQ_task)] = temp_chunk;
         //out_map[strdup(QQ_task)][strdup(ary)] = temp_chunk;
 
-//        printf("input_map[%s][%s] = %s %lf\n",ary, QQ_task, tmp_input1,edgeW[edgeCount-1]);
+        //        printf("input_map[%s][%s] = %s %lf\n",ary, QQ_task, tmp_input1,edgeW[edgeCount-1]);
 
         for(j = 0 ; j < ncolblks ; j++)
         {
@@ -402,44 +402,44 @@ void mainloop(int blocksize , int block_width){
                 edgeCount++;
 
                 // #### Hier #####
-                    strcpy(spmv_task, "SPMV,");
-                    strcat(spmv_task, nrowblksString[i]);
-                    strcat(spmv_task, ",");
-                    strcat(spmv_task, nrowblksString[j]);
-                    strcat(spmv_task, ",");
-                    strcat(spmv_task, nrowblksString[pseudo_tid_map[i][j]]);
+                strcpy(spmv_task, "SPMV,");
+                strcat(spmv_task, nrowblksString[i]);
+                strcat(spmv_task, ",");
+                strcat(spmv_task, nrowblksString[j]);
+                strcat(spmv_task, ",");
+                strcat(spmv_task, nrowblksString[pseudo_tid_map[i][j]]);
 
-                    //printf("\n\nspmm_task  %s\n\n",spmv_task);
+                //printf("\n\nspmm_task  %s\n\n",spmv_task);
 
-                    strcpy(tmp_input1,"Z");
-                    strcat(tmp_input1,",");
-                    strcat(tmp_input1,nrowblksString[i]);
+                strcpy(tmp_input1,"Z");
+                strcat(tmp_input1,",");
+                strcat(tmp_input1,nrowblksString[i]);
 
-                    strcpy(temp_chunk.memory_name,tmp_input1);
-                    temp_chunk.value = edgeW[edgeCount-1];
+                strcpy(temp_chunk.memory_name,tmp_input1);
+                temp_chunk.value = edgeW[edgeCount-1];
 
-                    ////inp_map[strdup(ary)][strdup(spmv_task)] = temp_chunk;
-                    //out_map[strdup(spmv_task)][strdup(ary)] = temp_chunk;
+                ////inp_map[strdup(ary)][strdup(spmv_task)] = temp_chunk;
+                //out_map[strdup(spmv_task)][strdup(ary)] = temp_chunk;
 
 
- //                   printf("input_map[%s][%s] = %s %lf\n",ary,spmv_task, tmp_input1,edgeW[edgeCount-1]);                
+                //                   printf("input_map[%s][%s] = %s %lf\n",ary,spmv_task, tmp_input1,edgeW[edgeCount-1]);                
 
             }   
-            
+
         }
 
 
-        
+
         memset(&QQ_task[0], 0, sizeof(QQ_task));
         strcat(QQ_task, "RED,alpha,0");
         //strcat(QQ_task, nrowblksString[i]);
-        
-        
+
+
 
         //NORM --> DLACPY
         edgeU[edgeCount] = nodeCount - 1; 
         edgeV[edgeCount] = redAlpha_id; 
-        edgeW[edgeCount] = nthrds * sizeof(double);
+        edgeW[edgeCount] = nthreads * sizeof(double);
         //printf("%d %d\n", edgeU[edgeCount], edgeV[edgeCount]);
         edgeCount++;
 
@@ -453,7 +453,7 @@ void mainloop(int blocksize , int block_width){
         //inp_map[strdup(QQ_task)][strdup(ary)] = temp_chunk;
         //out_map[strdup(ary)][strdup(QQ_task)] = temp_chunk;
 
-//        printf("input_map[%s][%s] = %s %lf\n",QQ_task, ary, tmp_input1,edgeW[edgeCount-1]);
+        //        printf("input_map[%s][%s] = %s %lf\n",QQ_task, ary, tmp_input1,edgeW[edgeCount-1]);
 
 
 
@@ -505,10 +505,10 @@ void mainloop(int blocksize , int block_width){
         memset(&QQ_task[0], 0, sizeof(QQ_task));
         strcat(QQ_task, "_Q,");
         strcat(QQ_task, nrowblksString[i]);
-        
-        
 
-        
+
+
+
         edgeU[edgeCount] = QQ_vertexNo[i]; 
         edgeV[edgeCount] = nodeCount - 1; //to DLACPY
         edgeW[edgeCount] = block_width * sizeof(double) * 51.0;
@@ -525,7 +525,7 @@ void mainloop(int blocksize , int block_width){
         //inp_map[strdup(ary)][strdup(QQ_task)] = temp_chunk;
         //out_map[strdup(QQ_task)][strdup(ary)] = temp_chunk;
 
-//        printf("input_map[%s][%s] = %s %lf\n",ary, QQ_task, tmp_input1,edgeW[edgeCount-1]);
+        //        printf("input_map[%s][%s] = %s %lf\n",ary, QQ_task, tmp_input1,edgeW[edgeCount-1]);
 
         for(j = 0 ; j < ncolblks ; j++)
         {
@@ -539,30 +539,30 @@ void mainloop(int blocksize , int block_width){
                 edgeCount++;
 
                 // #### Hier #####
-                    strcpy(spmv_task, "SPMV,");
-                    strcat(spmv_task, nrowblksString[i]);
-                    strcat(spmv_task, ",");
-                    strcat(spmv_task, nrowblksString[j]);
-                    strcat(spmv_task, ",");
-                    strcat(spmv_task, nrowblksString[pseudo_tid_map[i][j]]);
+                strcpy(spmv_task, "SPMV,");
+                strcat(spmv_task, nrowblksString[i]);
+                strcat(spmv_task, ",");
+                strcat(spmv_task, nrowblksString[j]);
+                strcat(spmv_task, ",");
+                strcat(spmv_task, nrowblksString[pseudo_tid_map[i][j]]);
 
-                    //printf("\n\nspmm_task  %s\n\n",spmv_task);
+                //printf("\n\nspmm_task  %s\n\n",spmv_task);
 
-                    strcpy(tmp_input1,"Z");
-                    strcat(tmp_input1,",");
-                    strcat(tmp_input1,nrowblksString[i]);
+                strcpy(tmp_input1,"Z");
+                strcat(tmp_input1,",");
+                strcat(tmp_input1,nrowblksString[i]);
 
-                    strcpy(temp_chunk.memory_name,tmp_input1);
-                    temp_chunk.value = edgeW[edgeCount-1];
+                strcpy(temp_chunk.memory_name,tmp_input1);
+                temp_chunk.value = edgeW[edgeCount-1];
 
-                    //inp_map[strdup(ary)][strdup(spmv_task)] = temp_chunk;
-                    //out_map[strdup(spmv_task)][strdup(ary)] = temp_chunk;
+                //inp_map[strdup(ary)][strdup(spmv_task)] = temp_chunk;
+                //out_map[strdup(spmv_task)][strdup(ary)] = temp_chunk;
 
 
-       //             printf("input_map[%s][%s] = %s %lf\n",ary,spmv_task, tmp_input1,edgeW[edgeCount-1]);                
+                //             printf("input_map[%s][%s] = %s %lf\n",ary,spmv_task, tmp_input1,edgeW[edgeCount-1]);                
 
             }   
-            
+
         }
 
         // DGEMV , 1 ----> RED,QpZ
@@ -573,7 +573,7 @@ void mainloop(int blocksize , int block_width){
 
         edgeU[edgeCount] = nodeCount - 1; 
         edgeV[edgeCount] = redqPz_id; 
-        edgeW[edgeCount] = nthrds *  sizeof(double) * 51.0;
+        edgeW[edgeCount] = nthreads *  sizeof(double) * 51.0;
         //printf("%d %d\n", edgeU[edgeCount], edgeV[edgeCount]);
         edgeCount++;
 
@@ -587,14 +587,14 @@ void mainloop(int blocksize , int block_width){
         //inp_map[strdup(QQ_task)][strdup(ary)] = temp_chunk;
         //out_map[strdup(ary)][strdup(QQ_task)] = temp_chunk;
 
-//        printf("input_map[%s][%s] = %s %lf\n",QQ_task, ary, tmp_input1,edgeW[edgeCount-1]);         
+        //        printf("input_map[%s][%s] = %s %lf\n",QQ_task, ary, tmp_input1,edgeW[edgeCount-1]);         
 
 
     }
 
 
 
-        //RED,QPZ node
+    //RED,QPZ node
     memset(&ary[0], 0, sizeof(ary));
     strcat(ary, "RED,QpZ,0");
 
@@ -637,10 +637,10 @@ void mainloop(int blocksize , int block_width){
         memset(&QQ_task[0], 0, sizeof(QQ_task));
         strcat(QQ_task, "_Q,");
         strcat(QQ_task, nrowblksString[i]);
-        
-        
 
-        
+
+
+
         edgeU[edgeCount] = QQ_vertexNo[i]; 
         edgeV[edgeCount] = nodeCount - 1; //to DLACPY
         edgeW[edgeCount] = block_width * sizeof(double) * 51.0;
@@ -657,7 +657,7 @@ void mainloop(int blocksize , int block_width){
         //inp_map[strdup(ary)][strdup(QQ_task)] = temp_chunk;
         //out_map[strdup(QQ_task)][strdup(ary)] = temp_chunk;
 
-//        printf("input_map[%s][%s] = %s %lf\n",ary, QQ_task, tmp_input1,edgeW[edgeCount-1]);
+        //        printf("input_map[%s][%s] = %s %lf\n",ary, QQ_task, tmp_input1,edgeW[edgeCount-1]);
 
         //  RED,QpZ -----> dgemv, 2
 
@@ -681,9 +681,9 @@ void mainloop(int blocksize , int block_width){
         //inp_map[strdup(QQ_task)][strdup(ary)] = temp_chunk;
         //out_map[strdup(ary)][strdup(QQ_task)] = temp_chunk;
 
-//        printf("input_map[%s][%s] = %s %lf\n",ary, QQ_task, tmp_input1,edgeW[edgeCount-1]);
+        //        printf("input_map[%s][%s] = %s %lf\n",ary, QQ_task, tmp_input1,edgeW[edgeCount-1]);
 
-        
+
 
 
         memset(&sub_task[0], 0, sizeof(sub_task));
@@ -693,7 +693,7 @@ void mainloop(int blocksize , int block_width){
         vertexName[strdup(sub_task)] = nodeCount;
         vertexWeight[nodeCount] = sizeof(double);
         nodeCount++;
-        
+
 
         //Global Graph
         strcpy(globalGraph[globalNodeCount], sub_task);
@@ -704,9 +704,9 @@ void mainloop(int blocksize , int block_width){
         edgeW[edgeCount] = block_width * sizeof(double) ;
         //printf("%d %d\n", edgeU[edgeCount], edgeV[edgeCount]);
         edgeCount++;
-//////ADD dotV node
-	
-	
+        //////ADD dotV node
+
+
         memset(&dotV_task[0], 0, sizeof(sub_task));
         strcat(dotV_task, "DOTV,");
         strcat(dotV_task, nrowblksString[i]);
@@ -716,7 +716,7 @@ void mainloop(int blocksize , int block_width){
         vertexName[strdup(dotV_task)] = nodeCount;
         vertexWeight[nodeCount] = sizeof(double);
         nodeCount++;
-        
+
         pseudo_tid++;
 
         //Global Graph
@@ -728,7 +728,7 @@ void mainloop(int blocksize , int block_width){
         edgeW[edgeCount] = block_width * sizeof(double) ;
         //printf("%d %d\n", edgeU[edgeCount], edgeV[edgeCount]);
         edgeCount++;
-	
+
 
 
 
@@ -742,11 +742,11 @@ void mainloop(int blocksize , int block_width){
         //inp_map[strdup(sub_task)][strdup(ary)] = temp_chunk;
         //out_map[strdup(ary)][strdup(sub_task)] = temp_chunk;
 
-//        printf("input_map[%s][%s] = %s %lf\n",sub_task, ary, tmp_input1,edgeW[edgeCount-1]);         
+        //        printf("input_map[%s][%s] = %s %lf\n",sub_task, ary, tmp_input1,edgeW[edgeCount-1]);         
 
 
 
-        
+
         edgeU[edgeCount] = nodeCount - 1; 
         edgeV[edgeCount] = norm_task_id; 
         edgeW[edgeCount] = block_width * sizeof(double) ;
@@ -763,7 +763,7 @@ void mainloop(int blocksize , int block_width){
         //inp_map[strdup(norm_task)][strdup(dotV_task)] = temp_chunk;
         //out_map[strdup(dotV_task)][strdup(norm_task)] = temp_chunk;
 
-  //      printf("input_map[%s][%s] = %s %lf\n",norm_task, sub_task, tmp_input1,edgeW[edgeCount-1]);         
+        //      printf("input_map[%s][%s] = %s %lf\n",norm_task, sub_task, tmp_input1,edgeW[edgeCount-1]);         
 
 
 
@@ -804,7 +804,7 @@ void mainloop(int blocksize , int block_width){
         edgeCount++;
 
         strcpy(tmp_input1,"beta");
-        
+
 
         strcpy(temp_chunk.memory_name,tmp_input1);
         temp_chunk.value = edgeW[edgeCount-1];
@@ -813,10 +813,10 @@ void mainloop(int blocksize , int block_width){
         //inp_map[strdup(daxpy_task)][strdup(norm_task)] = temp_chunk;
         //out_map[strdup(norm_task)][strdup(daxpy_task)] = temp_chunk;
 
-    //    printf("input_map[%s][%s] = %s %lf\n",daxpy_task, norm_task, tmp_input1,edgeW[edgeCount-1]);
+        //    printf("input_map[%s][%s] = %s %lf\n",daxpy_task, norm_task, tmp_input1,edgeW[edgeCount-1]);
     }
 
-        for (i = 0 ; i < nrowblks ; i++){
+    for (i = 0 ; i < nrowblks ; i++){
 
         //DLACPY
         memset(&ary[0], 0, sizeof(ary));
@@ -841,8 +841,8 @@ void mainloop(int blocksize , int block_width){
         memset(&QQ_task[0], 0, sizeof(QQ_task));
         strcat(QQ_task, "_QQ,");
         strcat(QQ_task, nrowblksString[i]);
-                
-        
+
+
         strcpy(tmp_input1,QQ_task);
         strcpy(temp_chunk.memory_name,tmp_input1);
         temp_chunk.value = edgeW[edgeCount-1];
@@ -851,28 +851,11 @@ void mainloop(int blocksize , int block_width){
         //inp_map[strdup(dlacpy_task)][strdup(daxpy_task)] = temp_chunk;
         //out_map[strdup(daxpy_task)][strdup(dlacpy_task)] = temp_chunk;
 
-     //   printf("input_map[%s][%s] = %s %lf\n",dlacpy_task, daxpy_task, tmp_input1,edgeW[edgeCount-1]);
-
-
-
-
-
-
-
-
-
+        //   printf("input_map[%s][%s] = %s %lf\n",dlacpy_task, daxpy_task, tmp_input1,edgeW[edgeCount-1]);
     }
-
-
 
     printf("Total Node: %d\nTotal edges: %d\n", nodeCount, edgeCount);
 
-
-     buildTaskInfoStruct_main(globalNodeCount, globalGraph , "lanczos_mainloop", blocksize , "msdoor");
-
-
-
-
-
-
+    //buildTaskInfoStruct_main(globalNodeCount, globalGraph , "lanczos_mainloop", blocksize , "msdoor");
+    buildTaskInfoStruct_main(globalNodeCount, globalGraph , "", blocksize , "");
 }

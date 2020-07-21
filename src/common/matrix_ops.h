@@ -17,6 +17,8 @@ using namespace std;
 #include <omp.h>
 #include "exec_util.h"
 
+void spmv_blkcoord_task(int R, int C, int nthrds, double *Y, block *H, double *X, int row_id, int col_id, int buf_id, int block_width);
+void spmv_blkcoord_loop(int R, int C, int nthrds, double *X,  double *Y, block *H);
 void spmm_blkcoord_loop(int R, int C, int blocksize, int nthrds, double *X,  double *Y, block *H);
 void mat_sub(double *src1, double *src2, double *dst, const int row, const int col);
 void mat_addition(double *src1, double *src2, double *dst, const int row, const int col);
@@ -54,8 +56,6 @@ void updateBlockVector_task_exe(double *activeBlockVectorR, int *activeMask, dou
 void custom_dlacpy_task_exe(double *src, double *dst, int row, int col, int block_width, int block_id);
 
 void dot_mm_exe(double *src1, double *src2, double *result, const int row, const int col, int block_width, int block_id, int buf_id);
-
-
 
 void spmm_blkcoord(int R, int C, int M, int nthrds, double *X,  double *Y, block *H);
 

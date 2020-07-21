@@ -18,43 +18,28 @@ using namespace std;
 #include "../../common/util.h"
 
 
-void mainloop(int blocksize , int block_width);
+void mainloop(int block_width, char *matrix_name);
 
 int main(int argc, char *argv[])
 {
-
-    int blocksize, block_width;
-
+    char *filename, *matrix_name;
+    int block_width;
     int i;
-
     double tstart , tend;
 
-
-    stringstream bs(argv[1]);
-    bs >> blocksize;
-    stringstream bw(argv[2]);
-    bw >> block_width;
-
-    /* csb format variables */
-
     double *xrem;
-
-    char *filename = argv[3];
+    filename = argv[1];
+    block_width = atoi(argv[2]);
+    matrix_name = argv[3];
 
     wblk = block_width; 
     
     //read_custom<double>(filename, xrem);
     read_custom(filename, xrem);
 
-    printf("Finsihed reading CUS file\n");
-    //exit(1);
-
     //csc2blkcoord<double>(matrixBlock, xrem);
     csc2blkcoord(matrixBlock, xrem);
     
-    printf("Finsihed Converting CUS TO CSB\n");
-
-
     #pragma omp parallel
     #pragma omp master
     {
@@ -87,8 +72,8 @@ int main(int argc, char *argv[])
     }
 
 
-    int guessEdgeCount = 8000000;
-    int guessNodeCount = 8000000;
+    int guessEdgeCount = 40000000;
+    int guessNodeCount = 20000000;
     edgeU = (int *) malloc(guessEdgeCount * sizeof(int));
     edgeV = (int *) malloc(guessEdgeCount * sizeof(int));
     edgeW = (double *) malloc(guessEdgeCount * sizeof(double));
@@ -104,13 +89,13 @@ int main(int argc, char *argv[])
         globalGraph[i] = (char*) malloc(100 * sizeof(char));
     }
 
-    mainloop(blocksize, block_width);
+    mainloop(block_width, matrix_name);
 }
 
 
 
 
-void mainloop(int blocksize , int block_width){
+void mainloop(int block_width, char *matrix_name){
     
     int i, j, k; 
     int pseudo_tid = 0, nbuf = 16;
@@ -359,8 +344,6 @@ void mainloop(int blocksize , int block_width){
 
     printf("Total Node: %d\nTotal edges: %d\n", nodeCount, edgeCount);
 
-    buildTaskInfoStruct_main(globalNodeCount, globalGraph , "power_mainloop", blocksize , "msdoor");
-
-
-
+    //buildTaskInfoStruct_main(globalNodeCount, globalGraph , "power_mainloop", blocksize , "msdoor");
+    buildTaskInfoStruct_main(globalNodeCount, globalGraph , "power_mainloop", /*RHS is always 1*/1, matrix_name);
 }

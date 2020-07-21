@@ -31,8 +31,11 @@ struct block
 {
     int nnz;
     int roffset, coffset;
+#ifdef SHORT_INT
     unsigned short int *rloc, *cloc;
-    //int *rloc , *cloc ; 
+#else
+    int *rloc , *cloc; 
+#endif
     double *val;
 };
 
@@ -51,7 +54,6 @@ struct TaskInfo
 } ;
 
 
-
 ///////libcsb and libcsr functions//////////////////////
 
 void transpose(double *src, double *dst, const int N, const int M);
@@ -68,20 +70,14 @@ void mat_copy(double *src,  int row, int col, double *dst, int start_row, int st
 void print_eigenvalues( MKL_INT n, double* wr, double* wi );
 
 
-
 /////common for all/////////////////////
 void read_custom(char* filename, double *&xrem);
 
 void csc2blkcoord(block *&matrixBlock, double *xrem);
 
-
-
 void custom_dlacpy(double *src, double *dst, int m, int n);
 
-
 bool checkEquals( double* a, double* b, size_t outterSize, size_t innerSize);
-
-
 
 
 ////////taskinfo related functions///////////
@@ -92,8 +88,6 @@ void reverse(char str[], int length);
 //void structToString(struct TaskInfo taskInfo, char *structToStr);
 
 
-
-
 ///////////////global version util functions///////////
 
 void print_summary(double **timingStat, int iterationNumber);
@@ -102,7 +96,5 @@ void myitoa(int x, char* dest);
 int buildTaskInfoStruct(struct TaskInfo *&taskInfo, char *partFile);
 void structToString(struct TaskInfo taskInfo, char *structToStr);
 int readPartBoundary(int *&partBoundary, char *partBoundaryFile);
-
-
 
 #endif

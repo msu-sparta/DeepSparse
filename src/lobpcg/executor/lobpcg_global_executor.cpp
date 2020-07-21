@@ -300,7 +300,7 @@ int main(int argc, char *argv[])
                 {
                     _XTY_v1_exe(blockVectorX, blockVectorX, gramXBXBUF, M, blocksize, blocksize, block_width, block_id, buf_id);
                 }
-                else if(task_id = 21)
+                else if(task_id == 21)
                 {
                     _XTY_v1_exe(blockVectorX, blockVectorAX, gramXAXBUF, M, blocksize, blocksize, block_width, block_id, buf_id);  
                 }

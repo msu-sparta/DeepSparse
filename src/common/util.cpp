@@ -1,8 +1,5 @@
 #include "util.h"
 
-
-
-
 //------ global parametes (block) ---------
 
 long position = 0 ;
@@ -3521,18 +3518,15 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
     cout << "wblk = " << wblk << endl;
     cout << "nrowblks = " << nrowblks << endl;
     cout << "ncolblks = " << ncolblks << endl;
-    //cout << xrem[1] << endl;
     //matrixBlock = new block<T>[nrowblks * ncolblks];
     matrixBlock = new block[nrowblks * ncolblks];
 
     top = new int*[nrowblks];
-    //top = (int **) malloc(nrowblks * sizeof(int *));
     nnzPerRow = (int *) malloc(nrowblks * sizeof(int));
 
     for(i = 0 ; i < nrowblks ; i++)
     {
         top[i] = new int[ncolblks];
-        //top[i] = (int *) malloc(ncolblks * sizeof(int));
         nnzPerRow[i] = 0;
     }
 
@@ -3547,17 +3541,12 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
     cout << "here" << endl;
     cout<<"Finish memory allocation for block.."<<endl;
 
-    //cout<<"K1: "<<colptrs[0]<<" K2: "<<colptrs[1]<<endl;
-
-    //cout<<"calculatig nnz per block"<<endl;
-
     //calculatig nnz per block
     for(c = 0 ; c < numcols ; c++)
     {
         k1 = colptrs[c]+1;
         k2 = colptrs[c + 1] - 1+1;
         blkc = ceil((c + 1) / (double)wblk);
-        //cout<<"K1: "<<k1<<" K2: "<<k2<<" blkc: "<<blkc<<endl;
 
         for(k = k1 - 1 ; k < k2 ; k++)
         {
@@ -3580,18 +3569,19 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
     {
         for(blkr = 0 ; blkr < nrowblks ; blkr++)
         {
-            //cout<<"br: "<<blkr<<" bc: "<<blkc<<" roffset: "<<blkr*wblk<<" coffset: "<<blkc*wblk<<endl;
             matrixBlock[blkr * ncolblks + blkc].roffset = blkr * wblk + 1;
             matrixBlock[blkr * ncolblks + blkc].coffset = blkc * wblk + 1;
-            //cout<<"here 1"<<endl;
 
             if(matrixBlock[blkr * ncolblks + blkc].nnz > 0)
             {
                 nnzPerRow[blkr] += matrixBlock[blkr * ncolblks + blkc].nnz;
-                //matrixBlock[blkr * ncolblks + blkc].rloc = new int[matrixBlock[blkr * ncolblks + blkc].nnz];
+#ifdef SHORT_INT
                 matrixBlock[blkr * ncolblks + blkc].rloc = new unsigned short int[matrixBlock[blkr * ncolblks + blkc].nnz];
-                //matrixBlock[blkr * ncolblks + blkc].cloc = new int[matrixBlock[blkr * ncolblks + blkc].nnz];
                 matrixBlock[blkr * ncolblks + blkc].cloc = new unsigned short int[matrixBlock[blkr * ncolblks + blkc].nnz];
+#else
+                matrixBlock[blkr * ncolblks + blkc].rloc = new int[matrixBlock[blkr * ncolblks + blkc].nnz];
+                matrixBlock[blkr * ncolblks + blkc].cloc = new int[matrixBlock[blkr * ncolblks + blkc].nnz];
+#endif
                 //matrixBlock[blkr * ncolblks + blkc].val = new T[matrixBlock[blkr * ncolblks + blkc].nnz];
                 matrixBlock[blkr * ncolblks + blkc].val = new double[matrixBlock[blkr * ncolblks + blkc].nnz];
             }
@@ -3605,24 +3595,16 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
 
     cout<<"allocating memory for each block"<<endl;
 
-    //for(blkr=0;blkr<nrowblks;blkr++)
-    //{
-        //printf("nnzPerRow[%d] : %d\n", blkr, nnzPerRow[blkr]);
-    //}
-
     for(c = 0 ; c < numcols ; c++)
     {
         k1 = colptrs[c]+1;
         k2 = colptrs[c + 1] - 1+1; 
         blkc = ceil((c + 1) / (double)wblk);
 
-        //cout<<"K1: "<<k1<<" K2: "<<k2<<" blkc: "<<blkc<<endl;
-
         for(k = k1 - 1 ; k < k2 ; k++)
         {
             r = irem[k]+1;
             blkr = ceil(r / (double)wblk);
-            //printf("matblk[%d].rloc[%d] = %d - matblk[%d].roffset\n",(blkr - 1) * ncolblks+blkc - 1,top[blkr-1][blkc-1],r,(blkr - 1) * ncolblks + blkc - 1);
 	        matrixBlock[(blkr - 1) * ncolblks+blkc - 1].rloc[top[blkr-1][blkc-1]] = r - matrixBlock[(blkr - 1) * ncolblks + blkc - 1].roffset;
             matrixBlock[(blkr - 1) * ncolblks+blkc - 1].cloc[top[blkr-1][blkc-1]] = (c + 1) -  matrixBlock[(blkr - 1) * ncolblks + blkc - 1].coffset;
             matrixBlock[(blkr - 1) * ncolblks+blkc - 1].val[top[blkr-1][blkc-1]] = xrem[k];
@@ -4232,20 +4214,20 @@ void buildTaskInfoStruct_main(int nodeCount, char **graph , const char *loopType
 
                 //printf("taskName: %s --> %s\n", taskName, ary);
             }
-            // else if(!strcmp(splitParams[0], "NORM")) /* taskName starts NORM */
-   //          {
-   //           strcpy(ary, "25,1,");
-      //        strcat(ary, splitParams[1]); //block_id
-      //        strcat(ary, ",0,"); //no string params
-      //        strcat(ary, splitParams[2]); //task_id
-      //        strcat(ary, ",");
-      //        myitoa (partNo, buffer);
-      //        strcat(ary, buffer); //partNo
-      //        strcat(ary, ",0"); //priority
-      //        taskInfoFile << ary << endl;
-
-      //        //printf("taskName: %s --> %s\n", taskName, ary);
-   //          }
+            else if(!strcmp(splitParams[0], "NORM")) /* taskName starts NORM */
+            {
+                strcpy(ary, "25,1,");
+                strcat(ary, splitParams[1]); //block_id
+                strcat(ary, ",0,"); //no string params
+                strcat(ary, splitParams[2]); //task_id
+                strcat(ary, ",");
+                myitoa (partNo, buffer);
+                strcat(ary, buffer); //partNo
+                strcat(ary, ",0"); //priority
+                taskInfoFile << ary << endl;
+                
+                //printf("taskName: %s --> %s\n", taskName, ary);
+            }
             else if(!strcmp(splitParams[0], "DAXPY")) /* taskName starts DAXPY */
             {
                 strcpy(ary, "27,1,");

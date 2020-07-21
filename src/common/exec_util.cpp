@@ -8,13 +8,9 @@ int *nnzPerRow;
 //block<double> *matrixBlock;
 block *matrixBlock;
 
-
-
 //template<typename T>
 void read_custom(char* filename, double *&xrem)
 {
-
-
     FILE *fp;
 
     double tstart, tend;
@@ -52,103 +48,43 @@ void read_custom(char* filename, double *&xrem)
     cout << "finished reading irem" << endl;
 
     fread(txrem, sizeof(float), nnonzero, fp);
-        cout << "finished reading xrem" << endl;
-    for(int i = 0 ; i < nnonzero ; i++){
-    
+    cout << "finished reading xrem" << endl;
+
+    for(int i = 0 ; i < nnonzero; i++)
+    {
         xrem[i] = txrem[i];
     }
 
-
-    for(int i = 0 ; i < numcols+1 ; i++)
+    for(int i = 0 ; i < numcols+1; i++)
     {	
     	colptrs[i]--;
     }
 
-    for(int i = 0 ; i < nnonzero ; i++)
+    for(int i = 0 ; i < nnonzero; i++)
     	irem[i]--;
 
-    //for (int i = 0; i < nnonzero; ++i)
-    //{
-    	
-   // 	xrem[i]--;
-    //}
-    
     delete []txrem;
     tend = omp_get_wtime();
     cout << "Matrix is read in " << tend - tstart << " seconds." << endl;
-
-
-	/*    int i,j;
-    ifstream file (filename, ios::in|ios::binary);
-    if (file.is_open())
-    {
-        int a = 0, c=0;
-        long int b=0;
-        //float d=0;
-        float d=0;
-        file.read ((char*)&numrows,sizeof(numrows));
-        cout<<"row: "<<numrows<<endl;
-        file.read(reinterpret_cast<char*>(&numcols), sizeof(numcols));
-        cout<<"colum: "<<numcols<<endl;
-
-        file.read(reinterpret_cast<char*>(&nnonzero), sizeof(nnonzero));
-        cout<<"non zero: "<<nnonzero<<endl;
-
-        colptrs=new int[numcols+1];
-        irem=new int[nnonzero];
-        xrem=new double[nnonzero];
-        cout<<"Memory allocaiton finished"<<endl;
-        position=0;
-        while(!file.eof() && position<=numcols)
-        {
-            file.read(reinterpret_cast<char*>(&a), sizeof(a)); //irem(j)
-            colptrs[position++] = a-1;
-        }
-        cout<<"finished reading colptrs"<<endl;
-        position=0;
-        while(!file.eof() && position<nnonzero)
-        {
-            //file.read ((char*)&a,sizeof(double));
-            file.read(reinterpret_cast<char*>(&a), sizeof(a)); //irem(j)
-            irem[position++] = a-1;
-            //position++;
-        }
-
-        position=0;
-        while(!file.eof() && position<nnonzero)
-        {
-            //file.read ((char*)&a,sizeof(double));
-            file.read(reinterpret_cast<char*>(&d), sizeof(d)); //irem(j)
-            xrem[position++]=d;
-            //if(file.eof())
-            //cout<<"EOF found.. position: "<<position<<endl;
-        }  
-    }*/
-
 }
 
-//template<typename T>
-//void csc2blkcoord(block<T> *&matrixBlock, double *xrem)
 void csc2blkcoord(block *&matrixBlock, double *xrem)
 {
-    int i, j, r, c, k, k1, k2, blkr, blkc, tmp;
+    int i, j, r, c, k, blkr, blkc;
     int **top;
-    nrowblks = ceil(numrows / (double)(wblk));
-    ncolblks = ceil(numcols / (double)(wblk));
+    nrowblks = (numrows + wblk - 1) / wblk;
+    ncolblks = (numcols + wblk - 1) / wblk;
     cout << "wblk = " << wblk << endl;
     cout << "nrowblks = " << nrowblks << endl;
     cout << "ncolblks = " << ncolblks << endl;
 
-    //matrixBlock = new block<T>[nrowblks * ncolblks];
     matrixBlock = new block[nrowblks * ncolblks];
     top = new int*[nrowblks];
-    //top = (int **) malloc(nrowblks * sizeof(int *));
     nnzPerRow = (int *) malloc(nrowblks * sizeof(int));
 
     for(i = 0 ; i < nrowblks ; i++)
     {
         top[i] = new int[ncolblks];
-        //top[i] = (int *) malloc(ncolblks * sizeof(int));
         nnzPerRow[i] = 0;
     }
 
@@ -160,34 +96,25 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
             matrixBlock[blkr * ncolblks + blkc].nnz = 0;
         }
     }
-    cout<<"finished memory allocation for block.."<<endl;
 
-
-    //cout<<"calculatig nnz per block"<<endl;
+    cout<<"calculatig nnz per block"<<endl;
 
     //calculatig nnz per block
     for(c = 0 ; c < numcols ; c++)
     {
-        k1 = colptrs[c]+1;
-        k2 = colptrs[c + 1] - 1+1;
-        blkc = ceil((c + 1) / (double)wblk);
-        //k1 = colptrs[c];
-        //k2 = colptrs[c + 1] - 1;
-        //blkc = ceil((c + 1) / (float)wblk);
-        //cout<<"K1: "<<k1<<" K2: "<<k2<<" blkc: "<<blkc<<endl;
+        blkc = c / wblk;
 
-        for(k = k1 - 1 ; k < k2 ; k++)
+        for(k = colptrs[c]; k < colptrs[c+1]; k++)
         {
-            r = irem[k]+1;
-            //r = irem[k];
-            blkr = ceil(r/(double)wblk);
-            if((blkr - 1) >= nrowblks || (blkc - 1) >= ncolblks)
+            r = irem[k];
+            blkr = r / wblk;
+            if( blkr >= nrowblks || blkc >= ncolblks)
             {
-                cout << "(" << blkr - 1 << ", " << blkc - 1 << ") doesn't exist" << endl;
+                cout << "(" << blkr << ", " << blkc << ") doesn't exist" << endl;
             }
             else
             {
-                matrixBlock[(blkr - 1) * ncolblks + (blkc - 1)].nnz++;  
+                matrixBlock[blkr * ncolblks + blkc].nnz++;  
             }    
         }
     }
@@ -198,18 +125,19 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
     {
         for(blkr = 0 ; blkr < nrowblks ; blkr++)
         {
-            //cout<<"br: "<<blkr<<" bc: "<<blkc<<" roffset: "<<blkr*wblk<<" coffset: "<<blkc*wblk<<endl;
-            matrixBlock[blkr * ncolblks + blkc].roffset = blkr * wblk + 1;
-            matrixBlock[blkr * ncolblks + blkc].coffset = blkc * wblk + 1;
-            //cout<<"here 1"<<endl;
+            matrixBlock[blkr * ncolblks + blkc].roffset = blkr * wblk;
+            matrixBlock[blkr * ncolblks + blkc].coffset = blkc * wblk;
 
             if(matrixBlock[blkr * ncolblks + blkc].nnz > 0)
             {
                 nnzPerRow[blkr] += matrixBlock[blkr * ncolblks + blkc].nnz;
-                //matrixBlock[blkr * ncolblks + blkc].rloc = new int[matrixBlock[blkr * ncolblks + blkc].nnz];
+#ifdef SHORT_INT
                 matrixBlock[blkr * ncolblks + blkc].rloc = new unsigned short int[matrixBlock[blkr * ncolblks + blkc].nnz];
-                //matrixBlock[blkr * ncolblks + blkc].cloc = new int[matrixBlock[blkr * ncolblks + blkc].nnz];
                 matrixBlock[blkr * ncolblks + blkc].cloc = new unsigned short int[matrixBlock[blkr * ncolblks + blkc].nnz];
+#else
+                matrixBlock[blkr * ncolblks + blkc].rloc = new int[matrixBlock[blkr * ncolblks + blkc].nnz];
+                matrixBlock[blkr * ncolblks + blkc].cloc = new int[matrixBlock[blkr * ncolblks + blkc].nnz];
+#endif
                 //matrixBlock[blkr * ncolblks + blkc].val = new T[matrixBlock[blkr * ncolblks + blkc].nnz];
                 matrixBlock[blkr * ncolblks + blkc].val = new double[matrixBlock[blkr * ncolblks + blkc].nnz];
             }
@@ -223,38 +151,21 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
 
     cout<<"allocating memory for each block"<<endl;
 
-    //for(blkr=0;blkr<nrowblks;blkr++)
-    //{
-        //printf("nnzPerRow[%d] : %d\n", blkr, nnzPerRow[blkr]);
-    //}
-    //cout<<"end for"<<endl;
-
     printf("numrow = %d numcols = %d\n", numrows,numcols);
 
     for(c = 0 ; c < numcols ; c++)
     {
-        k1 = colptrs[c]+1;
-        k2 = colptrs[c + 1] - 1+1;
-        blkc = ceil((c + 1) / (double)wblk);
-        //k1 = colptrs[c];
-        //k2 = colptrs[c + 1] - 1;
-        //blkc = ceil((c + 1) / (float)wblk);
-
-    //    printf("k1 = %d k2 = %d blkc = %d \n", k1,k2,blkc);
-
-        for(k = k1 - 1 ; k < k2 ; k++)
+        blkc = c / wblk;
+        for(k = colptrs[c]; k < colptrs[c+1]; k++)
         {
-            r = irem[k]+1;
-            //r = irem[k];
+            r = irem[k];
+            blkr = r / wblk;
 
-      //      printf("irem[%d] = %d\n",k , r);
-            blkr = ceil(r / (double)wblk);
+            matrixBlock[blkr * ncolblks + blkc].rloc[top[blkr][blkc]] = r - matrixBlock[blkr * ncolblks + blkc].roffset;
+            matrixBlock[blkr * ncolblks + blkc].cloc[top[blkr][blkc]] = c - matrixBlock[blkr * ncolblks + blkc].coffset;
+            matrixBlock[blkr * ncolblks + blkc].val[top[blkr][blkc]] = xrem[k];
 
-            matrixBlock[(blkr - 1) * ncolblks+blkc - 1].rloc[top[blkr-1][blkc-1]] = r - matrixBlock[(blkr - 1) * ncolblks + blkc - 1].roffset;
-            matrixBlock[(blkr - 1) * ncolblks+blkc - 1].cloc[top[blkr-1][blkc-1]] = (c + 1) -  matrixBlock[(blkr - 1) * ncolblks + blkc - 1].coffset;
-            matrixBlock[(blkr - 1) * ncolblks+blkc - 1].val[top[blkr-1][blkc-1]] = xrem[k];
-
-            top[blkr-1][blkc-1]=top[blkr-1][blkc-1]+1;
+            top[blkr][blkc] = top[blkr][blkc] + 1;
         }
     }
 
@@ -264,10 +175,6 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
     }
     delete [] top;
 }
-
-
-
-
 
 void transpose(double *src, double *dst, const int N, const int M)
 {
@@ -514,10 +421,6 @@ bool checkEquals( double* a, double* b, size_t outterSize, size_t innerSize)
     }
     return true;
 }
-
-
-
-
 
 int buildTaskInfoStruct(struct TaskInfo *&taskInfo, char *partFile)
 {
@@ -865,4 +768,3 @@ int split (const char *str, char c, char ***arr)
 
     return count;
 }
-
