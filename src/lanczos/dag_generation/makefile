@@ -10,13 +10,8 @@ lanczos_global:
 	#$(CC)  -c lanczos_global.cpp   util.o -qopenmp
 	#$(CC) -o $(EXEDIR)/lanczos_global.x util.o lanczos_global.o -qopenmp
 	$(CC)  -c ../../common/util.cpp  -fopenmp
-	$(CC)  -c lanczos_global.cpp   util.o -fopenmp
+	$(CC)  -c lanczos_global.cpp -fopenmp
 	$(CC) -o $(EXEDIR)/lanczos_global.x util.o lanczos_global.o -fopenmp
-
-lobpcg_global: 
-	$(CC)  -c ../../common/util.cpp  -fopenmp
-	$(CC)  -c lobpcg_global.cpp   util.o -fopenmp
-	$(CC) -o $(EXEDIR_DAG)/lobpcg_global.x util.o lobpcg_global.o -fopenmp
 
 clean: 
 	rm -rf *.o 

@@ -24,10 +24,13 @@ void mat_sub(double *src1, double *src2, double *dst, const int row, const int c
 void mat_addition(double *src1, double *src2, double *dst, const int row, const int col);
 void mat_mult(double *src1, double *src2, double *dst, const int row, const int col);
 
+void dgemv_task_xy(double *X, double *Y, double *result ,int M, int N, int P, int block_width, int block_id);
 void _XY_exe(double *X, double *Y, double *result ,int M, int N, int P, int block_width, int block_id);
 
+void dgemv_task_xty(double *X, double *Y, double *buf ,int M, int N, int P, int block_width, int block_id, int buf_id);
 void _XTY_v1_exe(double *X, double *Y, double *buf ,int M, int N, int P, int block_width, int block_id, int buf_id);
 
+void RED_QpZ(double *buf, double *result, int N, int P, int block_width);
 void _XTY_v1_RED(double *buf, double *result, int N, int P, int block_width);
 
 void mat_addition_task_exe(double *src1, double *src2, double *dst, const int row,

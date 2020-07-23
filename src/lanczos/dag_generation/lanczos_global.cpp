@@ -18,7 +18,7 @@ using namespace std;
 #include "../../common/util.h"
 
 
-void mainloop(int blocksize , int block_width);
+void mainloop(int blocksize ,int block_width, char *mtx_name);
 
 int main(int argc, char *argv[])
 {
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     double tstart , tend;
 
 
-    stringstream bs(argv[1]);
+    stringstream bs(argv[3]);
     bs >> blocksize;
     stringstream bw(argv[2]);
     bw >> block_width;
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 
     double *xrem;
 
-    char *filename = argv[3];
+    char *filename = argv[1];
 
     wblk = block_width; 
 
@@ -47,7 +47,6 @@ int main(int argc, char *argv[])
     read_custom(filename, xrem);
 
     printf("Finsihed reading CUS file\n");
-    //exit(1);
 
     //csc2blkcoord<double>(matrixBlock, xrem);
     csc2blkcoord(matrixBlock, xrem);
@@ -61,6 +60,8 @@ int main(int argc, char *argv[])
         nthreads = omp_get_num_threads();
     }
 
+    printf("nthreads = %d\n", nthreads);
+
     /* initializing nrowblksString */
 
     tstart = omp_get_wtime();
@@ -71,12 +72,10 @@ int main(int argc, char *argv[])
     {
         nrowblksString[i] = (char *) malloc(7 * sizeof(char));
         myitoa(i, nrowblksString[i]);
-        //printf("%d : %s\n", i, nrowblksString[i]);
     }
 
     tend = omp_get_wtime();
     printf("nrowblksString time: %lf sec. \n", tend - tstart);
-
 
     /* graphn Gen timing breakdown*/
     graphGenTime = (double *) malloc(total_func * sizeof(double));
@@ -86,9 +85,8 @@ int main(int argc, char *argv[])
         graphGenTime[i] = 0.0;
     }
 
-
-    int guessEdgeCount = 8000000;
-    int guessNodeCount = 8000000;
+    int guessEdgeCount = 80000000;
+    int guessNodeCount = 20000000;
     edgeU = (int *) malloc(guessEdgeCount * sizeof(int));
     edgeV = (int *) malloc(guessEdgeCount * sizeof(int));
     edgeW = (double *) malloc(guessEdgeCount * sizeof(double));
@@ -104,21 +102,15 @@ int main(int argc, char *argv[])
         globalGraph[i] = (char*) malloc(100 * sizeof(char));
     }
 
-    mainloop(blocksize, block_width);
+    mainloop(blocksize, block_width, argv[4]);
 }
 
-
-
-
-void mainloop(int blocksize , int block_width){
-
-
-
+void mainloop(int blocksize , int block_width, char *mtx_name)
+{
     int i, j, k; 
     int pseudo_tid = 0, nbuf = 16;
     char ary[150], i_string[8];
-    int nthreads = 16;
-
+    int nthreads = 14;
 
     //memory chunk DS
     char main_task[100];
@@ -147,18 +139,10 @@ void mainloop(int blocksize , int block_width){
         pseudo_tid_map[i] = (int*) calloc(nrowblks + 1 , sizeof(int));
     }
 
-
-    //printf("inside lanczos mainloop nrowblks = %d colblks = %d\n",nrowblks,ncolblks);
-
-
     ////initialize edgeCount and nodeCount to zero
-
     edgeCount = 0 ; 
     nodeCount = 0 ; 
     globalNodeCount = 0 ; 
-
-
-
 
     int *QQ_vertexNo = (int *) malloc(ncolblks * sizeof(int));
 
@@ -245,7 +229,8 @@ void mainloop(int blocksize , int block_width){
                   nodeCount++;*/
                 //printf("nodeName: %s nodeId: %d\n", ary, nodeCount);
 
-                pseudo_tid = ((pseudo_tid % nthreads) > (nthreads - 1) ? 0 : (pseudo_tid % nthreads) ); //pseudo_tid changes itself from 0 to 15 in a cyclic fashion
+                //pseudo_tid changes itself from 0 to (# of threads - 1) in a cyclic fashion
+                //pseudo_tid = ((pseudo_tid % nthreads) > (nthreads - 1) ? 0 : (pseudo_tid % nthreads) );
 
                 memset(&ary[0], 0, sizeof(ary));
                 strcat(ary, "SPMV,");
@@ -259,8 +244,8 @@ void mainloop(int blocksize , int block_width){
                 nodeCount++;
                 SPMV_vertexNo[i][j] = nodeCount - 1;
                 //printf("nodeName: %s nodeId: %d\n", ary, nodeCount);
-                pseudo_tid++;
-                pseudo_tid_map[i][j] = pseudo_tid-1;
+                pseudo_tid_map[i][j] = pseudo_tid;
+                pseudo_tid = (pseudo_tid + 1) % nthreads;
 
                 strcpy(spmv_task,ary);
 
@@ -357,7 +342,7 @@ void mainloop(int blocksize , int block_width){
         vertexName[strdup(ary)] = nodeCount;
         vertexWeight[nodeCount] = sizeof(double);
         nodeCount++;
-        pseudo_tid++;
+        pseudo_tid = (pseudo_tid + 1) % nthreads;
 
         //Global Graph
         strcpy(globalGraph[globalNodeCount], ary);
@@ -494,7 +479,7 @@ void mainloop(int blocksize , int block_width){
         vertexName[strdup(ary)] = nodeCount;
         vertexWeight[nodeCount] = sizeof(double);
         nodeCount++;
-        pseudo_tid++;
+        pseudo_tid = (pseudo_tid + 1) % nthreads;
 
         //Global Graph
         strcpy(globalGraph[globalNodeCount], ary);
@@ -717,7 +702,7 @@ void mainloop(int blocksize , int block_width){
         vertexWeight[nodeCount] = sizeof(double);
         nodeCount++;
 
-        pseudo_tid++;
+        pseudo_tid = (pseudo_tid + 1) % nthreads;
 
         //Global Graph
         strcpy(globalGraph[globalNodeCount], dotV_task);
@@ -760,25 +745,14 @@ void mainloop(int blocksize , int block_width){
         strcpy(temp_chunk.memory_name,tmp_input1);
         temp_chunk.value = edgeW[edgeCount-1];
 
-        //inp_map[strdup(norm_task)][strdup(dotV_task)] = temp_chunk;
-        //out_map[strdup(dotV_task)][strdup(norm_task)] = temp_chunk;
+        // inp_map[strdup(norm_task)][strdup(dotV_task)] = temp_chunk;
+        // out_map[strdup(dotV_task)][strdup(norm_task)] = temp_chunk;
 
-        //      printf("input_map[%s][%s] = %s %lf\n",norm_task, sub_task, tmp_input1,edgeW[edgeCount-1]);         
-
-
-
-
-
-
-
-
-
+        // printf("input_map[%s][%s] = %s %lf\n",norm_task, sub_task, tmp_input1,edgeW[edgeCount-1]);         
     }
 
     strcpy(globalGraph[globalNodeCount], norm_task);
     globalNodeCount++;
-
-
 
 
     for (i = 0 ; i < nrowblks ; i++){
@@ -790,7 +764,7 @@ void mainloop(int blocksize , int block_width){
         vertexName[strdup(daxpy_task)] = nodeCount;
         vertexWeight[nodeCount] = sizeof(double);
         nodeCount++;
-        pseudo_tid++;
+        pseudo_tid = (pseudo_tid + 1) % nthreads;
 
         //Global Graph
         strcpy(globalGraph[globalNodeCount], daxpy_task);
@@ -857,5 +831,5 @@ void mainloop(int blocksize , int block_width){
     printf("Total Node: %d\nTotal edges: %d\n", nodeCount, edgeCount);
 
     //buildTaskInfoStruct_main(globalNodeCount, globalGraph , "lanczos_mainloop", blocksize , "msdoor");
-    buildTaskInfoStruct_main(globalNodeCount, globalGraph , "", blocksize , "");
+    buildTaskInfoStruct_main(globalNodeCount, globalGraph , "lanczos", blocksize , mtx_name);
 }

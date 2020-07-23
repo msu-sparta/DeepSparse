@@ -23,7 +23,7 @@ for MATRIX in MATRICES:
         os.system(libcsb_exe);
 
         print("\nexecuting global")
-        dag_gen = "./../exe/power_global.x " + matrix_folder + MATRIX + ".cus " + BLOCK_SIZE + " " + MATRIX + "_" + BLOCK_SIZE
+        dag_gen = "OMP_NUM_THREADS=14 OMP_PLACES=cores OMP_PROC_BIND=close ./../exe/power_global.x " + matrix_folder + MATRIX + ".cus " + BLOCK_SIZE + " " + MATRIX + "_" + BLOCK_SIZE
         dag_exe = "OMP_NUM_THREADS=14 OMP_PLACES=cores OMP_PROC_BIND=close ./../exe/power_global_executor.x " + matrix_folder + MATRIX + ".cus " + BLOCK_SIZE + " 10 " + MATRIX + "_" + BLOCK_SIZE + "*"
         os.system(dag_gen)
         os.system(dag_exe)

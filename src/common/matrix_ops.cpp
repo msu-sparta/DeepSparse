@@ -390,6 +390,35 @@ void spmm_blkcoord_finegrained_exe_fixed_buf_unrolled32(int R, int C, int M, int
     } 
 }
 
+/* TODO: how is that different than _XTY_v1_exe
+ * also, out dependency is different somehow */
+void dgemv_task_xty(double *X, double *Y, double *buf ,int M, int N, int P, int block_width, int block_id, int buf_id)
+{
+    int i, j, k, l, blksz, tid, length;
+    
+    //TODO: it should not be needed
+    //int nthrds_exec = omp_get_num_threads();
+    //buf_id = buf_id % nthrds_exec;
+
+    k = block_id * block_width;
+    blksz = block_width;
+    if(k + blksz > M)
+        blksz = M - k;
+    length = blksz * N;
+ 
+    i = buf_id;
+
+    #pragma omp task private(tid)\
+    firstprivate(k, M, N, P, blksz, length, X, Y, buf, block_id, block_width, buf_id)\
+    depend(in: X[k * N : blksz * N], M, N, P)\
+    depend(in: Y[k * P : blksz * P])\
+    depend(out: buf[buf_id * N * P] )
+    {
+        tid = omp_get_thread_num();
+        cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, N, P, blksz, 1.0, X+(k*N), N, Y+(k*P), P, 1.0, buf+(tid * N * P), P);
+    }
+}
+
 void _XTY_v1_exe(double *X, double *Y, double *buf ,int M, int N, int P, int block_width, int block_id, int buf_id)
 {
     //code: 10
@@ -411,7 +440,7 @@ void _XTY_v1_exe(double *X, double *Y, double *buf ,int M, int N, int P, int blo
         blksz = M - k;
     length = blksz * N ;
     
-    i = buf_id;
+    i = buf_id ;
     
     #pragma omp task private(tid, tstart, tend)\
     firstprivate(k, M, N, P, blksz, length, X, Y, nthrds, buf, block_id, block_width, buf_id)\
@@ -419,16 +448,73 @@ void _XTY_v1_exe(double *X, double *Y, double *buf ,int M, int N, int P, int blo
     depend(in: Y[k * P : blksz * P])\
     depend(out: buf[buf_id * N * P : N * P])
     {   
-        //printf("block_id: %d XTY in: %p[%d : %d]     %p[%d : %d]\n", block_id, X, k * N , blksz * N, Y, k * N , blksz * N);
         tid = omp_get_thread_num();
         tstart = omp_get_wtime();
 
         cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, N, P, blksz, 1.0, X+(k*N), N, Y+(k*P), P, 1.0, buf+(tid * N * P), P);
         
         tend = omp_get_wtime();
-        //taskTiming_exec[10][tid] += (tend - tstart);
-        
     } //task end
+}
+
+/* TODO: how is that different than the _XTY_v1_RED? */
+void RED_QpZ(double *buf, double *result, int N, int P, int block_width)
+{
+    //code: 11
+    /*
+    _XTY_v1_RED: adding partial sums block by block, not row by row
+    Input: buf: nthds * [N * P]
+    Output: result[N * P]
+    nthrds : global variable, total # of threads
+    buf : how to free/deallocate corresponding memory location
+    */
+    
+    int i, j, k, l, blksz, tid, nthreads, length;
+    double sum, tstart, tend;
+
+    int nthrds_exec = omp_get_num_threads();
+    
+    int nbuf = nthrds_exec;
+
+    for(i = 0 ; i < N ; i = i + block_width)
+    {
+        //reduce
+
+        blksz = block_width;
+        if(i + blksz > N)
+            blksz = N - i;
+
+        #pragma omp task private(sum, k, l, tid, tstart, tend)\
+        firstprivate(i, nthrds_exec, blksz, buf, N, P, result, block_width)\
+        depend(in: N, P) depend(out: result[i * P : blksz * P])\
+        depend(in: buf[0*N*P:N*P], buf[1*N*P:N*P], buf[2*N*P:N*P], buf[3*N*P:nthrds_exec*N*P], buf[4*N*P:N*P], buf[5*N*P:N*P], buf[6*N*P:N*P],\
+            buf[7*N*P:N*P], buf[8*N*P:N*P], buf[9*N*P:N*P], buf[10*N*P:nthrds_exec*N*P], buf[11*N*P:N*P], buf[12*N*P:N*P], buf[13*N*P:N*P])
+        {
+            tid = omp_get_thread_num();
+            tstart = omp_get_wtime();
+            
+            for( l = i ; l < (i + blksz) ; l++) //for each row in the block
+            {
+                for(k  = 0 ; k < P ; k++) //each col
+                {
+                    sum = 0.0;
+                    for(j = 0 ; j < nthrds_exec ; j++) //for each thread access corresponding N*N matrix
+                    {
+                        sum += buf[j * N * P + l * P + k];
+                    }
+                    result[l * P + k] = sum;
+                }
+                
+                
+            } //end inner for 1
+
+            
+
+            tend = omp_get_wtime();
+            //taskTiming_exec[11][tid] += (tend - tstart);
+
+        }// end of task 
+    }//end outer for
 }
 
 void _XTY_v1_RED(double *buf, double *result, int N, int P, int block_width)
@@ -500,6 +586,35 @@ void _XTY_v1_RED(double *buf, double *result, int N, int P, int block_width)
 
         }// end of task 
     }//end outer for
+}
+
+/* TODO: how is that different than _XY_exe */
+void dgemv_task_xy(double *X, double *Y, double *result ,int M, int N, int P, int block_width, int block_id)
+{
+    //code: 1
+    /*
+    Input: X[M * N], Y[N * P] (RHS matrix)
+    Output: result[M * P] (result = X * Y)
+    nthrds : global variable, total # of threads
+    */
+
+    int i, j, k, blksz, tid;
+    
+    k = block_id * block_width; //starting row # of the current block
+
+    blksz = block_width;
+        
+    if(k + blksz > M)
+        blksz = M - k;
+
+    #pragma omp task private(tid) firstprivate(k, blksz, X, Y, result, M, N, P)\
+    depend(in: X[k * N : blksz * N], Y[0 : N * P], M, N, P)\
+    depend(out: result[k * P : blksz * P]) //should be P here, check other version if those have N here. 
+    {
+        tid = omp_get_thread_num();
+        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, blksz, P, N, 1.0, X + (k * N), N, Y, P, 0.0, result + (k * P), P);
+        
+    }//end task
 }
 
 void _XY_exe(double *X, double *Y, double *result ,int M, int N, int P, int block_width, int block_id)

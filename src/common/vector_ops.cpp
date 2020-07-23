@@ -6,12 +6,9 @@ void norm_task(double *Y, double *save_norm, int iterationNumber)
 {
     int i;
     
-    /* TODO: make sure the buffer count matches
-     * the thread count each time */
     #pragma omp task firstprivate(Y, save_norm, iterationNumber) private(i)\
     depend(in: Y[0:1], Y[1:1], Y[2:1], Y[3:1], Y[4:1], Y[5:1], Y[6:1],\
-    Y[7:1], Y[8:1], Y[9:1], Y[10:1], Y[11:1], Y[12:1], Y[13:1]/*, Y[14:1], Y[15:1],\
-    Y[16:1], Y[17:1], Y[18:1], Y[19:1]*/)\
+    Y[7:1], Y[8:1], Y[9:1], Y[10:1], Y[11:1], Y[12:1], Y[13:1])\
     depend(out: save_norm[iterationNumber: 1])
     {
         save_norm[iterationNumber] = 0;
@@ -23,9 +20,27 @@ void norm_task(double *Y, double *save_norm, int iterationNumber)
     }
 }
 
+/* reduce on partial values as in dot product */
+void reduce_task(double *Y, double *local_res, int iterationNumber)
+{
+    int i;
+    
+    #pragma omp task firstprivate(Y, local_res, iterationNumber) private(i)\
+    depend(in: Y[0:1], Y[1:1], Y[2:1], Y[3:1], Y[4:1], Y[5:1], Y[6:1],\
+    Y[7:1], Y[8:1], Y[9:1], Y[10:1], Y[11:1], Y[12:1], Y[13:1])\
+    depend(out: local_res[iterationNumber: 1])
+    {
+        local_res[iterationNumber] = 0;
+        for(i = 0 ; i < nthrds; i++)
+        {
+            local_res[iterationNumber] += Y[i];
+        }
+    }
+}
 void normalize_task(double *Y, int n, int block_id, int block_width, double *save_norm, int iterationNumber)
 {
     int i, j, blksz, start_index;
+    double factor;
 
     i = block_id;
     blksz = block_width;
@@ -33,14 +48,64 @@ void normalize_task(double *Y, int n, int block_id, int block_width, double *sav
 
     if(i * block_width + blksz > n)
         blksz = n - i * block_width;
-        
+
     #pragma omp task firstprivate(i, blksz, start_index, Y, n, block_id)\
-    private(j) depend(in: save_norm[iterationNumber : 1])\
+    private(factor, j) depend(in: save_norm[iterationNumber : 1])\
     depend(out: Y[start_index : blksz])
     {
+        factor = 1.0 / save_norm[iterationNumber];
         for(j = start_index ; j < start_index + blksz ; j++)
         {
-            Y[j] = Y[j] / save_norm[iterationNumber];
+            Y[j] = Y[j] * factor;
+        }
+    }
+}
+
+/* src = dst / scalar beta[iterationNumber] */
+void divide_task(double *src, double *dst, double *beta, int n, int block_id, int block_width, int iterationNumber)
+{
+    int i, k, blksz;
+    double factor;
+
+    k = block_id * block_width;
+    blksz = block_width;
+
+    if(k + blksz > n)
+        blksz = n - k;
+    
+    #pragma omp task private(i, factor)\
+    firstprivate(blksz, n, src, dst, block_width, k, beta,iterationNumber)\
+    depend(in: src[k : blksz], n,beta[iterationNumber : 1])\
+    depend(out: dst[k : blksz])
+    {
+        factor = 1.0 / beta[iterationNumber];
+        for(i = k; i < k + blksz; i++)
+        {
+            dst[i] = src[i] * factor;
+        }
+    }
+}
+
+/* dst = src1 - src2 */
+void sub_task(double *src1, double *src2, double *dst, int n, int block_id, int block_width)
+{
+    int i, k, blksz;
+
+    k = block_id * block_width;
+    blksz = block_width;
+
+    if(k + blksz > n)
+        blksz = n - k;
+    
+    #pragma omp task private(i)\
+    firstprivate(blksz, n, src1, src2, dst, block_width, k)\
+    depend(in: src1[k : blksz], n)\
+    depend(in: src2[k : blksz])\
+    depend(out: dst[k : blksz])
+    {
+        for(i = k; i < k + blksz; i++)
+        {
+            dst[i] = src1[i] - src2[i];
         }
     }
 }

@@ -4276,6 +4276,11 @@ void buildTaskInfoStruct_main(int nodeCount, char **graph , const char *loopType
 
                 //printf("taskName: %s --> %s\n", taskName, ary);
             }
+            else
+            {
+                printf("Invalid OpCode, %s\n", splitParams[0]);
+                exit(1);
+            }
         }// end if(tokenCount == 1)
     } //end while (file read)
 
