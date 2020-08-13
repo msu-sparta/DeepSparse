@@ -19,13 +19,15 @@ lanczos_libcsb:
 	$(CC) $(CFLAGS) -c ../../common/vector_ops.cpp -g $(LINKER_DYNAMIC)
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -c lanczos_libcsb_executor.cpp -g $(LINKER_DYNAMIC)
 	$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_libcsb_executor.x exec_util.o lanczos_libcsb_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
+	#$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_libcsb_executor_intCSB.x exec_util.o lanczos_libcsb_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
 
 lanczos_global: 
-	$(CC) $(CFLAGS) -c ../../common/exec_util.cpp -g $(LINKER_DYNMAIC)
-	$(CC) $(CFLAGS) -c ../../common/matrix_ops.cpp -g $(LINKER_DYNAMIC)
-	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -c ../../common/vector_ops.cpp -g $(LINKER_DYNAMIC)
+	#$(CC) $(CFLAGS) -c ../../common/exec_util.cpp -g $(LINKER_DYNMAIC)
+	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -c ../../common/matrix_ops.cpp -g $(LINKER_DYNAMIC)
+	#$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -c ../../common/vector_ops.cpp -g $(LINKER_DYNAMIC)
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -c lanczos_global_executor.cpp -g $(LINKER_DYNAMIC)
 	$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_global_executor.x exec_util.o lanczos_global_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
+	#$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_global_executor_intCSB.x exec_util.o lanczos_global_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
 
 clean:
 	rm -rf *.p $(EXEDIR)/lanczos_*_executor.x

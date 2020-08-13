@@ -17,59 +17,33 @@ using namespace std;
 #include <omp.h>
 #include "exec_util.h"
 
-void spmv_blkcoord_task(int R, int C, int nthrds, double *Y, block *H, double *X, int row_id, int col_id, int buf_id, int block_width);
-void spmv_blkcoord_loop(int R, int C, int nthrds, double *X,  double *Y, block *H);
-void spmm_blkcoord_loop(int R, int C, int blocksize, int nthrds, double *X,  double *Y, block *H);
-void mat_sub(double *src1, double *src2, double *dst, const int row, const int col);
-void mat_addition(double *src1, double *src2, double *dst, const int row, const int col);
-void mat_mult(double *src1, double *src2, double *dst, const int row, const int col);
+void spmv_blkcoord_task(int C, double *Y, block *H, double *X, int row_id, int col_id, int block_width);
+void spmv_blkcoord_loop(double *X, double *Y, block *H);
+void spmm_blkcoord_loop(int blocksize, double *X,  double *Y, block *H);
+void spmm_blkcoord_finegrained_exe_fixed_buf(int R, int M, double *X,  double *Y, block *H, int row_id, int col_id, int block_width);
+void spmm_blkcoord_finegrained_SPMMRED_fixed_buf(int R, int M, int nbuf, double *Y, double *spmmBUF, int block_id, int block_width);
 
-void dgemv_task_xy(double *X, double *Y, double *result ,int M, int N, int P, int block_width, int block_id);
 void _XY_exe(double *X, double *Y, double *result ,int M, int N, int P, int block_width, int block_id);
-
-void dgemv_task_xty(double *X, double *Y, double *buf ,int M, int N, int P, int block_width, int block_id, int buf_id);
 void _XTY_v1_exe(double *X, double *Y, double *buf ,int M, int N, int P, int block_width, int block_id, int buf_id);
-
-void RED_QpZ(double *buf, double *result, int N, int P, int block_width);
 void _XTY_v1_RED(double *buf, double *result, int N, int P, int block_width);
 
-void mat_addition_task_exe(double *src1, double *src2, double *dst, const int row,
-                       const int col, int block_width, int block_id);
+void mat_addition(double *src1, double *src2, double *dst, const int row, const int col);
+void mat_sub(double *src1, double *src2, double *dst, const int row, const int col);
+void mat_mult(double *src1, double *src2, double *dst, const int row, const int col);
 
-void mat_sub_task_exe(double *src1, double *src2, double *dst, const int row,
-                       const int col, int block_width, int block_id);
+void mat_addition_task_exe(double *src1, double *src2, double *dst, const int row, const int col, int block_width, int block_id);
+void mat_sub_task_exe(double *src1, double *src2, double *dst, const int row, const int col, int block_width, int block_id);
+void mat_mult_task_exe(double *src1, double *src2, double *dst, const int row, const int col, int block_width, int block_id);
 
-void mat_mult_task_exe(double *src1, double *src2, double *dst, const int row,
-                       const int col, int block_width, int block_id);
-
-void sum_sqrt_task_COL(double *src, double *dst, const int row, const int col, int block_width, int block_id, int buf_id, double *buf);
-
+void sum_sqrt_task_COL(double *src, const int row, const int col, int block_width, int block_id, int buf_id, double *buf);
 void sum_sqrt_task_RNRED(double *buf, double *dst, const int col);
-
 void sum_sqrt_task_SQRT(double *dst, const int col);
 
 void update_activeMask_task_exe(int *activeMask, double *residualNorms, double residualTolerance, int blocksize);
-
-void getActiveBlockVector_task_exe(double *activeBlockVectorR, int *activeMask, double *blockVectorR, 
-                               int M, int blocksize, int currentBlockSize, int block_width, int block_id);
-
-void updateBlockVector_task_exe(double *activeBlockVectorR, int *activeMask, double *blockVectorR, 
-                             int M, int blocksize, int currentBlockSize, int block_width, int block_id);
+void getActiveBlockVector_task_exe(double *activeBlockVectorR, int *activeMask, double *blockVectorR, int M, int blocksize, int currentBlockSize, int block_width, int block_id);
+void updateBlockVector_task_exe(double *activeBlockVectorR, int *activeMask, double *blockVectorR, int M, int blocksize, int currentBlockSize, int block_width, int block_id);
 
 void custom_dlacpy_task_exe(double *src, double *dst, int row, int col, int block_width, int block_id);
-
 void dot_mm_exe(double *src1, double *src2, double *result, const int row, const int col, int block_width, int block_id, int buf_id);
-
-void spmm_blkcoord(int R, int C, int M, int nthrds, double *X,  double *Y, block *H);
-
-
-void spmm_blkcoord_finegrained_exe_fixed_buf(int R, int C, int M, int nbuf, double *X,  double *Y, block *H, int row_id, int col_id, int buf_id, int block_width);
-
-
-void spmm_blkcoord_finegrained_SPMMRED_fixed_buf(int R, int M, int nbuf, double *Y, double *spmmBUF, int block_id, int block_width);
-
-
-void spmm_blkcoord_finegrained_exe_fixed_buf_unrolled32(int R, int C, int M, int nbuf, double *X,  double *Y, block *H, int row_id, int col_id, int buf_id, int block_width);
-
 
 #endif

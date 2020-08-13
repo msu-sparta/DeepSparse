@@ -19,6 +19,7 @@ power_libcsb:
 	$(CC) $(CFLAGS) -c ../../common/vector_ops.cpp -g $(LINKER_DYNAMIC)
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -c power_libcsb_executor.cpp -g $(LINKER_DYNAMIC)
 	$(CC) $(CFLAGS) -o $(EXEDIR)/power_libcsb_executor.x exec_util.o power_libcsb_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
+	#$(CC) $(CFLAGS) -o $(EXEDIR)/power_libcsb_executor_intCSB.x exec_util.o power_libcsb_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
 
 power_global: 
 	$(CC) $(CFLAGS) -c ../../common/exec_util.cpp -g $(LINKER_DYNMAIC)
@@ -26,6 +27,7 @@ power_global:
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -c ../../common/vector_ops.cpp -g $(LINKER_DYNAMIC)
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -c power_global_executor.cpp -g $(LINKER_DYNAMIC)
 	$(CC) $(CFLAGS) -o $(EXEDIR)/power_global_executor.x exec_util.o power_global_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
+	#$(CC) $(CFLAGS) -o $(EXEDIR)/power_global_executor_intCSB.x exec_util.o power_global_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
 
 clean:
 	rm -rf *.p $(EXEDIR)/power_*_executor.x

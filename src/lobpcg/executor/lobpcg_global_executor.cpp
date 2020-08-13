@@ -14,12 +14,15 @@ int main(int argc, char *argv[])
     long iterationNumber;
     int info, i, j, k, priority;
 
-    stringstream s(argv[1]);
+    stringstream s(argv[3]);
     s >> blocksize;
     stringstream s1(argv[2]);
     s1 >> block_width;
-    stringstream sIter(argv[7]);
-    sIter >> maxIterations;
+    if(argc == 8)
+    {
+        stringstream sIter(argv[7]);
+        sIter >> maxIterations;
+    }
     
     int currentBlockSize = blocksize, prevCurrentBlockSize = blocksize;
 
@@ -40,7 +43,7 @@ int main(int argc, char *argv[])
     //file read
     double *xrem;
     block *matrixBlock;
-    char *filename = argv[3];
+    char *filename = argv[1];
 
     //printf("filename: %s\n", filename);
     
@@ -400,7 +403,7 @@ int main(int argc, char *argv[])
                         row_id = taskInfo_nonLoop[structIterator].numParamsList[0];
                         col_id = taskInfo_nonLoop[structIterator].numParamsList[1]; 
                         buf_id = taskInfo_nonLoop[structIterator].numParamsList[2];
-                        spmm_blkcoord_finegrained_exe_fixed_buf(numrows, numcols, blocksize, nbuf, blockVectorX, blockVectorAX, matrixBlock, row_id, col_id, buf_id, block_width);
+                        spmm_blkcoord_finegrained_exe_fixed_buf(numrows, blocksize, blockVectorX, blockVectorAX, matrixBlock, row_id, col_id, block_width);
                         //spmmTaskCounter++;
                         //spmmTaskCounter_2++;
                 //}
@@ -974,7 +977,7 @@ int main(int argc, char *argv[])
                         row_id = taskInfo_firstLoop[structIterator].numParamsList[0]; 
                         col_id = taskInfo_firstLoop[structIterator].numParamsList[1]; 
                         buf_id = taskInfo_firstLoop[structIterator].numParamsList[2];
-                        spmm_blkcoord_finegrained_exe_fixed_buf(numrows, numcols, currentBlockSize, nbuf, activeBlockVectorR, activeBlockVectorAR, matrixBlock, row_id, col_id, buf_id, block_width);
+                        spmm_blkcoord_finegrained_exe_fixed_buf(numrows, currentBlockSize, activeBlockVectorR, activeBlockVectorAR, matrixBlock, row_id, col_id, block_width);
                     //}
                 }
                 else if(taskInfo_firstLoop[structIterator].opCode == 3) // taskName starts XTY 
@@ -1132,7 +1135,7 @@ int main(int argc, char *argv[])
                     block_id = taskInfo_firstLoop[structIterator].numParamsList[0];
                     buf_id = taskInfo_firstLoop[structIterator].numParamsList[1];
                     
-                    sum_sqrt_task_COL(newX, residualNorms, M, blocksize, block_width, block_id, buf_id, RNBUF);
+                    sum_sqrt_task_COL(newX, M, blocksize, block_width, block_id, buf_id, RNBUF);
                     //#pragma omp taskwait
                 }
                 else if(taskInfo_firstLoop[structIterator].opCode == 12) /* taskName starts RNRED */
@@ -1974,7 +1977,7 @@ int main(int argc, char *argv[])
                                 row_id = taskInfo_secondLoop[structIterator].numParamsList[0]; //atoi(splitParams[1]);
                                 col_id = taskInfo_secondLoop[structIterator].numParamsList[1]; //atoi(splitParams[2]); 
                                 buf_id = taskInfo_secondLoop[structIterator].numParamsList[2]; //atoi(splitParams[3]);
-                                spmm_blkcoord_finegrained_exe_fixed_buf(numrows, numcols, currentBlockSize, nbuf, activeBlockVectorR, activeBlockVectorAR, matrixBlock, row_id, col_id, buf_id, block_width);
+                                spmm_blkcoord_finegrained_exe_fixed_buf(numrows, currentBlockSize, activeBlockVectorR, activeBlockVectorAR, matrixBlock, row_id, col_id, block_width);
                                 //spmmTaskCounter++;
                                 //spmmTaskCounter_2++;
                             //}
@@ -2257,7 +2260,7 @@ int main(int argc, char *argv[])
 
                         //printf("sum_sqrt_task_COL\n");
 
-                        sum_sqrt_task_COL(newX, residualNorms, M, blocksize, block_width, block_id, buf_id, RNBUF);
+                        sum_sqrt_task_COL(newX, M, blocksize, block_width, block_id, buf_id, RNBUF);
                         //#pragma omp taskwait
                     }
                     else if(taskInfo_secondLoop[structIterator].opCode == 12) /* taskName starts RNRED */

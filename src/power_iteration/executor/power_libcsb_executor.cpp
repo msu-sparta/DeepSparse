@@ -4,6 +4,8 @@
 
 int main(int argc, char *argv[])
 {
+    (void)argc;
+
     int i, j;
     int block_width;
     int iterationNumber, maxIterations;
@@ -62,7 +64,7 @@ int main(int argc, char *argv[])
         cblas_dscal(numcols, 0.0, Y_temp, 1);
 
         /* Y_temp = A * Y */
-        spmv_blkcoord_loop(numrows, numcols, nthrds, Y, Y_temp, matrixBlock);
+        spmv_blkcoord_loop(Y, Y_temp, matrixBlock);
 
         /* Y = Y_temp */
         cblas_dcopy(numcols, Y_temp, 1, Y, 1);

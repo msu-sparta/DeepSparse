@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
    // cout.setf(ios::fixed);
     //cout.setf(ios::showpoint);
 
-    stringstream s(argv[1]);
+    stringstream s(argv[3]);
     s >> blocksize;
     stringstream s1(argv[2]);
     s1 >> block_width;
@@ -38,8 +38,6 @@ int main(int argc, char *argv[])
     cout << "Block Size: " << blocksize << " Block Width: " << block_width << endl;
 
     int currentBlockSize = blocksize, prevCurrentBlockSize = blocksize;
-
-    
 
     //----- lib spmm params 
     char matdescra[6];
@@ -68,15 +66,13 @@ int main(int argc, char *argv[])
     double *acsr;
     //block<double> *matrixBlock;
 
-    double *matrixBlock ; 
+    double *matrixBlock; 
 
-
-    char *filename = argv[3] ; 
+    char *filename = argv[1]; 
     wblk = block_width; 
 
     read_custom(filename,xrem);
 
-    //read_custom_csr(filename, acsr);
     printf("Finish Reading CUS file\n");
     
     #pragma omp parallel
@@ -84,11 +80,6 @@ int main(int argc, char *argv[])
     {
         nthrds = omp_get_num_threads();
     }
-
-    //-- deleting CSC storage memory ------
-    //delete []colptrs;
-    //delete []irem;
-    //delete []xrem;
 
     M = numrows;
     N = numcols;
@@ -106,8 +97,6 @@ int main(int argc, char *argv[])
     int job_dcsrcsc[] = {1, 0, 0, 0, 0, 1}; 
     int dcsrcsc_info = -1;
      
-   
-    
     acsr = (double *) malloc(nnonzero * sizeof(double)); //new double[nnonzero](); //xrem
     ja = (int *) malloc(nnonzero * sizeof(int)); //new int[nnonzero](); //irem
     ia = (int *) malloc((numrows + 1) * sizeof(int)); //new int[numrows + 1](); //colsptr
@@ -123,23 +112,19 @@ int main(int argc, char *argv[])
     delete []irem;
     delete []xrem;
 
-    //std::fstream blockVectorXfile("MatX100.txt", std::ios_base::in);
     srand(0);
-   //#pragma omp parallel for private(j) default(shared)
+    //#pragma omp parallel for private(j) default(shared)
     for(i = 0 ; i < M ; i++)
     {
         for(j = 0 ; j < blocksize ; j++)
         {
-            //blockVectorXfile>>blockVectorX[i*blocksize+j];
             blockVectorX[i * blocksize + j] = (double)rand()/(double)RAND_MAX;
+            //blockVectorX[i * blocksize + j] = 1.0;
             //blockVectorX[i*blocksize+j]= -1.00 + rand() % 2 ;
         }
     }
 
-    //cout<<"finished reading X"<<endl;
-
     //******** memory allocation for matrices ********
-
     double *blockVectorAX = (double *) malloc(M * blocksize * sizeof(double));
     double *blockVectorR = (double *) malloc(M * blocksize * sizeof(double));
     double *blockVectorAR = (double *) malloc(M * blocksize * sizeof(double));
@@ -194,7 +179,6 @@ int main(int argc, char *argv[])
     std::memset(zeros_B_CB, 0.0, sizeof(zeros_B_CB));
     std::memset(zeros_CB_B, 0.0, sizeof(zeros_CB_B));
 
-    // saveLamda[blocksize * maxIterations]
     double **saveLamda = (double **) malloc(blocksize * maxIterations * sizeof(double *));
     for(i = 0 ; i < blocksize ; i++)
         saveLamda[i] = (double *) malloc(maxIterations * sizeof(double));
@@ -206,10 +190,6 @@ int main(int argc, char *argv[])
     double *loopTime = (double *) malloc(maxIterations * sizeof(double));
     for(i = 0 ; i < maxIterations ; i++)
         loopTime[i] = 0;
-
-    //cout<<"Allocation 8"<<endl;
-
-    //cout<<"Total allocation time: "<<omp_get_wtime()-allocation_time<<" sec."<<endl;
 
     //---- if 9 ----
     //gramXBX=blockVectorX'*blockVectorX;

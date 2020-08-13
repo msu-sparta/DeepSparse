@@ -35,7 +35,7 @@ int main(int argc, char *argv[]){
     double tstart , tend;
 
 
-    stringstream bs(argv[1]);
+    stringstream bs(argv[3]);
     bs >> blocksize;
     stringstream bw(argv[2]);
     bw >> block_width;
@@ -44,7 +44,7 @@ int main(int argc, char *argv[]){
 
     double *xrem;
 
-    char *filename = argv[3];
+    char *filename = argv[1];
 
     wblk = block_width; 
     
@@ -120,10 +120,6 @@ int main(int argc, char *argv[]){
     nonloop(blocksize, block_width, argv[4]);
     firstloop(blocksize, block_width, argv[4]);
     secondloop(blocksize, block_width, argv[4]);
-
-
-
-
 }
 
 

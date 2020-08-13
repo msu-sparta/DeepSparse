@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     int info;
 
 
-    stringstream s(argv[1]);
+    stringstream s(argv[3]);
     s >> blocksize;
     stringstream s1(argv[2]);
     s1 >> block_width;
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 
     double *xrem;
     block *matrixBlock;
-    char *filename = argv[3] ; //"/global/cscratch1/sd/rabbimd/Matrices/Nm7-original.cus"; 
+    char *filename = argv[1];
     wblk = block_width; 
     read_custom(filename , xrem);
     csc2blkcoord(matrixBlock , xrem);
@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
     //mkl_dcscmm(&transA, &M, &blocksize, &N, &alpha, matdescra, xrem, irem, colptrs, colptrs+1, blockVectorX, &blocksize,  &beta, blockVectorAX, &blocksize);
     //mkl_dcsrmm(&transA, &M, &blocksize, &N, &alpha, matdescra, acsr, ja, ia, ia+1, blockVectorX, &blocksize, &beta, blockVectorAX, &blocksize);
     //spmm_blkcoord(numrows, numcols, blocksize, nthrds, blockVectorX, blockVectorAX, matrixBlock);
-    spmm_blkcoord_loop(numrows, numcols, blocksize, nthrds, blockVectorX, blockVectorAX, matrixBlock);
+    spmm_blkcoord_loop(blocksize, blockVectorX, blockVectorAX, matrixBlock);
     
     //gramXAX = full(blockVectorX'*blockVectorAX);
     double *gramXAX=new double[blocksize*blocksize]();
@@ -487,7 +487,7 @@ int main(int argc, char *argv[])
         //mkl_dcscmm(&transA, &M, &currentBlockSize, &M, &alpha, matdescra, xrem, irem, colptrs, colptrs+1, activeBlockVectorR, &currentBlockSize,  &beta, activeBlockVectorAR, &currentBlockSize);
         //mkl_dcsrmm(&transA, &M, &currentBlockSize, &M, &alpha, matdescra, acsr, ja, ia, ia+1, activeBlockVectorR, &currentBlockSize, &beta, activeBlockVectorAR, &currentBlockSize);
         //spmm_blkcoord(numrows, numcols, currentBlockSize, nthrds, activeBlockVectorR, activeBlockVectorAR, matrixBlock);
-        spmm_blkcoord_loop(numrows, numcols, currentBlockSize, nthrds, activeBlockVectorR, activeBlockVectorAR, matrixBlock);
+        spmm_blkcoord_loop(currentBlockSize, activeBlockVectorR, activeBlockVectorAR, matrixBlock);
         
         taskTiming[6] += (omp_get_wtime() - tstart); //SPMM 6
 

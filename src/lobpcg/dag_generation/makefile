@@ -7,8 +7,8 @@ CFLAGS = -O3 -w -fopenmp -m64
 EXEDIR_DAG=../exe
 
 lobpcg_global: 
-	$(CC)  -c ../../common/util.cpp  -fopenmp
-	$(CC)  -c lobpcg_global.cpp   util.o -fopenmp
+	$(CC)  -c ../../common/util.cpp -fopenmp
+	$(CC)  -c lobpcg_global.cpp -fopenmp
 	$(CC) -o $(EXEDIR_DAG)/lobpcg_global.x util.o lobpcg_global.o -fopenmp
 
 

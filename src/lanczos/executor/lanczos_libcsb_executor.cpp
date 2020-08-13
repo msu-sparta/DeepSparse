@@ -4,6 +4,8 @@
 
 int main(int argc, char *argv[])
 {
+    (void) argc;
+
     int i, block_width;
     int iterationNumber, eig_wanted;
     char *filename;
@@ -82,7 +84,7 @@ int main(int argc, char *argv[])
         }
 
         // z = A * qq
-        spmv_blkcoord_loop(nrows, ncols, nthrds, qq, z, matrixBlock);
+        spmv_blkcoord_loop(qq, z, matrixBlock);
 
         //alpha[iterationNumber] = qq' * z
         cblas_dgemv(CblasRowMajor, CblasTrans, numcols, 1, 1.0, qq,

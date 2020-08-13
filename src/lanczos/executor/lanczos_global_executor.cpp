@@ -1,62 +1,11 @@
-/*
-Thoughts: buffer count might be a problem previously,
-especially when there is only 16 of them and you run
-the code on an entire laconia node (28 threads).
-
-Also think about whether omp taskwait is needed.
-
-Maybe in the unmerged repo, the issue is due to wrong
-initialization of CSB blocks.
-
-# spmv_blkcoord_task: z = A*qq 
-  !!! rloc - 1 and cloc - 1 !!!
-
-# norm_task_kk: beta[iter] = reduce(normBUFF)
-  !!! depend out beta[0:eig_wanted] !!!
-
-# daxpy_task: qq = z / beta
-  !!! depend in beta[0:eig_wanted] !!!
-
-# sub_task: z = z - QQpZ
-  +++ looks damn fine +++
-
-# dgemv_task_xty: QpZBUFF = Q' * z
-  !!! why use tid, buf_id should specify the index range !!!
-
-# dgemv_task_xy: QQpZ = Q * z
-  +++ looks damn fine +++
-
-# dotV: normBUFF = z' * z
-  !!! why use tid, buf_id should specify the index range !!!
-
-# _XTY_v1_exe: alphaBUFF = qq' * z
-  !!! why use tid, buf_id should specify the index range !!!
-
-# _XTY_v1_RED: alpha[iter] = reduce(alphaBUFF)
-  !!! consider editing the buffer count !!!
-
-# RED_QpZ: QpZ = reduce(QpZBUFF)
-  !!! consider editing the buffer count !!!
-
-# z = 0 --> embedded here in the main loop, consider having a separate task
-  +++ looks damn fine +++
-
-# QQ[col iter+1] = qq --> same, also consider having a separate task for this
-  +++ looks damn fine +++
-*/
-
-/* 
-HPX thought: use index mod # of threads to set the dependencies
-whenever there's a reduce operation as in here with normBUFF,
-QpZBUFF and aplhaBUFF
-*/
-
 #include "../../common/exec_util.h"
 #include "../../common/matrix_ops.h"
 #include "../../common/vector_ops.h"
 
 int main(int argc, char *argv[])
 {
+    (void)argc;
+
     int i, j;
     int blocksize, block_width;
     int iterationNumber, eig_wanted;
@@ -241,7 +190,7 @@ int main(int argc, char *argv[])
                         row_id = taskInfo[structIterator].numParamsList[0]; 
                         col_id = taskInfo[structIterator].numParamsList[1]; 
                         buf_id = taskInfo[structIterator].numParamsList[2]; 
-                        spmv_blkcoord_task(numrows, numcols, nthrds, z, matrixBlock, qq, row_id, col_id, buf_id, block_width);
+                        spmv_blkcoord_task(numcols, z, matrixBlock, qq, row_id, col_id, block_width);
                     }
                         
                     else if(taskInfo[structIterator].opCode == 21) // task name without , in it ==> opCode = 21 
@@ -274,11 +223,13 @@ int main(int argc, char *argv[])
                         task_id = taskInfo[structIterator].taskID;
                         if (task_id == 1 )
                         {
-                            dgemv_task_xty(Q, z, QpZBUFF, numcols, eig_wanted, 1, block_width, block_id, buf_id);
+                            //dgemv_task_xty(Q, z, QpZBUFF, numcols, eig_wanted, 1, block_width, block_id, buf_id);
+                            _XTY_v1_exe(Q, z, QpZBUFF, numcols, eig_wanted, 1, block_width, block_id, buf_id);
                         }
                         else if(task_id == 2)
                         {
-                            dgemv_task_xy(Q, QpZ, QQpZ ,numcols, eig_wanted, 1, block_width, block_id);
+                            //dgemv_task_xy(Q, QpZ, QQpZ ,numcols, eig_wanted, 1, block_width, block_id);
+                            _XY_exe(Q, QpZ, QQpZ ,numcols, eig_wanted, 1, block_width, block_id);
                         }
                     }
 
@@ -310,7 +261,8 @@ int main(int argc, char *argv[])
                         }
                         else if(!strcmp(taskInfo[structIterator].strParamsList[0], "QpZ")) //xty 2 reduction
                         {
-                            RED_QpZ(QpZBUFF, QpZ, eig_wanted, 1, block_width);
+                            //RED_QpZ(QpZBUFF, QpZ, eig_wanted, 1, block_width);
+                            _XTY_v1_RED(QpZBUFF, QpZ, eig_wanted, 1, block_width);
                         }
                     }
                     else if(taskInfo[structIterator].opCode != 22) // undefined taskName

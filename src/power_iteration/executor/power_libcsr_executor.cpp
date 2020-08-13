@@ -4,6 +4,8 @@
 
 int main(int argc, char *argv[])
 {
+    (void)argc;
+
     int i, block_width;
     int iterationNumber, maxIterations;
     char *filename;

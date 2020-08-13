@@ -4,6 +4,8 @@
 
 int main(int argc, char *argv[])
 {
+    (void)argc;
+
     int i, j;
     int block_width;
     int iterationNumber, maxIterations;
@@ -122,7 +124,7 @@ int main(int argc, char *argv[])
                         col_id = taskInfo[structIterator].numParamsList[1]; 
                         buf_id = taskInfo[structIterator].numParamsList[2]; 
                     
-                        spmv_blkcoord_task(numrows, numcols, nthrds, Y_temp, matrixBlock, Y, row_id, col_id, buf_id, block_width);
+                        spmv_blkcoord_task(numcols, Y_temp, matrixBlock, Y, row_id, col_id, block_width);
                     }
                     else if(taskInfo[structIterator].opCode == 24) //DOT PRODUCT, changed from SUBMAX
                     {
