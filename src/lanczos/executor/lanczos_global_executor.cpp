@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
     {
         nthrds = omp_get_num_threads();
     }
+    printf("nthrds: %d\n", nthrds);
 
     delete [] colptrs;
     delete [] irem;
@@ -94,6 +95,32 @@ int main(int argc, char *argv[])
             {
                 tstart = omp_get_wtime();
 
+#ifdef EPYC
+                #pragma omp task private(i, tstart, tend)\
+                firstprivate(nthrds, AlphaBUFF)\
+                depend(in: nthrds)\
+                depend(inout: AlphaBUFF[0 * blocksize : blocksize], AlphaBUFF[1 * blocksize : blocksize], AlphaBUFF[2 * blocksize : blocksize],\
+                        AlphaBUFF[3 * blocksize : blocksize], AlphaBUFF[4 * blocksize : blocksize], AlphaBUFF[5 * blocksize : blocksize], AlphaBUFF[6 * blocksize : blocksize],\
+                        AlphaBUFF[7 * blocksize : blocksize], AlphaBUFF[8 * blocksize : blocksize], AlphaBUFF[9 * blocksize : blocksize], AlphaBUFF[10 * blocksize : blocksize],\
+                        AlphaBUFF[11 * blocksize : blocksize], AlphaBUFF[12 * blocksize : blocksize], AlphaBUFF[13 * blocksize : blocksize],\
+                        AlphaBUFF[14 * blocksize : blocksize], AlphaBUFF[15 * blocksize : blocksize], AlphaBUFF[16 * blocksize : blocksize],\
+                        AlphaBUFF[17 * blocksize : blocksize], AlphaBUFF[18 * blocksize : blocksize], AlphaBUFF[19 * blocksize : blocksize],\
+                        AlphaBUFF[20 * blocksize : blocksize], AlphaBUFF[21 * blocksize : blocksize], AlphaBUFF[22 * blocksize : blocksize],\
+                        AlphaBUFF[23 * blocksize : blocksize], AlphaBUFF[24 * blocksize : blocksize], AlphaBUFF[25 * blocksize : blocksize],\
+                        AlphaBUFF[26 * blocksize : blocksize], AlphaBUFF[27 * blocksize : blocksize], AlphaBUFF[28 * blocksize : blocksize],\
+                        AlphaBUFF[29 * blocksize : blocksize], AlphaBUFF[30 * blocksize : blocksize], AlphaBUFF[31 * blocksize : blocksize],\
+                        AlphaBUFF[32 * blocksize : blocksize], AlphaBUFF[33 * blocksize : blocksize], AlphaBUFF[34 * blocksize : blocksize],\
+                        AlphaBUFF[35 * blocksize : blocksize], AlphaBUFF[36 * blocksize : blocksize], AlphaBUFF[37 * blocksize : blocksize],\
+                        AlphaBUFF[38 * blocksize : blocksize], AlphaBUFF[39 * blocksize : blocksize], AlphaBUFF[40 * blocksize : blocksize],\
+                        AlphaBUFF[41 * blocksize : blocksize], AlphaBUFF[42 * blocksize : blocksize], AlphaBUFF[43 * blocksize : blocksize],\
+                        AlphaBUFF[44 * blocksize : blocksize], AlphaBUFF[45 * blocksize : blocksize], AlphaBUFF[46 * blocksize : blocksize],\
+                        AlphaBUFF[47 * blocksize : blocksize], AlphaBUFF[48 * blocksize : blocksize], AlphaBUFF[49 * blocksize : blocksize],\
+                        AlphaBUFF[50 * blocksize : blocksize], AlphaBUFF[51 * blocksize : blocksize], AlphaBUFF[52 * blocksize : blocksize],\
+                        AlphaBUFF[53 * blocksize : blocksize], AlphaBUFF[54 * blocksize : blocksize], AlphaBUFF[55 * blocksize : blocksize],\
+                        AlphaBUFF[56 * blocksize : blocksize], AlphaBUFF[57 * blocksize : blocksize], AlphaBUFF[58 * blocksize : blocksize],\
+                        AlphaBUFF[59 * blocksize : blocksize], AlphaBUFF[60 * blocksize : blocksize], AlphaBUFF[61 * blocksize : blocksize],\
+                        AlphaBUFF[62 * blocksize : blocksize], AlphaBUFF[63 * blocksize : blocksize])
+#else
                 #pragma omp task private(i, tstart, tend)\
                 firstprivate(nthrds, AlphaBUFF)\
                 depend(in: nthrds)\
@@ -101,6 +128,7 @@ int main(int argc, char *argv[])
                         AlphaBUFF[3 * blocksize : blocksize], AlphaBUFF[4 * blocksize : blocksize], AlphaBUFF[5 * blocksize : blocksize], AlphaBUFF[6 * blocksize : blocksize],\
                         AlphaBUFF[7 * blocksize : blocksize], AlphaBUFF[8 * blocksize : blocksize], AlphaBUFF[9 * blocksize : blocksize], AlphaBUFF[10 * blocksize : blocksize],\
                         AlphaBUFF[11 * blocksize : blocksize], AlphaBUFF[12 * blocksize : blocksize], AlphaBUFF[13 * blocksize : blocksize])
+#endif
                 {
                     tstart = omp_get_wtime();
                     for(i = 0 ; i < nthrds * blocksize; ++i)
@@ -108,7 +136,33 @@ int main(int argc, char *argv[])
                         AlphaBUFF[i] = 0.0;
                     }
                 }
-                
+
+#ifdef EPYC
+                #pragma omp task private(i, tstart, tend)\
+                firstprivate(nthrds, normBUFF)\
+                depend(in: nthrds)\
+                depend(inout: normBUFF[0 * blocksize : blocksize], normBUFF[1 * blocksize : blocksize], normBUFF[2 * blocksize : blocksize],\
+                        normBUFF[3 * blocksize : blocksize], normBUFF[4 * blocksize : blocksize], normBUFF[5 * blocksize : blocksize], normBUFF[6 * blocksize : blocksize],\
+                        normBUFF[7 * blocksize : blocksize], normBUFF[8 * blocksize : blocksize], normBUFF[9 * blocksize : blocksize], normBUFF[10 * blocksize : blocksize],\
+                        normBUFF[11 * blocksize : blocksize], normBUFF[12 * blocksize : blocksize], normBUFF[13 * blocksize : blocksize],\
+                        normBUFF[14 * blocksize : blocksize], normBUFF[15 * blocksize : blocksize], normBUFF[16 * blocksize : blocksize],\
+                        normBUFF[17 * blocksize : blocksize], normBUFF[18 * blocksize : blocksize], normBUFF[19 * blocksize : blocksize],\
+                        normBUFF[20 * blocksize : blocksize], normBUFF[21 * blocksize : blocksize], normBUFF[22 * blocksize : blocksize],\
+                        normBUFF[23 * blocksize : blocksize], normBUFF[24 * blocksize : blocksize], normBUFF[25 * blocksize : blocksize],\
+                        normBUFF[26 * blocksize : blocksize], normBUFF[27 * blocksize : blocksize], normBUFF[28 * blocksize : blocksize],\
+                        normBUFF[29 * blocksize : blocksize], normBUFF[30 * blocksize : blocksize], normBUFF[31 * blocksize : blocksize],\
+                        normBUFF[32 * blocksize : blocksize], normBUFF[33 * blocksize : blocksize], normBUFF[34 * blocksize : blocksize],\
+                        normBUFF[35 * blocksize : blocksize], normBUFF[36 * blocksize : blocksize], normBUFF[37 * blocksize : blocksize],\
+                        normBUFF[38 * blocksize : blocksize], normBUFF[39 * blocksize : blocksize], normBUFF[40 * blocksize : blocksize],\
+                        normBUFF[41 * blocksize : blocksize], normBUFF[42 * blocksize : blocksize], normBUFF[43 * blocksize : blocksize],\
+                        normBUFF[44 * blocksize : blocksize], normBUFF[45 * blocksize : blocksize], normBUFF[46 * blocksize : blocksize],\
+                        normBUFF[47 * blocksize : blocksize], normBUFF[48 * blocksize : blocksize], normBUFF[49 * blocksize : blocksize],\
+                        normBUFF[50 * blocksize : blocksize], normBUFF[51 * blocksize : blocksize], normBUFF[52 * blocksize : blocksize],\
+                        normBUFF[53 * blocksize : blocksize], normBUFF[54 * blocksize : blocksize], normBUFF[55 * blocksize : blocksize],\
+                        normBUFF[56 * blocksize : blocksize], normBUFF[57 * blocksize : blocksize], normBUFF[58 * blocksize : blocksize],\
+                        normBUFF[59 * blocksize : blocksize], normBUFF[60 * blocksize : blocksize], normBUFF[61 * blocksize : blocksize],\
+                        normBUFF[62 * blocksize : blocksize], normBUFF[63 * blocksize : blocksize])
+#else
                 #pragma omp task private(i, tstart, tend)\
                 firstprivate(nthrds, normBUFF)\
                 depend(in: nthrds)\
@@ -116,6 +170,7 @@ int main(int argc, char *argv[])
                         normBUFF[3 * blocksize : blocksize], normBUFF[4 * blocksize : blocksize], normBUFF[5 * blocksize : blocksize], normBUFF[6 * blocksize : blocksize],\
                         normBUFF[7 * blocksize : blocksize], normBUFF[8 * blocksize : blocksize], normBUFF[9 * blocksize : blocksize], normBUFF[10 * blocksize : blocksize],\
                         normBUFF[11 * blocksize : blocksize], normBUFF[12 * blocksize : blocksize], normBUFF[13 * blocksize : blocksize])
+#endif
                 {
                     tstart = omp_get_wtime();
                     for(i = 0 ; i < nthrds * blocksize; ++i)
@@ -124,6 +179,32 @@ int main(int argc, char *argv[])
                     }
                 }
                 
+#ifdef EPYC
+                #pragma omp task private(i, tstart, tend)\
+                firstprivate(nthrds, QpZBUFF)\
+                depend(in: nthrds)\
+                depend(inout: QpZBUFF[0 * blocksize : eig_wanted], QpZBUFF[1 * blocksize : eig_wanted], QpZBUFF[2 * blocksize : eig_wanted],\
+                        QpZBUFF[3 * blocksize : eig_wanted], QpZBUFF[4 * blocksize : eig_wanted], QpZBUFF[5 * blocksize : eig_wanted], QpZBUFF[6 * blocksize : eig_wanted],\
+                        QpZBUFF[7 * blocksize : eig_wanted], QpZBUFF[8 * blocksize : eig_wanted], QpZBUFF[9 * blocksize : eig_wanted], QpZBUFF[10 * blocksize : eig_wanted],\
+                        QpZBUFF[11 * blocksize : eig_wanted], QpZBUFF[12 * blocksize : eig_wanted], QpZBUFF[13 * blocksize : eig_wanted],\
+                        QpZBUFF[14 * blocksize : eig_wanted], QpZBUFF[15 * blocksize : eig_wanted], QpZBUFF[16 * blocksize : eig_wanted],\
+                        QpZBUFF[17 * blocksize : eig_wanted], QpZBUFF[18 * blocksize : eig_wanted], QpZBUFF[19 * blocksize : eig_wanted],\
+                        QpZBUFF[20 * blocksize : eig_wanted], QpZBUFF[21 * blocksize : eig_wanted], QpZBUFF[22 * blocksize : eig_wanted],\
+                        QpZBUFF[23 * blocksize : eig_wanted], QpZBUFF[24 * blocksize : eig_wanted], QpZBUFF[25 * blocksize : eig_wanted],\
+                        QpZBUFF[26 * blocksize : eig_wanted], QpZBUFF[27 * blocksize : eig_wanted], QpZBUFF[28 * blocksize : eig_wanted],\
+                        QpZBUFF[29 * blocksize : eig_wanted], QpZBUFF[30 * blocksize : eig_wanted], QpZBUFF[31 * blocksize : eig_wanted],\
+                        QpZBUFF[32 * blocksize : eig_wanted], QpZBUFF[33 * blocksize : eig_wanted], QpZBUFF[34 * blocksize : eig_wanted],\
+                        QpZBUFF[35 * blocksize : eig_wanted], QpZBUFF[36 * blocksize : eig_wanted], QpZBUFF[37 * blocksize : eig_wanted],\
+                        QpZBUFF[38 * blocksize : eig_wanted], QpZBUFF[39 * blocksize : eig_wanted], QpZBUFF[40 * blocksize : eig_wanted],\
+                        QpZBUFF[41 * blocksize : eig_wanted], QpZBUFF[42 * blocksize : eig_wanted], QpZBUFF[43 * blocksize : eig_wanted],\
+                        QpZBUFF[44 * blocksize : eig_wanted], QpZBUFF[45 * blocksize : eig_wanted], QpZBUFF[46 * blocksize : eig_wanted],\
+                        QpZBUFF[47 * blocksize : eig_wanted], QpZBUFF[48 * blocksize : eig_wanted], QpZBUFF[49 * blocksize : eig_wanted],\
+                        QpZBUFF[50 * blocksize : eig_wanted], QpZBUFF[51 * blocksize : eig_wanted], QpZBUFF[52 * blocksize : eig_wanted],\
+                        QpZBUFF[53 * blocksize : eig_wanted], QpZBUFF[54 * blocksize : eig_wanted], QpZBUFF[55 * blocksize : eig_wanted],\
+                        QpZBUFF[56 * blocksize : eig_wanted], QpZBUFF[57 * blocksize : eig_wanted], QpZBUFF[58 * blocksize : eig_wanted],\
+                        QpZBUFF[59 * blocksize : eig_wanted], QpZBUFF[60 * blocksize : eig_wanted], QpZBUFF[61 * blocksize : eig_wanted],\
+                        QpZBUFF[62 * blocksize : eig_wanted], QpZBUFF[63 * blocksize : eig_wanted])
+#else
                 #pragma omp task private(i, tstart, tend)\
                 firstprivate(nthrds, QpZBUFF)\
                 depend(in: nthrds)\
@@ -131,6 +212,7 @@ int main(int argc, char *argv[])
                         QpZBUFF[3 * blocksize : eig_wanted], QpZBUFF[4 * blocksize : eig_wanted], QpZBUFF[5 * blocksize : eig_wanted], QpZBUFF[6 * blocksize : eig_wanted],\
                         QpZBUFF[7 * blocksize : eig_wanted], QpZBUFF[8 * blocksize : eig_wanted], QpZBUFF[9 * blocksize : eig_wanted], QpZBUFF[10 * blocksize : eig_wanted],\
                         QpZBUFF[11 * blocksize : eig_wanted], QpZBUFF[12 * blocksize : eig_wanted], QpZBUFF[13 * blocksize : eig_wanted])
+#endif
                 {
                     tstart = omp_get_wtime();
                     for(i = 0; i < nthrds * eig_wanted; ++i)
@@ -189,7 +271,7 @@ int main(int argc, char *argv[])
                     {
                         row_id = taskInfo[structIterator].numParamsList[0]; 
                         col_id = taskInfo[structIterator].numParamsList[1]; 
-                        buf_id = taskInfo[structIterator].numParamsList[2]; 
+                        //buf_id = taskInfo[structIterator].numParamsList[2]; 
                         spmv_blkcoord_task(numcols, z, matrixBlock, qq, row_id, col_id, block_width);
                     }
                         

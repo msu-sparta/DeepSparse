@@ -239,16 +239,18 @@ void inverse(double *arr, int m, int n)
 
 void print_mat(double *arr, const int row, const int col) 
 {
-    cout.setf(ios::fixed);
-    cout.setf(ios::showpoint);
-    //cout.precision(15);
+    //cout.setf(ios::fixed);
+    //cout.setf(ios::showpoint);
+    //cout.precision(12);
     for(int i = 0 ; i < row ; i++)
     {
         for(int j = 0 ; j < col ; j++)
         {
-          cout << arr[i * col + j] << " ";
+            //cout << arr[i * col + j] << " ";
+            printf("%.18lf ", arr[i*col + j]);
         }
-        cout << endl;
+        //cout << endl;
+        printf("\n");
     }
 }
 

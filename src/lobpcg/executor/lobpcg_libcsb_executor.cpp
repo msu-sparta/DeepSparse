@@ -637,7 +637,7 @@ int main(int argc, char *argv[])
 
      
         //--- cond_try for loop -----
-        for(int cond_try = 1 ; cond_try <=2 ; cond_try++)
+        for(int cond_try = 1 ; cond_try <=1 ; cond_try++)
         {
             if(restart == 0) //---- if 24 ----
             {
@@ -929,15 +929,8 @@ int main(int argc, char *argv[])
 
     } //loop ends
 
-    //print_mat(blockVectorP, 16, blocksize);
-
     //iteraton_time = omp_get_wtime() - iteraton_start_time;
     
-    /*cout<<"Total iterations: "<<iterationNumber-1<<endl;
-    cout<<"\nTotal Execution time: "<<iteraton_time<<" sec."<<endl;*/
-
-    //print_mat(blockVectorX, 16, blocksize);
-
     /*cout<<"printing activeMask:" <<endl;
     for(i = 0 ; i < blocksize ; i++)
     {
@@ -973,7 +966,7 @@ int main(int argc, char *argv[])
         printf("\n");
     }
 
-    printf("%10s %.6lf sec.\n", "SETZERO", taskTiming[0]);
+    /*printf("%10s %.6lf sec.\n", "SETZERO", taskTiming[0]);
     printf("%10s %.6lf sec.\n", "XY", taskTiming[1]);
     printf("%10s %.6lf sec.\n", "XTY", taskTiming[2]);
     printf("%10s %.6lf sec.\n", "ADD", taskTiming[3]);
@@ -983,7 +976,7 @@ int main(int argc, char *argv[])
     printf("%10s %.6lf sec.\n", "GET", taskTiming[7]);
     printf("%10s %.6lf sec.\n", "UPDATE", taskTiming[8]);
     printf("%10s %.6lf sec.\n", "EIGEN", taskTiming[9]);
-    printf("%10s %.6lf sec.\n", "DLACPY", taskTiming[10]);
+    printf("%10s %.6lf sec.\n", "DLACPY", taskTiming[10]);*/
 
     return 0;
 }

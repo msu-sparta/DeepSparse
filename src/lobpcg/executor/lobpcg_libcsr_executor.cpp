@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     int block_width;
     double *A, *blockVectorX;
     double *at, *bt;
-    double residualTolerance = 0.0001;
+    double residualTolerance = 1.0e-10;
     long maxIterations = 10;
     int constraintStyle = 0; //operatorB not used
     long iterationNumber;
@@ -85,8 +85,8 @@ int main(int argc, char *argv[])
     N = numcols;
 
     //timing variables
-    int numTaks = 11;
-    double *taskTiming = (double *) malloc(sizeof(double) * numTaks);
+    int numTask = 11;
+    double *taskTiming = (double *) malloc(sizeof(double) * numTask);
 
     double tstart, tend, temp1Time;
     double loop_start_time = 0, loop_finish_time = 0;
@@ -120,6 +120,7 @@ int main(int argc, char *argv[])
         {
             blockVectorX[i * blocksize + j] = (double)rand()/(double)RAND_MAX;
             //blockVectorX[i * blocksize + j] = 1.0;
+            //blockVectorX[i * blocksize + j] = 0.001*(i*blocksize+j) + 0.12;
             //blockVectorX[i*blocksize+j]= -1.00 + rand() % 2 ;
         }
     }
@@ -130,7 +131,6 @@ int main(int argc, char *argv[])
     double *blockVectorAR = (double *) malloc(M * blocksize * sizeof(double));
     double *blockVectorP = (double *) malloc(M * blocksize * sizeof(double));
     double *blockVectorAP = (double *) malloc(M * blocksize * sizeof(double));
-    
 
     double *activeBlockVectorR = (double *) malloc(M * currentBlockSize * sizeof(double));
     double *activeBlockVectorAR = (double *) malloc(M * currentBlockSize * sizeof(double));
@@ -144,12 +144,7 @@ int main(int argc, char *argv[])
 
     //--- modified new
 
-    
-    //double *newAX = new double[M*blocksize]();
-    //double *temp1 = new double[M*blocksize]();
-
     //double *newActP = new double[M*currentBlockSize]();
-    //double *tempMultResult=new double[M*currentBlockSize]();
     
     double *residualNorms = (double *) malloc(blocksize * sizeof(double));
     double *gramPBP = (double *) malloc(currentBlockSize * currentBlockSize * sizeof(double));
@@ -179,13 +174,13 @@ int main(int argc, char *argv[])
     std::memset(zeros_B_CB, 0.0, sizeof(zeros_B_CB));
     std::memset(zeros_CB_B, 0.0, sizeof(zeros_CB_B));
 
-    double **saveLamda = (double **) malloc(blocksize * maxIterations * sizeof(double *));
+    double **saveLambda = (double **) malloc(blocksize * maxIterations * sizeof(double *));
     for(i = 0 ; i < blocksize ; i++)
-        saveLamda[i] = (double *) malloc(maxIterations * sizeof(double));
+        saveLambda[i] = (double *) malloc(maxIterations * sizeof(double));
     
     for(i = 0 ; i < blocksize ; i++)
         for(j = 0 ; j < maxIterations ; j++)
-            saveLamda[i][j] = 0.0;
+            saveLambda[i][j] = 0.0;
 
     double *loopTime = (double *) malloc(maxIterations * sizeof(double));
     for(i = 0 ; i < maxIterations ; i++)
@@ -243,7 +238,7 @@ int main(int argc, char *argv[])
     // blockVectorAX = operatorA*blockVectorX;
     //std::memset(blockVectorAX, 0.0, sizeof(blockVectorAX));
     
-    for(i = 0 ; i < numTaks ; i++)
+    for(i = 0 ; i < numTask ; i++)
         taskTiming[i] = 0;
 
     tstart = omp_get_wtime();
@@ -328,7 +323,6 @@ int main(int argc, char *argv[])
     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, blocksize, blocksize, 1.00, blockVectorAX, blocksize, gramXAX, blocksize, 0.00, newX, blocksize);
     custom_dlacpy(newX, blockVectorAX, M, blocksize);
     free(gramXAX);
-    
 
     int gramASize = -1;
     int *activeMask = (int *) malloc(blocksize * sizeof(int));
@@ -344,7 +338,7 @@ int main(int argc, char *argv[])
     //loop starts here
     for(iterationNumber = 1 ; iterationNumber <= maxIterations ; iterationNumber++)
     {
-        // for(i = 0 ; i < numTaks ; i++)
+        // for(i = 0 ; i < numTask ; i++)
         //     taskTiming[i] = 0;
 
         //cout << "\niterationNumber: " << iterationNumber << endl;
@@ -371,7 +365,6 @@ int main(int argc, char *argv[])
         taskTiming[5] += (omp_get_wtime() - tstart);
         
         sum_sqrt(newX, residualNorms, M, blocksize);
-        
         //residualNormsHistory(1:blockSize,iterationNumber)=residualNorms;
         //activeMask = full(residualNorms > residualTolerance) & activeMask;
 
@@ -417,6 +410,7 @@ int main(int argc, char *argv[])
         mat_sub(activeBlockVectorR, temp3, activeBlockVectorR, M, currentBlockSize);
         taskTiming[4] += (omp_get_wtime() - tstart);
 
+        
         // tstart = omp_get_wtime();
         // updateBlockVector(activeBlockVectorR, activeMask, blockVectorR, M, blocksize, currentBlockSize); //UPDATE: 8
         // taskTiming[8] += (omp_get_wtime() - tstart);
@@ -586,7 +580,7 @@ int main(int argc, char *argv[])
         for(i = 0 ; i < blocksize ; i++)
         {
             //cout<<"residualNorms[i] :"<<residualNorms[i]<<endl;
-            if(residualNorms[i] < 4.0538e-10)
+            if(residualNorms[i] < residualTolerance)
             {
                 flag = 0;
                 break;
@@ -613,12 +607,16 @@ int main(int argc, char *argv[])
             restart = 0;
         }
 
+        //printf("iteration = %d,\tcurrentBlockSize = %d, \tflag = %d, \texplicitGramFlag = %d, \trestart = %d, \tactivePSize = %d\n", iterationNumber, currentBlockSize, flag, explicitGramFlag, restart, activePSize);
+        //fflush(stdout);
+
         //gramXAR=full(blockVectorAX'*blockVectorR(:,activeMask));
         //gramRAR=full(blockVectorAR(:,activeMask)'*blockVectorR(:,activeMask));
         //gramRAR=(gramRAR'+gramRAR)*0.5;
  
         tstart = omp_get_wtime();
         cblas_dgemm(CblasRowMajor,CblasTrans, CblasNoTrans, blocksize, currentBlockSize, M, 1.0, blockVectorAX, blocksize, activeBlockVectorR, currentBlockSize, 0.0, gramXAR, currentBlockSize);
+
         //_XTY(blockVectorAX, activeBlockVectorR, gramXAR, M, blocksize, currentBlockSize, block_width);
         taskTiming[2] += (omp_get_wtime() - tstart);
      
@@ -635,7 +633,7 @@ int main(int argc, char *argv[])
 
      
         //--- cond_try for loop -----
-        for(int cond_try = 1 ; cond_try <=2 ; cond_try++)
+        for(int cond_try = 1 ; cond_try <=1 ; cond_try++)
         {
             if(restart == 0) //---- if 24 ----
             {
@@ -781,7 +779,6 @@ int main(int argc, char *argv[])
             }
         }//inner loop finish here
 
-
         tstart = omp_get_wtime();
 
         eigen_value = new double[gramASize]();
@@ -899,7 +896,7 @@ int main(int argc, char *argv[])
         loopTime[iterationNumber - 1] = omp_get_wtime() - loop_start_time;
         for(i = 0 ; i < blocksize ; i++)
         {
-            saveLamda[i][iterationNumber - 1] = lambda[i * blocksize + i];
+            saveLambda[i][iterationNumber - 1] = lambda[i * blocksize + i];
         }
 
         /*printf("%10s %.6lf sec.\n", "SETZERO", taskTiming[0]);
@@ -938,14 +935,14 @@ int main(int argc, char *argv[])
     {
         for(j = 0 ; j < maxIterations ; j++)
         {
-            printf("%.4lf", saveLamda[i][j]);
+            printf("%.4lf", saveLambda[i][j]);
             if(j != maxIterations - 1)
                 printf(",");
         }
         printf("\n");
     }
 
-    printf("%10s %.6lf sec.\n", "SETZERO", taskTiming[0]);
+    /*printf("%10s %.6lf sec.\n", "SETZERO", taskTiming[0]);
     printf("%10s %.6lf sec.\n", "XY", taskTiming[1]);
     printf("%10s %.6lf sec.\n", "XTY", taskTiming[2]);
     printf("%10s %.6lf sec.\n", "ADD", taskTiming[3]);
@@ -955,7 +952,7 @@ int main(int argc, char *argv[])
     printf("%10s %.6lf sec.\n", "GET", taskTiming[7]);
     printf("%10s %.6lf sec.\n", "UPDATE", taskTiming[8]);
     printf("%10s %.6lf sec.\n", "EIGEN", taskTiming[9]);
-    printf("%10s %.6lf sec.\n", "DLACPY", taskTiming[10]);
+    printf("%10s %.6lf sec.\n", "DLACPY", taskTiming[10]);*/
 
     return 0;
 }

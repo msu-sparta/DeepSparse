@@ -112,6 +112,12 @@ void mainloop(int blocksize , int block_width, char *mtx_name)
     char ary[150], i_string[8];
     int nthreads = 14;
 
+#pragma omp parallel
+#pragma omp master
+    {
+        nthreads = omp_get_num_threads();
+    }
+
     //memory chunk DS
     char main_task[100];
     char tmp_input1[100];

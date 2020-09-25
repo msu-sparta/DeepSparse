@@ -6,10 +6,25 @@ void norm_task(double *Y, double *save_norm, int iterationNumber)
 {
     int i;
     
+#ifdef EPYC
+    #pragma omp task firstprivate(Y, save_norm, iterationNumber) private(i)\
+    depend(in: Y[0:1], Y[1:1], Y[2:1], Y[3:1], Y[4:1], Y[5:1], Y[6:1],\
+            Y[7:1], Y[8:1], Y[9:1], Y[10:1], Y[11:1], Y[12:1], Y[13:1],\
+            Y[14:1], Y[15:1], Y[16:1], Y[17:1], Y[18:1], Y[19:1], Y[20:1],\
+            Y[21:1], Y[22:1], Y[23:1], Y[24:1], Y[25:1], Y[26:1], Y[27:1],\
+            Y[28:1], Y[29:1], Y[30:1], Y[31:1], Y[32:1], Y[33:1], Y[34:1],\
+            Y[35:1], Y[36:1], Y[37:1], Y[38:1], Y[39:1], Y[40:1], Y[41:1],\
+            Y[42:1], Y[43:1], Y[44:1], Y[45:1], Y[46:1], Y[47:1], Y[48:1],\
+            Y[49:1], Y[50:1], Y[51:1], Y[52:1], Y[53:1], Y[54:1], Y[55:1],\
+            Y[56:1], Y[57:1], Y[58:1], Y[59:1], Y[60:1], Y[61:1], Y[62:1],\
+            Y[63:1])\
+    depend(out: save_norm[iterationNumber: 1])
+#else
     #pragma omp task firstprivate(Y, save_norm, iterationNumber) private(i)\
     depend(in: Y[0:1], Y[1:1], Y[2:1], Y[3:1], Y[4:1], Y[5:1], Y[6:1],\
     Y[7:1], Y[8:1], Y[9:1], Y[10:1], Y[11:1], Y[12:1], Y[13:1])\
     depend(out: save_norm[iterationNumber: 1])
+#endif
     {
         save_norm[iterationNumber] = 0;
         for(i = 0 ; i < nthrds; i++)
@@ -24,11 +39,26 @@ void norm_task(double *Y, double *save_norm, int iterationNumber)
 void reduce_task(double *Y, double *local_res, int iterationNumber)
 {
     int i;
-    
+
+#ifdef EPYC
+    #pragma omp task firstprivate(Y, local_res, iterationNumber) private(i)\
+    depend(in: Y[0:1], Y[1:1], Y[2:1], Y[3:1], Y[4:1], Y[5:1], Y[6:1],\
+            Y[7:1], Y[8:1], Y[9:1], Y[10:1], Y[11:1], Y[12:1], Y[13:1],\
+            Y[14:1], Y[15:1], Y[16:1], Y[17:1], Y[18:1], Y[19:1], Y[20:1],\
+            Y[21:1], Y[22:1], Y[23:1], Y[24:1], Y[25:1], Y[26:1], Y[27:1],\
+            Y[28:1], Y[29:1], Y[30:1], Y[31:1], Y[32:1], Y[33:1], Y[34:1],\
+            Y[35:1], Y[36:1], Y[37:1], Y[38:1], Y[39:1], Y[40:1], Y[41:1],\
+            Y[42:1], Y[43:1], Y[44:1], Y[45:1], Y[46:1], Y[47:1], Y[48:1],\
+            Y[49:1], Y[50:1], Y[51:1], Y[52:1], Y[53:1], Y[54:1], Y[55:1],\
+            Y[56:1], Y[57:1], Y[58:1], Y[59:1], Y[60:1], Y[61:1], Y[62:1],\
+            Y[63:1])\
+    depend(out: local_res[iterationNumber: 1])
+#else
     #pragma omp task firstprivate(Y, local_res, iterationNumber) private(i)\
     depend(in: Y[0:1], Y[1:1], Y[2:1], Y[3:1], Y[4:1], Y[5:1], Y[6:1],\
     Y[7:1], Y[8:1], Y[9:1], Y[10:1], Y[11:1], Y[12:1], Y[13:1])\
     depend(out: local_res[iterationNumber: 1])
+#endif
     {
         local_res[iterationNumber] = 0;
         for(i = 0 ; i < nthrds; i++)

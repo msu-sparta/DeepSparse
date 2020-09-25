@@ -578,13 +578,13 @@ int main(int argc, char *argv[])
     } //end parallel
 
     free(taskInfo_nonLoop);
-    printf("After nonloop part \n");
+    /*printf("After nonloop part \n");
     for(i = 0 ; i < blocksize ; i++)
     {
         //cout << lambda[i * blocksize + i] << endl;
         printf("%.4lf ", lambda[i * blocksize + i]);
     }
-    printf("\n");
+    printf("\n");*/
 
 
     free(gramXAX); 
@@ -1122,8 +1122,6 @@ int main(int argc, char *argv[])
                     block_id = taskInfo_firstLoop[structIterator].numParamsList[0];
                     buf_id = taskInfo_firstLoop[structIterator].numParamsList[1]; 
 
-                    //printf("DOT --> block_id: %d buf_id: %d\n", block_id, buf_id);
-
                     //mat_mult_task_exe(blockVectorR, blockVectorR, newX, M, blocksize, block_width, block_id);
                     dot_mm_exe(blockVectorR, blockVectorR, RNBUF, M, blocksize, block_width, block_id, buf_id);
                     //#pragma omp taskwait
@@ -1134,7 +1132,6 @@ int main(int argc, char *argv[])
                     // buf_id = atoi(splitParams[2]);
                     block_id = taskInfo_firstLoop[structIterator].numParamsList[0];
                     buf_id = taskInfo_firstLoop[structIterator].numParamsList[1];
-                    
                     sum_sqrt_task_COL(newX, M, blocksize, block_width, block_id, buf_id, RNBUF);
                     //#pragma omp taskwait
                 }
@@ -1593,13 +1590,13 @@ int main(int argc, char *argv[])
 
     //printf("\nargv[6]: %s\n", argv[4]);
 
-    printf("After firstloop part \n");
+    /*printf("After firstloop part \n");
     for(i = 0 ; i < blocksize ; i++)
     {
         //cout << lambda[i * blocksize + i] << endl;
         printf("%.4lf ", lambda[i * blocksize + i]);
     }
-    printf("\n");
+    printf("\n");*/
 
    
     
