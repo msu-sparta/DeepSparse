@@ -1,6 +1,7 @@
 CC=g++
 CFLAGS=-march=native -fopenmp -O3 -m64 -I${MKL_ROOT}/include
 CFLAGS+=-DSHORT_INT
+#CFLAGS+=-DEPYC
 CFLAGS_EXTRA=-Wall -Wextra -Wconversion
 LINKER_DYNAMIC=-L${MKL_ROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_gnu_thread -lmkl_core -lgomp -lpthread -lm -ldl
 
@@ -11,23 +12,30 @@ lanczos_libcsr:
 	$(CC) $(CFLAGS) -c ../../common/matrix_ops.cpp -g $(LINKER_DYNAMIC)
 	$(CC) $(CFLAGS) -c ../../common/vector_ops.cpp -g $(LINKER_DYNAMIC)
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -c lanczos_libcsr_executor.cpp -g $(LINKER_DYNAMIC)
-	$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_libcsr_executor.x exec_util.o lanczos_libcsr_executor.o matrix_ops.o vector_ops.o  -g $(LINKER_DYNAMIC)
+	$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_libcsr_executor_intel_short_optimized.x exec_util.o lanczos_libcsr_executor.o matrix_ops.o vector_ops.o  -g $(LINKER_DYNAMIC)
+	#$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_libcsr_executor_amd_short_optimized.x exec_util.o lanczos_libcsr_executor.o matrix_ops.o vector_ops.o  -g $(LINKER_DYNAMIC)
+	#$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_libcsr_executor_intel_int_optimized.x exec_util.o lanczos_libcsr_executor.o matrix_ops.o vector_ops.o  -g $(LINKER_DYNAMIC)
+	#$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_libcsr_executor_amd_int_optimized.x exec_util.o lanczos_libcsr_executor.o matrix_ops.o vector_ops.o  -g $(LINKER_DYNAMIC)
 
 lanczos_libcsb: 
 	$(CC) $(CFLAGS) -c ../../common/exec_util.cpp -g $(LINKER_DYNMAIC)
 	$(CC) $(CFLAGS) -c ../../common/matrix_ops.cpp -g $(LINKER_DYNAMIC)
 	$(CC) $(CFLAGS) -c ../../common/vector_ops.cpp -g $(LINKER_DYNAMIC)
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -c lanczos_libcsb_executor.cpp -g $(LINKER_DYNAMIC)
-	$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_libcsb_executor.x exec_util.o lanczos_libcsb_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
-	#$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_libcsb_executor_intCSB.x exec_util.o lanczos_libcsb_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
+	$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_libcsb_executor_intel_short_optimized.x exec_util.o lanczos_libcsb_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
+	#$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_libcsb_executor_amd_short_optimized.x exec_util.o lanczos_libcsb_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
+	#$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_libcsb_executor_intel_int_optimized.x exec_util.o lanczos_libcsb_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
+	#$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_libcsb_executor_amd_int_optimized.x exec_util.o lanczos_libcsb_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
 
 lanczos_global: 
-	#$(CC) $(CFLAGS) -c ../../common/exec_util.cpp -g $(LINKER_DYNMAIC)
+	$(CC) $(CFLAGS) -c ../../common/exec_util.cpp -g $(LINKER_DYNMAIC)
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -c ../../common/matrix_ops.cpp -g $(LINKER_DYNAMIC)
-	#$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -c ../../common/vector_ops.cpp -g $(LINKER_DYNAMIC)
+	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -c ../../common/vector_ops.cpp -g $(LINKER_DYNAMIC)
 	$(CC) $(CFLAGS) $(CFLAGS_EXTRA) -c lanczos_global_executor.cpp -g $(LINKER_DYNAMIC)
-	$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_global_executor.x exec_util.o lanczos_global_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
-	#$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_global_executor_intCSB.x exec_util.o lanczos_global_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
+	$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_global_executor_intel_short_optimized.x exec_util.o lanczos_global_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
+	#$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_global_executor_amd_short_optimized.x exec_util.o lanczos_global_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
+	#$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_global_executor_intel_int_optimized.x exec_util.o lanczos_global_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
+	#$(CC) $(CFLAGS) -o $(EXEDIR)/lanczos_global_executor_amd_int_optimized.x exec_util.o lanczos_global_executor.o matrix_ops.o vector_ops.o -g $(LINKER_DYNAMIC)
 
 clean:
 	rm -rf *.p $(EXEDIR)/lanczos_*_executor.x

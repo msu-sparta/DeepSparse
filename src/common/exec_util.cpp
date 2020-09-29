@@ -35,36 +35,50 @@ void read_custom(char* filename, double *&xrem)
     cout<<"non zero: "<<nnonzero<<endl;
 
     colptrs = new int[numcols + 1];
-        irem = new int[nnonzero];
-        //xrem = new T[nnonzero];
-        xrem = new double[nnonzero];
-        float *txrem = new float[nnonzero];
+    irem = new int[nnonzero];
+    //xrem = new T[nnonzero];
+    xrem = new double[nnonzero];
+
+    int *tcolptrs = new int[numcols + 1];
+    int *tirem = new int[nnonzero];
+    float *txrem = new float[nnonzero];
+
     cout << "Memory allocation finished" << endl;
 
-    fread(colptrs, sizeof(int), numcols+1, fp);
-        cout << "finished reading colptrs" << endl;
+    fread(tcolptrs, sizeof(int), numcols+1, fp);
+        cout << "finished reading tcolptrs" << endl;
 
-    fread(irem, sizeof(int), nnonzero, fp);
-    cout << "finished reading irem" << endl;
+    fread(tirem, sizeof(int), nnonzero, fp);
+    cout << "finished reading tirem" << endl;
 
     fread(txrem, sizeof(float), nnonzero, fp);
-    cout << "finished reading xrem" << endl;
+    cout << "finished reading txrem" << endl;
 
+
+    #pragma omp parallel for
     for(int i = 0 ; i < nnonzero; i++)
     {
         xrem[i] = txrem[i];
     }
 
+    #pragma omp parallel for
     for(int i = 0 ; i < numcols+1; i++)
     {	
-    	colptrs[i]--;
+    	colptrs[i] = tcolptrs[i] - 1;
     }
 
+    #pragma omp parallel for
     for(int i = 0 ; i < nnonzero; i++)
-    	irem[i]--;
+    {
+    	irem[i] = tirem[i] - 1;
+    }
 
+    delete []tcolptrs;
+    delete []tirem;
     delete []txrem;
+
     tend = omp_get_wtime();
+
     cout << "Matrix is read in " << tend - tstart << " seconds." << endl;
 }
 
@@ -88,6 +102,7 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
         nnzPerRow[i] = 0;
     }
 
+    #pragma omp parallel for default(shared) private(blkr, blkc)
     for(blkr = 0 ; blkr < nrowblks ; blkr++)
     {
         for(blkc = 0 ; blkc < ncolblks ; blkc++)
@@ -100,22 +115,26 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
     cout<<"calculatig nnz per block"<<endl;
 
     //calculatig nnz per block
-    for(c = 0 ; c < numcols ; c++)
+    #pragma omp parallel for default(shared) private(i, c, k, blkc, r, blkr)
+    for(i = 0; i < ncolblks; i++)
     {
-        blkc = c / wblk;
-
-        for(k = colptrs[c]; k < colptrs[c+1]; k++)
+        for(c = i * wblk ; c < min( (i+1)*wblk, numcols) ; c++)
         {
-            r = irem[k];
-            blkr = r / wblk;
-            if( blkr >= nrowblks || blkc >= ncolblks)
+            blkc = c / wblk;
+
+            for(k = colptrs[c]; k < colptrs[c+1]; k++)
             {
-                cout << "(" << blkr << ", " << blkc << ") doesn't exist" << endl;
+                r = irem[k];
+                blkr = r / wblk;
+                if( blkr >= nrowblks || blkc >= ncolblks)
+                {
+                    cout << "(" << blkr << ", " << blkc << ") doesn't exist" << endl;
+                }
+                else
+                {
+                    matrixBlock[blkr * ncolblks + blkc].nnz++;  
+                }    
             }
-            else
-            {
-                matrixBlock[blkr * ncolblks + blkc].nnz++;  
-            }    
         }
     }
 
@@ -153,19 +172,23 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
 
     printf("numrow = %d numcols = %d\n", numrows,numcols);
 
-    for(c = 0 ; c < numcols ; c++)
+    #pragma omp parallel for default(shared) private(i, c, k, blkc, r, blkr)
+    for(i = 0; i < ncolblks; i++)
     {
-        blkc = c / wblk;
-        for(k = colptrs[c]; k < colptrs[c+1]; k++)
+        for(c = i * wblk ; c < min( (i+1)*wblk, numcols) ; c++)
         {
-            r = irem[k];
-            blkr = r / wblk;
+            blkc = c / wblk;
+            for(k = colptrs[c]; k < colptrs[c+1]; k++)
+            {
+                r = irem[k];
+                blkr = r / wblk;
 
-            matrixBlock[blkr * ncolblks + blkc].rloc[top[blkr][blkc]] = r - matrixBlock[blkr * ncolblks + blkc].roffset;
-            matrixBlock[blkr * ncolblks + blkc].cloc[top[blkr][blkc]] = c - matrixBlock[blkr * ncolblks + blkc].coffset;
-            matrixBlock[blkr * ncolblks + blkc].val[top[blkr][blkc]] = xrem[k];
+                matrixBlock[blkr * ncolblks + blkc].rloc[top[blkr][blkc]] = r - matrixBlock[blkr * ncolblks + blkc].roffset;
+                matrixBlock[blkr * ncolblks + blkc].cloc[top[blkr][blkc]] = c - matrixBlock[blkr * ncolblks + blkc].coffset;
+                matrixBlock[blkr * ncolblks + blkc].val[top[blkr][blkc]] = xrem[k];
 
-            top[blkr][blkc] = top[blkr][blkc] + 1;
+                top[blkr][blkc] = top[blkr][blkc] + 1;
+            }
         }
     }
 
@@ -174,6 +197,8 @@ void csc2blkcoord(block *&matrixBlock, double *xrem)
         delete [] top[i];
     }
     delete [] top;
+
+    cout<<"matrix conversion completed"<<endl;
 }
 
 void transpose(double *src, double *dst, const int N, const int M)
