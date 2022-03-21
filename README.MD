@@ -18,3 +18,12 @@ We are porting our DeepSparse framework on GPU using directive-based programming
 Our WACCPD 2019 Paper can be found here: https://www.cse.msu.edu/~rabbimd/papers/waccpd2019_lobpcg.pdf
 
 WACCPD 2019 Paper's Artifact (source code) is available here: https://github.com/fazlay-rabbi/WACCPD_2019_Artifact
+
+## ICPP 2021 Paper
+We evaluate the OpenMP, HPX and Regent runtime systems in terms of performance and ease of implementation, and compare them against the traditional BSP model for two popular eigensolvers, Lanczos and LOBPCG. Note that OpenMP's task parallel model is utilized through DeepSparse's framework in this evaluation.
+
+Our paper can be found here: https://dl.acm.org/doi/abs/10.1145/3472456.3472476
+
+We refer those who want to run our HPX codes to here: https://hpx-docs.stellar-group.org/latest/html/quickstart.html
+
+We refer those who want to run our Regent codes to here: https://regent-lang.org/install

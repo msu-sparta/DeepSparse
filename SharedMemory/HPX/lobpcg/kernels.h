@@ -1,0 +1,38 @@
+#include "utils.h"
+
+void Fill(int tid, double *V, int size);
+void XY(double *a, double *b, double *c, int m, int n, int k, double alpha, double beta);
+void XY_part(double *a, double *b, double *c, int m, int n, int k, double alpha, double beta, int block_width, int part);
+void XTY(double *a, double *b, double *c, int m, int n, int k, double alpha, double beta);
+void XTY_part(double *a, double *b, double *c, int m, int n, int k, double alpha, double beta, int block_width, int part);
+void XTY_red(double *src, double *dst, int m, int n);
+void Transpose(double *src, double *dst, int m, int n);
+void Cholesky(double *a, int m);
+void Copy(double *src, double *dst, int m, int n);
+void Copy_part(double *src, double *dst, int m, int n, int block_width, int part);
+void Inverse(double *a, int m);
+void Print(double *a, int m, int n);
+void ResetBelowDiagonal(double *a, int m);
+void Reset(double *a, int m, int n);
+void Reset_part(double *a, int m, int n, int block_width, int part);
+void SpMM(block *A, double *X, double *Y, int RHS);
+void SpMM_part(block *A, double *X, double *Y, int RHS, int row, int col);
+void Identity(double *a, int m);
+void EigenComp(double *a, double *b, double *w, int blocksize);
+void Diag(double *src, double *dst, int m);
+void Subtract(double *src1, double *src2, double *dst, int m, int n);
+void Subtract_part(double *src1, double *src2, double *dst, int m, int n, int block_width, int part);
+void Multiply(double *src, double *src2, double *dst, int m, int n);
+void Multiply_part(double *src1, double *src2, double *dst, int m, int n, int block_width, int part);
+void ReducedNorm(double *src, double *dst, int m, int n);
+void ReducedNorm_part(double *src, double *dst, int m, int n, int block_width, int part);
+void ReducedNorm_red(double *src, double *dst, int m);
+int UpdateActiveMask(double *src, int *dst, double threshold, int m);
+void GatherActiveVectors(double *src, double *dst, int *mask, int m, int n, int activeN);
+void GatherActiveVectors_part(double *src, double *dst, int *mask, int m, int n, int activeN, int block_width, int part);
+void ScatterActiveVectors(double *src, double *dst, int *mask, int m, int n, int activeN);
+void ScatterActiveVectors_part(double *src, double *dst, int *mask, int m, int n, int activeN, int block_width, int part);
+void CopyBlock(double *src, double *dst, int m, int n, int ld, int rOffset, int cOffset);
+void CopyCoordX(double *src, double *dst, int m, int n);
+void Add(double *src1, double *src2, double *dst, int m, int n);
+void Add_part(double *src1, double *src2, double *dst, int m, int n, int block_width, int part);
