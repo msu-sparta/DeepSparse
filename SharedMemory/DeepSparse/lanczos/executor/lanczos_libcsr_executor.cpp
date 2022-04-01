@@ -93,6 +93,18 @@ int main(int argc, char *argv[])
         Q[i*(eig_wanted)] = qq[i];
     }
 
+    #pragma omp parallel for default(shared)
+    for(i = 0; i < numcols; ++i)
+    {
+        QQpZ[i] = 0.0;
+    }
+
+    #pragma omp parallel for default(shared)
+    for(i = 0; i < numcols; ++i)
+    {
+        z[i] = 0.0;
+    }
+
     total_time = 0.0;
 
     for(iterationNumber = 0; iterationNumber < eig_wanted; ++iterationNumber)
